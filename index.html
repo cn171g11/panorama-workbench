@@ -54,7 +54,7 @@
     .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
     .dot.blue { background: var(--blue); }
     .dot.gold { background: var(--gold); }
-    .dot.red { background: var(--red); }
+    .dot.green { background: var(--green); }
     .side { min-height: 0; display: grid; grid-template-rows: 250px minmax(0, 1fr); border-left: 1px solid var(--line); background: rgba(10, 24, 43, .88); }
     .filters { padding: 14px; border-bottom: 1px solid var(--line); overflow: auto; }
     .filter-row { display: grid; grid-template-columns: 1fr 112px 104px; gap: 8px; margin-bottom: 9px; }
@@ -73,7 +73,6 @@
     .pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 6px; border-radius: 999px; border: 1px solid var(--line); font-size: 11px; }
     .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--blue); }
     .pill.tencent::before { background: var(--gold); }
-    .pill.missing::before { background: var(--red); }
     .id-text { color: var(--muted); font-family: Consolas, monospace; font-size: 11px; }
     .jump-link { color: var(--blue); text-decoration: none; border-bottom: 1px dashed rgba(88, 166, 255, .5); }
     .jump-link:hover { color: var(--gold); border-color: rgba(255, 215, 0, .6); }
@@ -134,13 +133,12 @@
           <div class="metric"><strong id="panoramaCount">0</strong><span>街景点</span></div>
           <div class="metric"><strong id="baiduCount">0</strong><span>百度</span></div>
           <div class="metric"><strong id="tencentCount">0</strong><span>腾讯</span></div>
-          <div class="metric"><strong id="missingCount">0</strong><span>未覆盖采样</span></div>
           <div class="metric"><strong id="selectedCount">0</strong><span>已选择</span></div>
         </div>
         <div class="legend">
           <span class="legend-item"><i class="dot blue"></i>百度街景</span>
           <span class="legend-item"><i class="dot gold"></i>腾讯街景</span>
-          <span class="legend-item"><i class="dot red"></i>无覆盖</span>
+          <span class="legend-item"><i class="dot green"></i>街景链路</span>
         </div>
         <aside class="detail" id="detailPanel" hidden>
           <div class="detail-head">
@@ -174,12 +172,12 @@
             <select class="select-field" id="statusFilter">
               <option value="all">全部状态</option>
               <option value="confirmed">已确认</option>
-              <option value="missing">未覆盖</option>
             </select>
           </div>
           <div class="filter-actions">
             <label class="checkbox-line"><input id="selectVisible" type="checkbox"> 全选当前结果</label>
             <label class="checkbox-line"><input id="arrowToggle" type="checkbox" checked> 方位箭头</label>
+            <label class="checkbox-line"><input id="chainToggle" type="checkbox" checked> 街景链路</label>
             <button class="button" id="addManualButton" type="button">＋ 手动添加</button>
             <button class="button" id="saveButton" type="button">保存本地修改</button>
           </div>
@@ -211,12 +209,20 @@
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
     const STORAGE_KEY = "s341-panorama-workbench-v2";
+    // 溧水区全区数据约 8 万条, 拆成 5 个分片以便并行加载 (单文件过大会拖慢首屏).
+    const LISHUI_PART_URLS = Array.from({ length: 5 }, (unused, index) =>
+      `lishui-tencent-panoramas-part-${String(index + 1).padStart(2, "0")}.json`);
     const SOURCE_FILES = [
       { provider: "baidu", url: "s341-baidu-panoramas.json" },
       { provider: "tencent", url: "s341-tencent-panoramas.json" },
+      ...LISHUI_PART_URLS.map(url => ({ provider: "tencent", url })),
     ];
+    // 蓝线来自腾讯元数据里的有序道路点链, 不是把孤立点位硬连, 因此能反映改道后的真实走向.
+    const CHAIN_FILES = ["lishui-tencent-lines.geojson"];
     const TENCENT_VIEWER_URL = "https://qq-map.netlify.app/";
-    const BAIDU_VIEWER_URL = "https://map.baidu.com/panorama";
+    // 百度官方全景入口 /panorama 已失效(实测 404), 改用仍返回 200 的 qt=pano 查询式入口.
+    // 旧数据里记录的 sourceUrl 是失效地址, 因此这里只按 streetViewId 现算, 不沿用记录值.
+    const BAIDU_VIEWER_URL = "https://map.baidu.com/?qt=pano&panoId=";
     const INITIAL_CENTER = { latitude: 31.59, longitude: 119.02 };
     const INITIAL_ZOOM = 11;
     const METERS_PER_DEGREE_LATITUDE = 111320;
@@ -230,7 +236,9 @@
     const SMALL_DOT_RADIUS = 3;
     const PROVIDER_LABELS = { baidu: "百度街景", tencent: "腾讯街景" };
     const PROVIDER_COLORS = { baidu: "#58a6ff", tencent: "#ffd700" };
-    const MISSING_COLOR = "#ff6b7a";
+    const CHAIN_COLOR = "#55d18a";
+    // 全区数据数万条, 表格一次性渲染全部行会卡死浏览器, 因此限制渲染行数.
+    const TABLE_ROW_LIMIT = 300;
     // 天地图需要自备 key: 请到 国家地理信息公共服务平台天地图(https://console.tianditu.gov.cn/api/key)
     // 申请自己的 key 并替换此占位符, 否则该底图选项保持禁用.
     const TIANDITU_ACCESS_KEY = "请到 国家地理信息公共服务平台天地图 申请自己的 key 并替换此占位符";
@@ -268,7 +276,7 @@
     let tileLayer = null;
     let routeLayer = null;
     let pointLayer = null;
-    let missingLayer = null;
+    let chainLayer = null;
     let highlightLayer = null;
     let activeRecordKey = null;
     let activeBasemap = BASEMAP_DEFINITIONS.find(definition => definition.id === DEFAULT_BASEMAP_ID);
@@ -278,10 +286,11 @@
       return {
         sourcePayloads: [],
         panoramas: [],
-        missingSamples: [],
+        chainCollections: [],
         selectedIds: new Set(),
         filteredRecords: [],
         isArrowMode: true,
+        isChainVisible: true,
       };
     }
 
@@ -335,8 +344,7 @@
     }
 
     function buildBaiduJumpUrl(record) {
-      if (record.sourceUrl) return record.sourceUrl;
-      return `${BAIDU_VIEWER_URL}?pid=${encodeURIComponent(record.streetViewId || "")}`;
+      return `${BAIDU_VIEWER_URL}${encodeURIComponent(record.streetViewId || "")}`;
     }
 
     function getJumpUrl(record) {
@@ -378,20 +386,35 @@
       return false;
     }
 
+    async function loadSourcePayload(source) {
+      try {
+        const response = await fetch(source.url, { cache: "no-store" });
+        if (!response.ok) throw new Error(`HTTP ${response.status}`);
+        return { provider: source.provider, payload: await response.json(), url: source.url };
+      } catch (error) {
+        showNotice(`${source.url} 加载失败: ${error.message}`);
+        return null;
+      }
+    }
+
     async function loadSourceData() {
-      const payloads = [];
-      for (const source of SOURCE_FILES) {
+      // 分片数据并行加载, 避免逐个大文件串行等待.
+      const loaded = await Promise.all(SOURCE_FILES.map(loadSourcePayload));
+      applicationState.sourcePayloads = loaded.filter(Boolean);
+      applicationState.chainCollections = await loadChainCollections();
+    }
+
+    async function loadChainCollections() {
+      const collections = [];
+      for (const url of CHAIN_FILES) {
         try {
-          const response = await fetch(source.url, { cache: "no-store" });
-          if (!response.ok) throw new Error(`HTTP ${response.status}`);
-          const payload = await response.json();
-          payloads.push({ provider: source.provider, payload, url: source.url });
+          const response = await fetch(url, { cache: "no-store" });
+          if (response.ok) collections.push(await response.json());
         } catch (error) {
-          showNotice(`${source.url} 加载失败: ${error.message}`);
+          showNotice(`${url} 加载失败: ${error.message}`);
         }
       }
-      applicationState.sourcePayloads = payloads;
-      applicationState.missingSamples = payloads.flatMap(entry => entry.payload.errors || []);
+      return collections;
     }
 
     function collectSourceRecords() {
@@ -425,22 +448,19 @@
         const searchableText = [record.streetViewId, record.streetName, record.captureDate, record.captureTime, record.latitude, record.longitude].join(" ").toLowerCase();
         const matchesSearch = !searchTerm || searchableText.includes(searchTerm);
         const matchesProvider = provider === "all" || getProvider(record) === provider;
-        const matchesStatus = status === "all" || (status === "missing" ? record.status === "missing" : record.status !== "missing");
+        const matchesStatus = status === "all" || record.status === status;
         return matchesSearch && matchesProvider && matchesStatus;
       });
     }
 
     function countByProvider(provider) {
-      return applicationState.panoramas.filter(record => record.status !== "missing" && getProvider(record) === provider).length;
+      return applicationState.panoramas.filter(record => getProvider(record) === provider).length;
     }
 
     function updateMetrics() {
-      const missingSampleCount = applicationState.missingSamples.filter(error => error && error.sample).length;
-      const manuallyMissingCount = applicationState.panoramas.filter(record => record.status === "missing").length;
-      getElement("panoramaCount").textContent = applicationState.panoramas.filter(record => record.status !== "missing").length;
+      getElement("panoramaCount").textContent = applicationState.panoramas.length;
       getElement("baiduCount").textContent = countByProvider("baidu");
       getElement("tencentCount").textContent = countByProvider("tencent");
-      getElement("missingCount").textContent = missingSampleCount + manuallyMissingCount;
       getElement("selectedCount").textContent = applicationState.selectedIds.size;
       getElement("sourceStatus").textContent = applicationState.sourcePayloads.length
         ? `来源文件 ${applicationState.sourcePayloads.map(entry => entry.url).join(" · ")}`
@@ -451,11 +471,13 @@
       filterRecords();
       const tableBody = getElement("panoramaTableBody");
       const emptyState = getElement("emptyState");
-      tableBody.innerHTML = applicationState.filteredRecords.map(record => {
+      // 全区数据有数万条, 一次性生成全部表格行会让浏览器卡死, 因此只渲染前若干行.
+      const visibleRecords = applicationState.filteredRecords.slice(0, TABLE_ROW_LIMIT);
+      tableBody.innerHTML = visibleRecords.map(record => {
         const recordKey = escapeHtml(getRecordKey(record));
         const provider = getProvider(record);
-        const pillClass = record.status === "missing" ? "missing" : provider;
-        const statusText = record.status === "missing" ? "未覆盖" : PROVIDER_LABELS[provider];
+        const pillClass = provider;
+        const statusText = PROVIDER_LABELS[provider];
         const jumpUrl = escapeHtml(getJumpUrl(record));
         return `<tr data-record-key="${recordKey}" class="${activeRecordKey === getRecordKey(record) ? "active" : ""}">`
           + `<td><input class="record-checkbox" type="checkbox" data-record-id="${recordKey}" ${applicationState.selectedIds.has(getRecordKey(record)) ? "checked" : ""}></td>`
@@ -465,7 +487,11 @@
           + `<td><a class="jump-link" href="${jumpUrl}" target="_blank" rel="noreferrer">跳转 ↗</a></td>`
           + `</tr>`;
       }).join("");
-      emptyState.hidden = applicationState.filteredRecords.length > 0;
+      const isTruncated = applicationState.filteredRecords.length > visibleRecords.length;
+      emptyState.hidden = applicationState.filteredRecords.length > 0 && !isTruncated;
+      emptyState.textContent = isTruncated
+        ? `匹配 ${applicationState.filteredRecords.length} 条, 仅显示前 ${visibleRecords.length} 条, 请用搜索或筛选缩小范围`
+        : "没有匹配的记录";
       tableBody.querySelectorAll("tr").forEach(row => row.addEventListener("click", event => {
         if (event.target.classList.contains("record-checkbox") || event.target.classList.contains("jump-link")) return;
         selectRecord(row.dataset.recordKey);
@@ -496,7 +522,7 @@
 
     function showDetail(record) {
       const provider = getProvider(record);
-      const providerLabel = record.status === "missing" ? "未覆盖采样" : PROVIDER_LABELS[provider];
+      const providerLabel = PROVIDER_LABELS[provider];
       const fields = [
         ["来源", providerLabel],
         ["街景 ID", record.streetViewId],
@@ -619,27 +645,14 @@
       );
     }
 
-    function getMissingDisplayRecords() {
-      const seenLocations = new Set();
-      return applicationState.missingSamples
-        .filter(error => error && error.sample)
-        .map(error => ({
-          latitude: error.sample.latitude,
-          longitude: error.sample.longitude,
-          coordinateSystem: "WGS84",
-          streetName: error.sample.osmTags?.name,
-          streetViewId: `missing-${error.sample.latitude}-${error.sample.longitude}`,
-          status: "missing",
-          provider: "baidu",
-        }))
-        .filter(record => Number.isFinite(Number(record.latitude)))
-        // The two sources sample the corridor at different spacings, so collapse duplicate gaps.
-        .filter(record => {
-          const locationKey = `${Number(record.latitude).toFixed(4)}:${Number(record.longitude).toFixed(4)}`;
-          if (seenLocations.has(locationKey)) return false;
-          seenLocations.add(locationKey);
-          return true;
-        });
+    function getChainPaths() {
+      // 每条链路来自腾讯元数据里的有序道路点, 已按拍摄顺序排列, 不做跨路段的强制连接.
+      return applicationState.chainCollections.flatMap(collection =>
+        (collection.features || [])
+          .filter(feature => feature.geometry && feature.geometry.type === "LineString" && feature.geometry.coordinates.length > 1)
+          .map(feature => feature.geometry.coordinates.map(([longitude, latitude]) =>
+            toDisplayLatLng({ latitude, longitude, coordinateSystem: "WGS84" }))),
+      );
     }
 
     function renderRouteLayer() {
@@ -669,7 +682,7 @@
 
     function renderPointLayer() {
       if (!mapInstance) return;
-      const confirmedRecords = applicationState.panoramas.filter(record => record.status !== "missing" && Number.isFinite(Number(record.latitude)));
+      const confirmedRecords = applicationState.panoramas.filter(record => Number.isFinite(Number(record.latitude)));
       if (pointLayer) pointLayer.remove();
       const renderer = L.canvas({ padding: 0.4 });
       // Arrow length follows the current scale so orientation stays readable at every zoom level.
@@ -677,17 +690,16 @@
       pointLayer = L.layerGroup(confirmedRecords.map(record => buildPointFeature(record, renderer, arrowMeters))).addTo(mapInstance);
     }
 
-    function renderMissingLayer() {
+    function renderChainLayer() {
       if (!mapInstance) return;
-      const missingRecords = getMissingDisplayRecords();
-      if (missingLayer) missingLayer.remove();
-      const renderer = L.canvas({ padding: 0.4 });
-      missingLayer = L.layerGroup(missingRecords.map(record => {
-        const point = toDisplayLatLng(record);
-        return L.circleMarker([point.lat, point.lng], {
-          renderer, radius: 4, color: "#ffffff", weight: 0.8, fillColor: MISSING_COLOR, fillOpacity: 0.9, bubblingMouseEvents: false,
-        });
-      })).addTo(mapInstance);
+      if (chainLayer) chainLayer.remove();
+      chainLayer = null;
+      if (!applicationState.isChainVisible) return;
+      const paths = getChainPaths();
+      if (!paths.length) return;
+      chainLayer = L.layerGroup(paths.map(path => L.polyline(path, {
+        color: CHAIN_COLOR, weight: 3, opacity: 0.85, interactive: false,
+      }))).addTo(mapInstance);
     }
 
     function renderHighlightLayer() {
@@ -704,9 +716,9 @@
     }
 
     function renderMapLayers() {
+      renderChainLayer();
       renderRouteLayer();
       renderPointLayer();
-      renderMissingLayer();
       renderHighlightLayer();
     }
 
@@ -753,8 +765,8 @@
       });
       L.control.scale({ imperial: false, position: "bottomleft" }).addTo(mapInstance);
       applyBasemap(activeBasemap);
-      const routePaths = getRouteDisplayPaths();
-      if (routePaths.length) mapInstance.fitBounds(L.latLngBounds(routePaths.flat().map(point => [point.lat, point.lng])), { padding: [24, 24] });
+      const fittedPaths = getChainPaths().concat(getRouteDisplayPaths());
+      if (fittedPaths.length) mapInstance.fitBounds(L.latLngBounds(fittedPaths.flat().map(point => [point.lat, point.lng])), { padding: [24, 24] });
     }
 
     function parseCsvRow(csvRow) {
@@ -867,6 +879,10 @@
       getElement("arrowToggle").addEventListener("change", event => {
         applicationState.isArrowMode = event.target.checked;
         renderPointLayer();
+      });
+      getElement("chainToggle").addEventListener("change", event => {
+        applicationState.isChainVisible = event.target.checked;
+        renderChainLayer();
       });
       getElement("basemapSelect").addEventListener("change", event => {
         const definition = BASEMAP_DEFINITIONS.find(item => item.id === event.target.value);

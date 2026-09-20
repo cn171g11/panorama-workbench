@@ -1,0 +1,39 @@
+{
+  "generatedAt": "2026-09-20T14:23:14.138911+00:00",
+  "area": "南京市溧水区",
+  "boundary": {
+    "relationId": 2147643,
+    "name": "溧水区",
+    "source": "OpenStreetMap (ODbL)",
+    "approximateAreaSquareKilometers": 1068.7,
+    "rings": 3,
+    "polygons": 3
+  },
+  "grid": {
+    "coarseSpacingMeters": 1000.0,
+    "fineSpacingMeters": 200.0,
+    "coarseCells": 2009,
+    "coveredCells": 151,
+    "emptyCells": 1858,
+    "fineSeeds": 2458
+  },
+  "results": {
+    "discoveredPanoramas": 80165,
+    "panoramasInsideDistrict": 63597,
+    "panoramasOutsideDistrict": 16568,
+    "lineSegments": 1822,
+    "lineLengthKilometers": 376.91
+  },
+  "completeness": {
+    "argument": "Coverage is decided by distance, not by the request radius, because the discovery endpoint ignores its radius parameter and always answers with the globally nearest panorama. A coarse cell is marked empty only when its nearest panorama is further than the coarse spacing, so an empty cell contains no panorama at all. Every panorama inside a covered cell is within 141 m of a fine sample, which is inside the 250 m acceptance distance, so it is always detected.",
+    "coarseCellMaxDistanceToCentreMeters": 707,
+    "fineLatticeMaxDistanceMeters": 141,
+    "fineAcceptanceMeters": 250.0,
+    "emptyCellsMeaning": "No Tencent panorama exists within roughly one coarse cell of the cell centre."
+  },
+  "notes": [
+    "Blue lines come from the ordered per-road point chains in the panorama metadata, so they follow captured imagery instead of the OSM road network.",
+    "Camera heading is filled only for panoramas whose metadata was fetched directly; panoramas enumerated from a neighbouring chain keep a null heading and render as dots.",
+    "Tencent coverage in Lishui is concentrated on major roads; the exhaustive grid is what proves which cells have no imagery at all."
+  ]
+}
