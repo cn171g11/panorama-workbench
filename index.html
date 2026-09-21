@@ -55,6 +55,7 @@
     .dot.blue { background: var(--blue); }
     .dot.gold { background: var(--gold); }
     .dot.green { background: var(--green); }
+    .dot.orange { background: var(--orange); }
     .side { min-height: 0; display: grid; grid-template-rows: 250px minmax(0, 1fr); border-left: 1px solid var(--line); background: rgba(10, 24, 43, .88); }
     .filters { padding: 14px; border-bottom: 1px solid var(--line); overflow: auto; }
     .filter-row { display: grid; grid-template-columns: 1fr 112px 104px; gap: 8px; margin-bottom: 9px; }
@@ -208,17 +209,15 @@
   <div class="notice" id="notice" hidden></div>
   <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
   <script>
-    const STORAGE_KEY = "s341-panorama-workbench-v2";
-    // 溧水区全区数据约 8 万条, 拆成 5 个分片以便并行加载 (单文件过大会拖慢首屏).
-    const LISHUI_PART_URLS = Array.from({ length: 5 }, (unused, index) =>
-      `lishui-tencent-panoramas-part-${String(index + 1).padStart(2, "0")}.json`);
+    const STORAGE_KEY = "s341-panorama-workbench-v3";
     const SOURCE_FILES = [
       { provider: "baidu", url: "s341-baidu-panoramas.json" },
       { provider: "tencent", url: "s341-tencent-panoramas.json" },
-      ...LISHUI_PART_URLS.map(url => ({ provider: "tencent", url })),
     ];
-    // 蓝线来自腾讯元数据里的有序道路点链, 不是把孤立点位硬连, 因此能反映改道后的真实走向.
-    const CHAIN_FILES = ["lishui-tencent-lines.geojson"];
+    const CHAIN_FILES = [];
+    // 参考路线(GeoJSON LineString)以金色单独绘制, 与按拍摄顺序的绿色街景链路区分.
+    const ROUTE_FILES = [];
+    // S341 页面只加载 S341 的两份数据，溧水全域数据见独立工作台。
     const TENCENT_VIEWER_URL = "https://qq-map.netlify.app/";
     // 百度官方全景入口 /panorama 已失效(实测 404), 改用仍返回 200 的 qt=pano 查询式入口.
     // 旧数据里记录的 sourceUrl 是失效地址, 因此这里只按 streetViewId 现算, 不沿用记录值.
@@ -237,6 +236,8 @@
     const PROVIDER_LABELS = { baidu: "百度街景", tencent: "腾讯街景" };
     const PROVIDER_COLORS = { baidu: "#58a6ff", tencent: "#ffd700" };
     const CHAIN_COLOR = "#55d18a";
+    // 参考路线用独立颜色, 避免与同为金色的腾讯点位混淆.
+    const ROUTE_COLOR = "#ffb454";
     // 全区数据数万条, 表格一次性渲染全部行会卡死浏览器, 因此限制渲染行数.
     const TABLE_ROW_LIMIT = 300;
     // 天地图需要自备 key: 请到 国家地理信息公共服务平台天地图(https://console.tianditu.gov.cn/api/key)
@@ -287,6 +288,7 @@
         sourcePayloads: [],
         panoramas: [],
         chainCollections: [],
+        routeCollections: [],
         selectedIds: new Set(),
         filteredRecords: [],
         isArrowMode: true,
@@ -402,11 +404,25 @@
       const loaded = await Promise.all(SOURCE_FILES.map(loadSourcePayload));
       applicationState.sourcePayloads = loaded.filter(Boolean);
       applicationState.chainCollections = await loadChainCollections();
+      applicationState.routeCollections = await loadRouteCollections();
     }
 
     async function loadChainCollections() {
       const collections = [];
       for (const url of CHAIN_FILES) {
+        try {
+          const response = await fetch(url, { cache: "no-store" });
+          if (response.ok) collections.push(await response.json());
+        } catch (error) {
+          showNotice(`${url} 加载失败: ${error.message}`);
+        }
+      }
+      return collections;
+    }
+
+    async function loadRouteCollections() {
+      const collections = [];
+      for (const url of ROUTE_FILES) {
         try {
           const response = await fetch(url, { cache: "no-store" });
           if (response.ok) collections.push(await response.json());
@@ -638,11 +654,19 @@
     }
 
     function getRouteDisplayPaths() {
-      return applicationState.sourcePayloads.flatMap(entry =>
+      // 两条来源: 采集文件内嵌的 route.elements(旧 S341 数据), 以及独立的参考路线 GeoJSON.
+      const embeddedPaths = applicationState.sourcePayloads.flatMap(entry =>
         (entry.payload.route?.elements || [])
           .filter(element => Array.isArray(element.geometry) && element.geometry.length > 1)
           .map(element => element.geometry.map(node => toDisplayLatLng({ latitude: node.lat, longitude: node.lon, coordinateSystem: "WGS84" }))),
       );
+      const filePaths = applicationState.routeCollections.flatMap(collection =>
+        (collection.features || [])
+          .filter(feature => feature.geometry && feature.geometry.type === "LineString" && feature.geometry.coordinates.length > 1)
+          .map(feature => feature.geometry.coordinates.map(([longitude, latitude]) =>
+            toDisplayLatLng({ latitude, longitude, coordinateSystem: "WGS84" }))),
+      );
+      return embeddedPaths.concat(filePaths);
     }
 
     function getChainPaths() {
@@ -659,7 +683,7 @@
       if (!mapInstance) return;
       if (routeLayer) routeLayer.remove();
       routeLayer = L.layerGroup(getRouteDisplayPaths().map(path => L.polyline(path, {
-        color: "#ffd700", weight: 3, opacity: 0.85, interactive: false,
+        color: ROUTE_COLOR, weight: 3, opacity: 0.85, interactive: false,
       }))).addTo(mapInstance);
     }
 
