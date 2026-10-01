@@ -3,6 +3,7 @@
 //
 // Usage:
 //   node tools/g212-scan.mjs <key-file> [output-json] [spacing-meters] [radius-meters]
+//   node tools/g212-scan.mjs <key-file> --route-only   # refresh g212-osm-route.geojson only
 //
 // The key file is read locally; the key itself is never printed. Only SHA256
 // fingerprints appear in logs, so run logs are safe to share.
@@ -26,11 +27,15 @@ const PROGRESS_INTERVAL = 250;
 const SCENE_FILTER_RADIUS_METERS = 500;
 const MAX_CONSECUTIVE_FAILURES = 20;
 const FAILURE_BACKOFF_MS = 10000;
+const ROUTE_OUTPUT_FILE = "g212-osm-route.geojson";
 
-const keyFilePath = process.argv[2];
-const outputFilePath = process.argv[3] || "g212-tencent-panoramas.json";
-const sampleSpacingMeters = Number(process.argv[4] || 400);
-const lookupRadiusMeters = Number(process.argv[5] || 250);
+const isRouteOnly = process.argv.includes("--route-only");
+// Flags must not shift positional arguments, so parse only non-flag arguments.
+const positionalArgs = process.argv.slice(2).filter(argument => !argument.startsWith("--"));
+const keyFilePath = positionalArgs[0];
+const outputFilePath = positionalArgs[1] || "g212-tencent-panoramas.json";
+const sampleSpacingMeters = Number(positionalArgs[2] || 400);
+const lookupRadiusMeters = Number(positionalArgs[3] || 250);
 const logFilePath = `${outputFilePath}.log`;
 
 if (!keyFilePath) {
@@ -169,6 +174,22 @@ async function fetchRouteWays(apiKey) {
   return payload.elements.filter(element => Array.isArray(element.geometry) && element.geometry.length > 1);
 }
 
+function buildRouteGeojson(routeWays) {
+  return {
+    type: "FeatureCollection",
+    name: "g212-osm-route",
+    crs: { type: "name", properties: { name: "urn:ogc:def:crs:OGC:1.3:CRS84" } },
+    features: routeWays.map(way => ({
+      type: "Feature",
+      properties: { osmWayId: way.id, ref: way.tags?.ref, name: way.tags?.name },
+      geometry: {
+        type: "LineString",
+        coordinates: way.geometry.map(point => [Number(point.lon.toFixed(6)), Number(point.lat.toFixed(6))]),
+      },
+    })),
+  };
+}
+
 function normalizeLookupRecord(sample, detail) {
   if (!detail || !detail.svid) return null;
   const nativePoint = convertMercatorToLatLng(Number(detail.x), Number(detail.y));
@@ -299,8 +320,16 @@ async function main() {
 
   log("fetching G212 route from Overpass...");
   const routeWays = await fetchRouteWays(apiKey);
+  await writeFile(ROUTE_OUTPUT_FILE, JSON.stringify(buildRouteGeojson(routeWays)));
+  log(`route ways=${routeWays.length} saved=${ROUTE_OUTPUT_FILE}`);
+
+  if (isRouteOnly) {
+    log(`route-only mode finished in ${((Date.now() - startedAt) / 1000).toFixed(1)}s`);
+    return;
+  }
+
   const samples = createSamples(routeWays, sampleSpacingMeters);
-  log(`route ways=${routeWays.length} samples=${samples.length} spacing=${sampleSpacingMeters}m radius=${lookupRadiusMeters}m`);
+  log(`samples=${samples.length} spacing=${sampleSpacingMeters}m radius=${lookupRadiusMeters}m`);
 
   log("looking up Tencent street views...");
   const failureState = { consecutiveFailures: 0 };
