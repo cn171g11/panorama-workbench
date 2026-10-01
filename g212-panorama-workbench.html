@@ -1,0 +1,557 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>G212 国道腾讯街景扫描工作台</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
+  <style>
+    :root {
+      color-scheme: dark;
+      --bg: #07111f;
+      --panel: rgba(14, 27, 47, 0.94);
+      --panel-strong: #101f36;
+      --line: rgba(146, 180, 222, 0.2);
+      --text: #edf5ff;
+      --muted: #9db0c8;
+      --blue: #58a6ff;
+      --gold: #ffd700;
+      --green: #55d18a;
+      --red: #ff6b7a;
+      --orange: #ffb454;
+      --shadow: 0 22px 55px rgba(0, 0, 0, 0.28);
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; min-height: 100%; background: var(--bg); color: var(--text); font-family: Inter, "Microsoft YaHei", sans-serif; }
+    body { min-width: 1080px; }
+    button, input, select { font: inherit; }
+    button { cursor: pointer; }
+    .shell { min-height: 100vh; display: grid; grid-template-rows: 74px 1fr 30px; }
+    .topbar { display: flex; align-items: center; gap: 14px; padding: 0 20px; border-bottom: 1px solid var(--line); background: rgba(7, 17, 31, 0.94); }
+    .brand { display: flex; align-items: center; gap: 12px; min-width: 318px; }
+    .brand-mark { width: 42px; height: 36px; display: grid; place-items: center; border: 1px solid rgba(88, 166, 255, .55); color: var(--blue); background: rgba(88, 166, 255, .1); border-radius: 8px; font-weight: 800; font-size: 12px; }
+    h1 { margin: 0; font-size: 17px; }
+    .subtitle { color: var(--muted); font-size: 12px; margin-top: 4px; }
+    .toolbar { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
+    .button { height: 34px; display: inline-flex; align-items: center; gap: 7px; border: 1px solid var(--line); border-radius: 7px; padding: 0 12px; color: var(--text); background: rgba(255, 255, 255, .05); text-decoration: none; }
+    .button:hover { border-color: rgba(88, 166, 255, .75); background: rgba(88, 166, 255, .14); }
+    .button.primary { border-color: rgba(88, 166, 255, .8); background: rgba(88, 166, 255, .18); }
+    .button.gold { border-color: rgba(255, 215, 0, .6); color: var(--gold); }
+    .button[disabled] { opacity: .45; cursor: not-allowed; }
+    .main { min-height: 0; display: grid; grid-template-columns: minmax(520px, 1fr) 450px; }
+    .map-area { position: relative; min-height: 0; background: #0a182b; }
+    #map { position: absolute; inset: 0; min-height: 620px; background: #0a182b; }
+    .leaflet-container { background: #0a182b; font-family: inherit; }
+    .map-overlay { position: absolute; left: 14px; top: 14px; z-index: 500; display: flex; gap: 7px; flex-wrap: wrap; max-width: 700px; }
+    .metric { min-width: 88px; padding: 8px 10px; border: 1px solid var(--line); border-radius: 7px; background: rgba(7, 17, 31, .84); box-shadow: var(--shadow); }
+    .metric strong { display: block; font-size: 17px; color: var(--gold); }
+    .metric span { color: var(--muted); font-size: 11px; }
+    .legend { position: absolute; right: 14px; bottom: 14px; z-index: 500; display: flex; gap: 12px; padding: 8px 11px; border: 1px solid var(--line); border-radius: 7px; background: rgba(7, 17, 31, .84); font-size: 12px; }
+    .legend-item { display: inline-flex; align-items: center; gap: 5px; color: var(--muted); }
+    .dot { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .dot.route { background: var(--orange); }
+    .dot.hit { background: var(--gold); }
+    .dot.scene { background: var(--green); }
+    .side { min-height: 0; display: grid; grid-template-rows: minmax(0, 1fr) 250px; border-left: 1px solid var(--line); background: rgba(10, 24, 43, .88); }
+    .panel { padding: 14px; border-bottom: 1px solid var(--line); overflow: auto; }
+    .panel h2 { margin: 0 0 10px; font-size: 14px; }
+    .field-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+    .field-group { display: grid; gap: 5px; }
+    .field-group.full { grid-column: 1 / -1; }
+    .field-group label { color: var(--muted); font-size: 11px; }
+    .field, .select-field { width: 100%; height: 34px; padding: 0 9px; border: 1px solid var(--line); border-radius: 6px; outline: none; color: var(--text); background: rgba(255, 255, 255, .06); }
+    .field:focus, .select-field:focus { border-color: var(--blue); }
+    .control-row { display: flex; flex-wrap: wrap; gap: 7px; align-items: center; margin-top: 10px; }
+    .checkbox-line { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); font-size: 12px; }
+    .progress { height: 6px; margin: 12px 0 8px; overflow: hidden; border-radius: 99px; background: rgba(255, 255, 255, .08); }
+    .progress-bar { width: 0; height: 100%; background: var(--blue); transition: width .2s ease; }
+    .status { min-height: 38px; color: var(--muted); font-size: 12px; line-height: 1.5; }
+    .help { padding: 9px; margin-top: 10px; border: 1px solid rgba(255, 180, 84, .35); border-radius: 6px; color: #ffe7bd; background: rgba(74, 45, 12, .35); font-size: 11px; line-height: 1.5; }
+    .table-wrap { min-height: 0; overflow: auto; }
+    table { width: 100%; border-collapse: collapse; font-size: 12px; }
+    th, td { border-bottom: 1px solid rgba(146, 180, 222, .12); padding: 8px 7px; text-align: left; vertical-align: middle; white-space: nowrap; }
+    th { position: sticky; top: 0; z-index: 2; color: var(--muted); background: var(--panel-strong); font-weight: 600; }
+    tbody tr { cursor: pointer; }
+    tbody tr:hover, tbody tr.active { background: rgba(88, 166, 255, .1); }
+    .pill { display: inline-flex; align-items: center; gap: 5px; padding: 2px 6px; border-radius: 999px; border: 1px solid var(--line); font-size: 11px; }
+    .pill::before { content: ""; width: 7px; height: 7px; border-radius: 50%; background: var(--gold); }
+    .pill.scene::before { background: var(--green); }
+    .id-text { color: var(--muted); font-family: Consolas, monospace; font-size: 11px; }
+    .jump-link { color: var(--blue); text-decoration: none; border-bottom: 1px dashed rgba(88, 166, 255, .5); }
+    .empty { padding: 26px 15px; color: var(--muted); text-align: center; }
+    .footer { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 0 14px; color: var(--muted); font-size: 11px; border-top: 1px solid var(--line); background: rgba(7, 17, 31, .94); }
+    .notice { position: fixed; left: 50%; bottom: 46px; z-index: 1400; transform: translateX(-50%); max-width: 760px; padding: 10px 14px; border: 1px solid rgba(255, 180, 84, .55); border-radius: 7px; color: #ffe7bd; background: rgba(74, 45, 12, .95); box-shadow: var(--shadow); font-size: 12px; }
+    .notice[hidden] { display: none; }
+    @media (max-width: 1240px) { body { min-width: 0; } .main { grid-template-columns: minmax(430px, 1fr) 410px; } .brand { min-width: 220px; } }
+  </style>
+</head>
+<body>
+  <div class="shell">
+    <header class="topbar">
+      <div class="brand">
+        <div class="brand-mark">G212</div>
+        <div>
+          <h1>G212 国道腾讯街景扫描工作台</h1>
+          <div class="subtitle">兰州—龙邦 G212 兰龙线 · Overpass 路线 · 腾讯街景 · qq-map.netlify.app 跳转</div>
+        </div>
+      </div>
+      <div class="toolbar">
+        <a class="button" href="index.html">返回 S341</a>
+        <button class="button gold" id="exportButton" type="button" disabled>导出 JSON</button>
+      </div>
+    </header>
+    <main class="main">
+      <section class="map-area">
+        <div id="map" aria-label="G212 国道街景地图"></div>
+        <div class="map-overlay">
+          <div class="metric"><strong id="routeCount">0</strong><span>路线段</span></div>
+          <div class="metric"><strong id="sampleCount">0</strong><span>采样点</span></div>
+          <div class="metric"><strong id="hitCount">0</strong><span>街景命中</span></div>
+          <div class="metric"><strong id="sceneCount">0</strong><span>扩展场景</span></div>
+        </div>
+        <div class="legend">
+          <span class="legend-item"><i class="dot route"></i>G212 路线</span>
+          <span class="legend-item"><i class="dot hit"></i>采样命中</span>
+          <span class="legend-item"><i class="dot scene"></i>相邻场景</span>
+        </div>
+      </section>
+      <aside class="side">
+        <section class="panel">
+          <h2>扫描配置</h2>
+          <div class="field-grid">
+            <div class="field-group full">
+              <label for="overpassEndpoint">Overpass 端点</label>
+              <input class="field" id="overpassEndpoint" value="https://api.fairwaymapper.com/api/interpreter" autocomplete="off">
+            </div>
+            <div class="field-group full">
+              <label for="apiKey">FairwayMapper API key <span>(仅内存)</span></label>
+              <input class="field" id="apiKey" type="password" placeholder="粘贴 fm_... key, 不会写入网页或 localStorage" autocomplete="off">
+            </div>
+            <div class="field-group">
+              <label for="sampleSpacing">路线采样间距, m</label>
+              <input class="field" id="sampleSpacing" type="number" min="100" max="5000" step="50" value="400">
+            </div>
+            <div class="field-group">
+              <label for="streetViewRadius">街景查询半径, m</label>
+              <input class="field" id="streetViewRadius" type="number" min="50" max="1000" step="10" value="250">
+            </div>
+          </div>
+          <div class="control-row">
+            <label class="checkbox-line"><input id="expandScenes" type="checkbox" checked> 扩展 /sv 相邻场景</label>
+            <label class="checkbox-line"><input id="includeUnmatched" type="checkbox"> 导出未命中采样点</label>
+          </div>
+          <div class="control-row">
+            <button class="button primary" id="scanButton" type="button">加载路线并扫描</button>
+            <button class="button" id="stopButton" type="button" disabled>停止</button>
+            <button class="button" id="clearButton" type="button">清空</button>
+          </div>
+          <div class="progress"><div class="progress-bar" id="progressBar"></div></div>
+          <div class="status" id="statusText">等待配置。API key 只在当前页面内存中使用。</div>
+          <div class="help">安全提示: key 仅保存在当前页面内存, 且只随请求发送给 fairwaymapper.com 端点。GitHub Pages 是纯前端环境, 浏览器发出的 key 无法对站点保密, 建议使用 FairwayMapper 允许当前 Origin 的 key, 或改用自有后端代理。不要把 key 写入 HTML, URL, localStorage 或提交到 Git。</div>
+        </section>
+        <section class="table-wrap">
+          <table>
+            <thead><tr><th>类型</th><th>街景 ID / 道路</th><th>坐标</th><th>跳转</th></tr></thead>
+            <tbody id="resultTableBody"></tbody>
+          </table>
+          <div class="empty" id="emptyState">扫描结果会显示在这里</div>
+        </section>
+      </aside>
+    </main>
+    <footer class="footer">
+      <span id="sourceStatus">数据来源: OpenStreetMap via FairwayMapper Overpass, Tencent Street View endpoint</span>
+      <span>ODbL attribution travels with OSM data</span>
+    </footer>
+  </div>
+  <div class="notice" id="notice" hidden></div>
+  <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
+  <script>
+    const TENCENT_LOOKUP_URL = "https://sv.map.qq.com/xf";
+    const TENCENT_DETAIL_URL = "https://sv.map.qq.com/sv";
+    const TENCENT_PROXY_BASE_URL = "https://qq-api-proxy.map-making.app";
+    const TENCENT_REQUEST_TIMEOUT_MS = 15000;
+    const QQ_MAP_VIEWER_URL = "https://qq-map.netlify.app/";
+    const INITIAL_CENTER = [35.5, 105.5];
+    const INITIAL_ZOOM = 5;
+    const QUERY_TIMEOUT_SECONDS = 120;
+    const MAX_RENDERED_RECORDS = 500;
+    const DEFAULT_OVERPASS_ENDPOINT = "https://api.fairwaymapper.com/api/interpreter";
+    const EARTH_RADIUS_METERS = 6378245;
+    const GCJ_AXIS_OFFSET = 0.006693421622965943;
+    const PI = Math.PI;
+    const SCENE_FILTER_RADIUS_METERS = 500;
+    // G212 is the Lanzhou-Longbang route; union of relation members and bbox-tagged ways avoids missing provinces.
+    const G212_QUERY = `[out:json][timeout:${QUERY_TIMEOUT_SECONDS}];(way["ref"~"(^|;)G212(;|$)"](18,73,54,135);rel["route"="road"]["ref"~"G212"];way(r););out geom tags;`;
+    const mapInstance = L.map("map", { center: INITIAL_CENTER, zoom: INITIAL_ZOOM, preferCanvas: true });
+    const baseLayer = L.tileLayer("https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=0", {
+      subdomains: ["0", "1", "2", "3"],
+      maxZoom: 19,
+      attribution: "© 腾讯地图",
+    }).addTo(mapInstance);
+    const applicationState = createInitialState();
+    let noticeTimer = null;
+
+    function createInitialState() {
+      return { routeWays: [], samples: [], records: [], isScanning: false, shouldStop: false, routeLayer: null, pointLayer: null, sceneLayer: null };
+    }
+
+    function getElement(elementId) {
+      const element = document.getElementById(elementId);
+      if (!element) throw new Error(`Missing element: ${elementId}`);
+      return element;
+    }
+
+    function showNotice(message) {
+      const notice = getElement("notice");
+      notice.textContent = message;
+      notice.hidden = false;
+      window.clearTimeout(noticeTimer);
+      noticeTimer = window.setTimeout(() => { notice.hidden = true; }, 5000);
+    }
+
+    function setStatus(message) { getElement("statusText").textContent = message; }
+
+    function setProgress(completed, total) {
+      const percentage = total ? Math.min(100, completed / total * 100) : 0;
+      getElement("progressBar").style.width = `${percentage}%`;
+    }
+
+    function escapeHtml(value) {
+      return String(value ?? "").replace(/[&<>'"]/g, character => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[character]));
+    }
+
+    function isFairwaymapperEndpoint(endpoint) {
+      try { return new URL(endpoint).hostname.endsWith("fairwaymapper.com"); } catch { return false; }
+    }
+
+    function readScanOptions() {
+      const apiKey = getElement("apiKey").value.trim();
+      const overpassEndpoint = getElement("overpassEndpoint").value.trim() || DEFAULT_OVERPASS_ENDPOINT;
+      const sampleSpacing = Number(getElement("sampleSpacing").value);
+      const streetViewRadius = Number(getElement("streetViewRadius").value);
+      if (isFairwaymapperEndpoint(overpassEndpoint) && !apiKey) throw new Error("FairwayMapper 端点需要 API key");
+      // Localhost is exempt so the page can be tested against a local mock endpoint.
+      const isLocalEndpoint = /^https?:\/\/(localhost|127\.0\.0\.1)([:/]|$)/i.test(overpassEndpoint);
+      if (!isLocalEndpoint && !/^https:\/\//i.test(overpassEndpoint)) throw new Error("Overpass 端点必须使用 HTTPS");
+      if (!Number.isFinite(sampleSpacing) || sampleSpacing < 100) throw new Error("采样间距至少为 100 m");
+      if (!Number.isFinite(streetViewRadius) || streetViewRadius < 50) throw new Error("街景半径至少为 50 m");
+      return { apiKey, overpassEndpoint, sampleSpacing, streetViewRadius, expandScenes: getElement("expandScenes").checked };
+    }
+
+    async function fetchJson(url, options = {}) {
+      const response = await fetch(url, options);
+      if (!response.ok) throw new Error(`HTTP ${response.status} from ${new URL(url).hostname}`);
+      return response.json();
+    }
+
+    function firstSuccessfulResponse(attempts) {
+      return new Promise((resolve, reject) => {
+        let failureCount = 0;
+        let hasResolved = false;
+        attempts.forEach(attempt => {
+          attempt
+            .then(response => {
+              if (!response.ok) throw new Error(`HTTP ${response.status}`);
+              if (!hasResolved) { hasResolved = true; resolve(response); }
+            })
+            .catch(() => {
+              failureCount += 1;
+              if (!hasResolved && failureCount === attempts.length) reject(new Error("all Tencent attempts failed"));
+            });
+        });
+      });
+    }
+
+    async function fetchTencentJson(url) {
+      const proxyUrl = url.replace("https://sv.map.qq.com", TENCENT_PROXY_BASE_URL);
+      // Race direct and proxy attempts so a stalled endpoint can never block the scan.
+      const response = await firstSuccessfulResponse([
+        fetch(url, { cache: "no-store", signal: AbortSignal.timeout(TENCENT_REQUEST_TIMEOUT_MS) }),
+        fetch(proxyUrl, { cache: "no-store", signal: AbortSignal.timeout(TENCENT_REQUEST_TIMEOUT_MS) }),
+      ]);
+      const responseBytes = await response.arrayBuffer();
+      return JSON.parse(new TextDecoder("gbk").decode(responseBytes));
+    }
+
+    async function fetchRoute(endpoint, apiKey) {
+      const requestBody = new URLSearchParams({ data: G212_QUERY });
+      const requestHeaders = { "Content-Type": "application/x-www-form-urlencoded;charset=UTF-8" };
+      // The key is scoped to the FairwayMapper host and must never leak to other Overpass mirrors.
+      if (isFairwaymapperEndpoint(endpoint)) requestHeaders.Authorization = `Bearer ${apiKey}`;
+      const payload = await fetchJson(endpoint, {
+        method: "POST",
+        headers: requestHeaders,
+        body: requestBody,
+      });
+      if (!Array.isArray(payload.elements)) throw new Error("Overpass 返回缺少 elements");
+      return payload.elements.filter(element => Array.isArray(element.geometry) && element.geometry.length > 1);
+    }
+
+    function toRadians(degrees) { return degrees * Math.PI / 180; }
+
+    function transformLatitude(latitude, longitude) {
+      const offsetX = longitude - 105;
+      const offsetY = latitude - 35;
+      let offset = -100 + 2 * offsetX + 3 * offsetY + .2 * offsetY ** 2 + .1 * offsetX * offsetY;
+      offset += .2 * Math.sqrt(Math.abs(offsetX));
+      offset += (20 * Math.sin(6 * offsetX * PI) + 20 * Math.sin(2 * offsetX * PI)) * 2 / 3;
+      offset += (20 * Math.sin(offsetY * PI) + 40 * Math.sin(offsetY * PI / 3)) * 2 / 3;
+      offset += (160 * Math.sin(offsetY * PI / 12) + 320 * Math.sin(offsetY * PI / 30)) * 2 / 3;
+      return offset;
+    }
+
+    function transformLongitude(latitude, longitude) {
+      const offsetX = longitude - 105;
+      const offsetY = latitude - 35;
+      let offset = 300 + offsetX + 2 * offsetY + .1 * offsetX ** 2 + .1 * offsetX * offsetY;
+      offset += .2 * Math.sqrt(Math.abs(offsetX));
+      offset += (20 * Math.sin(6 * offsetX * PI) + 20 * Math.sin(2 * offsetX * PI)) * 2 / 3;
+      offset += (20 * Math.sin(offsetX * PI) + 40 * Math.sin(offsetX * PI / 3)) * 2 / 3;
+      offset += (150 * Math.sin(offsetX * PI / 12) + 300 * Math.sin(offsetX * PI / 30)) * 2 / 3;
+      return offset;
+    }
+
+    function convertWgs84ToGcj02(latitude, longitude) {
+      if (longitude < 72.004 || longitude > 137.8347 || latitude < .8293 || latitude > 55.8271) return { lat: latitude, lon: longitude };
+      const latitudeRadians = toRadians(latitude);
+      const magic = 1 - GCJ_AXIS_OFFSET * Math.sin(latitudeRadians) ** 2;
+      const rootMagic = Math.sqrt(magic);
+      const latitudeOffset = transformLatitude(latitude, longitude) * 180 / (EARTH_RADIUS_METERS * (1 - GCJ_AXIS_OFFSET) / (magic * rootMagic) * PI);
+      const longitudeOffset = transformLongitude(latitude, longitude) * 180 / (EARTH_RADIUS_METERS / rootMagic * Math.cos(latitudeRadians) * PI);
+      return { lat: latitude + latitudeOffset, lon: longitude + longitudeOffset };
+    }
+
+    function convertMercatorToLatLng(x, y) {
+      if (!Number.isFinite(x) || !Number.isFinite(y) || x === 0 || y === 0) return null;
+      const longitude = x / 20037508.34 * 180;
+      const latitude = (2 * Math.atan(Math.exp(y / 20037508.34 * PI)) - PI / 2) * 180 / PI;
+      return { lat: latitude, lon: longitude };
+    }
+
+    function distanceMeters(firstPoint, secondPoint) {
+      const latitudeRadians = toRadians((firstPoint.lat + secondPoint.lat) / 2);
+      const latitudeScale = 111320;
+      const longitudeScale = latitudeScale * Math.cos(latitudeRadians);
+      return Math.hypot((secondPoint.lat - firstPoint.lat) * latitudeScale, (secondPoint.lon - firstPoint.lon) * longitudeScale);
+    }
+
+    function interpolatePoint(firstPoint, secondPoint, ratio) {
+      return { lat: firstPoint.lat + (secondPoint.lat - firstPoint.lat) * ratio, lon: firstPoint.lon + (secondPoint.lon - firstPoint.lon) * ratio };
+    }
+
+    function sampleWay(way, spacingMeters) {
+      const samples = [];
+      let distanceToNextSample = spacingMeters;
+      for (let index = 1; index < way.geometry.length; index += 1) {
+        const previousPoint = way.geometry[index - 1];
+        const currentPoint = way.geometry[index];
+        const segmentDistance = distanceMeters(previousPoint, currentPoint);
+        while (distanceToNextSample <= segmentDistance) {
+          const ratio = distanceToNextSample / segmentDistance;
+          const samplePoint = interpolatePoint(previousPoint, currentPoint, ratio);
+          samples.push({ lat: samplePoint.lat, lon: samplePoint.lon, wayId: way.id, tags: way.tags || {} });
+          distanceToNextSample += spacingMeters;
+        }
+        distanceToNextSample -= segmentDistance;
+      }
+      return samples;
+    }
+
+    function createSamples(routeWays, spacingMeters) {
+      const samples = routeWays.flatMap(way => sampleWay(way, spacingMeters));
+      const uniqueSamples = new Map();
+      samples.forEach(sample => uniqueSamples.set(`${sample.lat.toFixed(4)}:${sample.lon.toFixed(4)}`, sample));
+      return [...uniqueSamples.values()];
+    }
+
+    function getLookupUrl(sample, radiusMeters) {
+      const nativePoint = convertWgs84ToGcj02(sample.lat, sample.lon);
+      const searchParams = new URLSearchParams({ lat: nativePoint.lat.toFixed(6), lng: nativePoint.lon.toFixed(6), r: String(radiusMeters), output: "json" });
+      return `${TENCENT_LOOKUP_URL}?${searchParams}`;
+    }
+
+    function normalizeLookupRecord(sample, detail) {
+      if (!detail || !detail.svid) return null;
+      const fallbackPoint = convertWgs84ToGcj02(sample.lat, sample.lon);
+      const nativePoint = convertMercatorToLatLng(Number(detail.x), Number(detail.y)) || fallbackPoint;
+      return { provider: "tencent", streetViewId: detail.svid, latitude: nativePoint.lat, longitude: nativePoint.lon, nativeLatitude: nativePoint.lat, nativeLongitude: nativePoint.lon, coordinateSystem: "GCJ-02", heading: Number(detail.heading) || 0, streetName: detail.road_name || sample.tags.name || sample.tags.ref || "G212", roadId: sample.wayId, source: "Tencent /xf", sampleLatitude: sample.lat, sampleLongitude: sample.lon, type: "hit" };
+    }
+
+    async function lookupSample(sample, radiusMeters) {
+      const payload = await fetchTencentJson(getLookupUrl(sample, radiusMeters));
+      return normalizeLookupRecord(sample, payload.detail);
+    }
+
+    function getDetailUrl(streetViewId) {
+      const query = new URLSearchParams({ svid: streetViewId, output: "json" });
+      return `${TENCENT_DETAIL_URL}?${query}`;
+    }
+
+    function buildViewerUrl(record) {
+      const fragment = new URLSearchParams({ base: "roadmap", cov: "all", center: `${record.nativeLatitude},${record.nativeLongitude}`, zoom: "17", pano: record.streetViewId, heading: String(record.heading || 0), pitch: "0", svz: "0" });
+      return `${QQ_MAP_VIEWER_URL}#${fragment}`;
+    }
+
+    async function expandRecord(record) {
+      const payload = await fetchTencentJson(getDetailUrl(record.streetViewId));
+      const scenes = Array.isArray(payload.detail?.all_scenes) ? payload.detail.all_scenes : [];
+      const parentPoint = { lat: record.nativeLatitude, lon: record.nativeLongitude };
+      return scenes
+        .map(scene => {
+          const nativePoint = convertMercatorToLatLng(Number(scene.x), Number(scene.y));
+          if (!nativePoint || !scene.svid) return null;
+          return { ...record, streetViewId: scene.svid, nativeLatitude: nativePoint.lat, nativeLongitude: nativePoint.lon, latitude: nativePoint.lat, longitude: nativePoint.lon, type: "scene", source: "Tencent /sv all_scenes" };
+        })
+        // /sv can return the whole street cluster, so keep only scenes near the parent hit.
+        .filter(scene => scene && distanceMeters(parentPoint, { lat: scene.latitude, lon: scene.longitude }) <= SCENE_FILTER_RADIUS_METERS);
+    }
+
+    async function mapWithConcurrency(items, worker, concurrency, onProgress) {
+      const results = [];
+      let nextIndex = 0;
+      async function consumeQueue() {
+        while (nextIndex < items.length && !applicationState.shouldStop) {
+          const currentIndex = nextIndex;
+          nextIndex += 1;
+          try { results[currentIndex] = await worker(items[currentIndex]); } catch (error) { results[currentIndex] = null; }
+          onProgress(currentIndex + 1, items.length);
+        }
+      }
+      await Promise.all(Array.from({ length: Math.min(concurrency, items.length) }, consumeQueue));
+      return results;
+    }
+
+    function toLatLng(point) {
+      const nativePoint = convertWgs84ToGcj02(Number(point.lat), Number(point.lon ?? point.lng));
+      return [nativePoint.lat, nativePoint.lon];
+    }
+
+    function renderRouteLayer() {
+      if (applicationState.routeLayer) applicationState.routeLayer.remove();
+      const paths = applicationState.routeWays.map(way => way.geometry.map(toLatLng));
+      applicationState.routeLayer = L.layerGroup(paths.map(path => L.polyline(path, { color: "#ffb454", weight: 3, opacity: .82, interactive: false }))).addTo(mapInstance);
+      if (paths.length) mapInstance.fitBounds(L.latLngBounds(paths.flat()), { padding: [24, 24] });
+    }
+
+    function renderPointLayer() {
+      if (applicationState.pointLayer) applicationState.pointLayer.remove();
+      const hitRecords = applicationState.records.filter(record => record.type === "hit");
+      applicationState.pointLayer = L.layerGroup(hitRecords.map(record => L.circleMarker([record.latitude, record.longitude], { radius: 5, color: "#ffffff", weight: .8, fillColor: "#ffd700", fillOpacity: .9 }).bindPopup(createPopup(record)))).addTo(mapInstance);
+    }
+
+    function renderSceneLayer() {
+      if (applicationState.sceneLayer) applicationState.sceneLayer.remove();
+      const sceneRecords = applicationState.records.filter(record => record.type === "scene");
+      applicationState.sceneLayer = L.layerGroup(sceneRecords.map(record => L.circleMarker([record.latitude, record.longitude], { radius: 3, color: "#ffffff", weight: .5, fillColor: "#55d18a", fillOpacity: .8 }).bindPopup(createPopup(record)))).addTo(mapInstance);
+    }
+
+    function createPopup(record) {
+      const viewerUrl = buildViewerUrl(record);
+      return `<strong>${escapeHtml(record.streetName)}</strong><br>${escapeHtml(record.streetViewId)}<br><a href="${escapeHtml(viewerUrl)}" target="_blank" rel="noreferrer">在 QQ Map 中打开</a>`;
+    }
+
+    function updateMetrics() {
+      getElement("routeCount").textContent = applicationState.routeWays.length;
+      getElement("sampleCount").textContent = applicationState.samples.length;
+      getElement("hitCount").textContent = applicationState.records.filter(record => record.type === "hit").length;
+      getElement("sceneCount").textContent = applicationState.records.filter(record => record.type === "scene").length;
+      getElement("exportButton").disabled = !applicationState.records.length;
+    }
+
+    function renderTable() {
+      const records = applicationState.records.slice(0, MAX_RENDERED_RECORDS);
+      const tableBody = getElement("resultTableBody");
+      getElement("emptyState").hidden = records.length > 0;
+      tableBody.innerHTML = records.map(record => `<tr><td><span class="pill ${record.type === "scene" ? "scene" : ""}">${record.type === "scene" ? "相邻场景" : "采样命中"}</span></td><td><span class="id-text">${escapeHtml(record.streetViewId)}</span><br>${escapeHtml(record.streetName)}</td><td>${record.latitude.toFixed(5)}, ${record.longitude.toFixed(5)}</td><td><a class="jump-link" href="${escapeHtml(buildViewerUrl(record))}" target="_blank" rel="noreferrer">打开 ↗</a></td></tr>`).join("");
+    }
+
+    function renderAll() { renderRouteLayer(); renderPointLayer(); renderSceneLayer(); updateMetrics(); renderTable(); }
+
+    async function runScan() {
+      if (applicationState.isScanning) return;
+      let options;
+      try { options = readScanOptions(); } catch (error) { showNotice(error.message); return; }
+      applicationState.isScanning = true;
+      applicationState.shouldStop = false;
+      getElement("scanButton").disabled = true;
+      getElement("stopButton").disabled = false;
+      try {
+        setStatus("正在从 Overpass 获取 G212 路线...");
+        applicationState.routeWays = await fetchRoute(options.overpassEndpoint, options.apiKey);
+        applicationState.samples = createSamples(applicationState.routeWays, options.sampleSpacing);
+        applicationState.records = [];
+        renderAll();
+        setStatus(`路线 ${applicationState.routeWays.length} 段, 生成 ${applicationState.samples.length} 个采样点, 正在查询腾讯街景...`);
+        const lookupResults = await mapWithConcurrency(applicationState.samples, sample => lookupSample(sample, options.streetViewRadius), 4, setProgress);
+        const hitRecords = lookupResults.filter(Boolean);
+        applicationState.records = deduplicateRecords(hitRecords);
+        renderAll();
+        if (options.expandScenes && applicationState.records.length) await expandScenes();
+        setStatus(`扫描完成: 命中 ${applicationState.records.filter(record => record.type === "hit").length} 个采样点, 扩展 ${applicationState.records.filter(record => record.type === "scene").length} 个场景。`);
+      } catch (error) { setStatus(`扫描失败: ${error.message}`); showNotice(`扫描失败: ${error.message}`); }
+      finally { applicationState.isScanning = false; getElement("scanButton").disabled = false; getElement("stopButton").disabled = true; }
+    }
+
+    function deduplicateRecords(records) {
+      const recordsById = new Map();
+      records.forEach(record => recordsById.set(record.streetViewId, record));
+      return [...recordsById.values()];
+    }
+
+    async function expandScenes() {
+      setStatus(`正在扩展 ${applicationState.records.length} 个命中点的相邻场景...`);
+      const expandedResults = await mapWithConcurrency(applicationState.records, expandRecord, 2, setProgress);
+      const sceneRecords = expandedResults.flatMap(result => result || []).filter(record => record.streetViewId !== undefined);
+      applicationState.records = deduplicateRecords([...sceneRecords, ...applicationState.records]);
+      renderAll();
+    }
+
+    function clearResults() {
+      applicationState.shouldStop = true;
+      applicationState.routeWays = [];
+      applicationState.samples = [];
+      applicationState.records = [];
+      setProgress(0, 0);
+      setStatus("已清空当前扫描结果。API key 未保存。");
+      renderAll();
+    }
+
+    function exportResults() {
+      const includeUnmatched = getElement("includeUnmatched").checked;
+      const payload = { schemaVersion: "1.0.0", route: "G212", query: G212_QUERY, exportedAt: new Date().toISOString(), records: applicationState.records };
+      if (includeUnmatched) {
+        const matchedSampleKeys = new Set(applicationState.records.filter(record => record.type === "hit").map(record => `${record.sampleLatitude.toFixed(4)}:${record.sampleLongitude.toFixed(4)}`));
+        payload.unmatchedSamples = applicationState.samples.filter(sample => !matchedSampleKeys.has(`${sample.lat.toFixed(4)}:${sample.lon.toFixed(4)}`));
+      }
+      const fileBlob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json" });
+      const downloadUrl = URL.createObjectURL(fileBlob);
+      const anchor = document.createElement("a");
+      anchor.href = downloadUrl;
+      anchor.download = "g212-tencent-panoramas.json";
+      anchor.click();
+      URL.revokeObjectURL(downloadUrl);
+    }
+
+    async function loadSavedRecords() {
+      try {
+        const response = await fetch("g212-tencent-panoramas.json", { cache: "no-store" });
+        if (!response.ok) return;
+        const payload = await response.json();
+        if (!Array.isArray(payload.records) || !payload.records.length) return;
+        applicationState.records = payload.records;
+        renderAll();
+        const collectedAt = payload.collection?.collectedAt ? payload.collection.collectedAt.slice(0, 10) : "未知日期";
+        setStatus(`已载入预扫描数据 ${payload.records.length} 条 (${collectedAt})。可直接点击「加载路线并扫描」重新采集。`);
+      } catch {
+        // Saved data is optional; live scanning still works without it.
+      }
+    }
+
+    getElement("scanButton").addEventListener("click", runScan);
+    getElement("stopButton").addEventListener("click", () => { applicationState.shouldStop = true; setStatus("正在停止当前队列..."); });
+    getElement("clearButton").addEventListener("click", clearResults);
+    getElement("exportButton").addEventListener("click", exportResults);
+    loadSavedRecords();
+  </script>
+</body>
+</html>
