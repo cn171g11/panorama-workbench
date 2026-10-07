@@ -1,0 +1,372 @@
+{
+  "ref": "G312",
+  "source": "OpenStreetMap via Overpass API (ODbL)",
+  "osmTimestamp": "2026-10-01T11:07:05Z",
+  "wayCount": 4200,
+  "routeRefs": [
+    ";G205;G312;G328",
+    "G104;G205;G312;G328",
+    "G105;G312",
+    "G106;G312",
+    "G108;G312",
+    "G109;G312",
+    "G109;G312;G568",
+    "G205;G312;G328",
+    "G212;G248;G312",
+    "G213;G312",
+    "G215;G312",
+    "G218;G312",
+    "G230;G312",
+    "G30",
+    "G309;G312",
+    "G30;G218",
+    "G30;G312",
+    "G312",
+    "G312(旧)",
+    "G312;G215",
+    "G312;G240",
+    "G312;G314",
+    "G312;G328",
+    "G312;G328;X202",
+    "G312;G329",
+    "G312;G341",
+    "G312;G344",
+    "G312;G346",
+    "G312;G524",
+    "G312;S115",
+    "G312;S213",
+    "G312;S215",
+    "G312;S227",
+    "G312;S236",
+    "G312;S237",
+    "G312;S340",
+    "G312;S342",
+    "G312;X204",
+    "G634",
+    "G635;S230",
+    "G635;S230;G312",
+    "G635;S230;G312(旧)",
+    "S101",
+    "S101;G312",
+    "S230;G312"
+  ],
+  "nameCount": 147,
+  "sampleNames": [
+    "312国道",
+    "G312",
+    "Taiyu Tunnel",
+    "三桥新街",
+    "三环路",
+    "上海 - 霍尔果斯",
+    "上海大道",
+    "上海－霍尔果斯",
+    "世纪大道东段",
+    "东大通河桥",
+    "中环南线",
+    "丹徒大道",
+    "丹霞大道",
+    "乌伊公路",
+    "乌昌快速路",
+    "乌鲁木齐东路",
+    "乌鲁木齐西路",
+    "亚欧路",
+    "伏龙坪隧道",
+    "信臣东路",
+    "信臣中路",
+    "信臣西路",
+    "六盘山隧道",
+    "兰工坪桥",
+    "兰工坪路",
+    "兰新东路",
+    "兰新西路",
+    "兰永公路",
+    "具区路",
+    "北兴塘大桥",
+    "北环路",
+    "华林坪隧道",
+    "南京长江大桥",
+    "南环东路",
+    "南环西路",
+    "古城中路",
+    "合浦路",
+    "和平大道",
+    "城北东路",
+    "城北西路",
+    "外塘河大桥",
+    "外环路",
+    "外环路桥",
+    "天一高架桥",
+    "奎石路",
+    "奔牛南立交",
+    "娄江大道",
+    "娄江快速路",
+    "宁滁快速通道",
+    "宋剑湖桥",
+    "宝山路",
+    "封岸河桥",
+    "工林路",
+    "建材街",
+    "建西东路",
+    "建西西路",
+    "悟真寺二号隧道",
+    "惠澄大桥",
+    "惠运大桥",
+    "慈渎大桥",
+    "扁担河桥",
+    "撮镇路",
+    "新南西路",
+    "新武宜运河大桥",
+    "春河桥",
+    "智谷大道",
+    "曹安公路",
+    "曹安公路6号桥",
+    "曹安公路8号桥",
+    "曹安公路9号桥",
+    "曹安路",
+    "李通大道",
+    "桑园子黄河大桥",
+    "武宜河大桥",
+    "民大隧道",
+    "江乘大道",
+    "沙墩港大桥",
+    "沙河特大桥",
+    "沪霍线",
+    "沿山大道"
+  ],
+  "membership": {
+    "memberPolicy": "connected",
+    "keptWays": 4200,
+    "keptTagged": 3949,
+    "keptRelationOnly": 32,
+    "keptConcurrent": 219,
+    "coRoutes": [
+      "G30"
+    ],
+    "concurrency": [
+      {
+        "coRoute": "G30",
+        "routeRelationMemberWays": 4581,
+        "coRouteRelationMemberWays": 6932,
+        "sharedWayCount": 362
+      }
+    ],
+    "droppedRelationMemberCount": 652,
+    "droppedRelationMemberSample": [
+      {
+        "id": 28258015,
+        "tags": {
+          "highway": "primary",
+          "lanes": "4",
+          "name": "长乐中路",
+          "name:en": "Middle Changle Road",
+          "name:zh": "长乐中路",
+          "oneway": "yes"
+        },
+        "nodeCount": 28,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 28276806,
+        "tags": {
+          "highway": "primary",
+          "lanes": "2",
+          "name": "大庆路",
+          "name:en": "Daqing Road",
+          "name:zh": "大庆路",
+          "oneway": "yes",
+          "surface": "asphalt"
+        },
+        "nodeCount": 33,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 28343210,
+        "tags": {
+          "highway": "primary",
+          "lanes": "2",
+          "layer": "0",
+          "name": "大庆路",
+          "name:en": "Daqing Road",
+          "name:zh": "大庆路",
+          "oneway": "yes"
+        },
+        "nodeCount": 15,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 28358446,
+        "tags": {
+          "highway": "primary",
+          "oneway": "yes"
+        },
+        "nodeCount": 3,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 28358447,
+        "tags": {
+          "highway": "primary",
+          "lanes": "4",
+          "name": "东五路",
+          "name:en": "East 5th Road",
+          "name:zh": "东五路",
+          "oneway": "yes"
+        },
+        "nodeCount": 14,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 28632555,
+        "tags": {
+          "highway": "trunk",
+          "oneway": "yes"
+        },
+        "nodeCount": 13,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 36913555,
+        "tags": {
+          "highway": "motorway",
+          "name": "机场高速",
+          "name:en": "Airport Expressway",
+          "name:zh": "机场高速",
+          "oneway": "yes"
+        },
+        "nodeCount": 20,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 36913556,
+        "tags": {
+          "highway": "motorway",
+          "name": "机场高速",
+          "name:en": "Airport Expressway",
+          "name:zh": "机场高速",
+          "oneway": "yes"
+        },
+        "nodeCount": 27,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 36931165,
+        "tags": {
+          "highway": "motorway_link",
+          "oneway": "yes"
+        },
+        "nodeCount": 11,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 36931174,
+        "tags": {
+          "highway": "trunk",
+          "oneway": "yes"
+        },
+        "nodeCount": 9,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37378362,
+        "tags": {
+          "highway": "primary",
+          "name": "جەنۇبىي ۋوگزال يولى",
+          "name:ug": "جەنۇبىي ۋوگزال يولى",
+          "oneway": "yes"
+        },
+        "nodeCount": 11,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37411086,
+        "tags": {
+          "highway": "primary",
+          "oneway": "yes"
+        },
+        "nodeCount": 12,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37411090,
+        "tags": {
+          "highway": "primary",
+          "oneway": "yes"
+        },
+        "nodeCount": 19,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37417469,
+        "tags": {
+          "highway": "primary",
+          "oneway": "yes"
+        },
+        "nodeCount": 5,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37417470,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk_link",
+          "layer": "1",
+          "oneway": "yes"
+        },
+        "nodeCount": 10,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37520608,
+        "tags": {
+          "highway": "motorway_link",
+          "layer": "-1",
+          "oneway": "yes",
+          "tunnel": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37520609,
+        "tags": {
+          "highway": "motorway_link",
+          "oneway": "yes"
+        },
+        "nodeCount": 7,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37522176,
+        "tags": {
+          "highway": "primary",
+          "oneway": "yes"
+        },
+        "nodeCount": 6,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37630202,
+        "tags": {
+          "highway": "secondary",
+          "oneway": "yes"
+        },
+        "nodeCount": 4,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 37630210,
+        "tags": {
+          "highway": "secondary",
+          "oneway": "yes"
+        },
+        "nodeCount": 8,
+        "endpointsOnRoute": false
+      }
+    ]
+  },
+  "geometryNodeCount": 46250,
+  "warnings": [
+    "OSM geometry is used as a route reference and corridor fence; Tencent panorama completeness is verified separately.",
+    "Ways may be split, duplicated for carriageways, or disconnected in OSM and must be stitched/deduplicated by the scanner."
+  ]
+}
