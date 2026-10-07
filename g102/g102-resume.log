@@ -1,0 +1,15 @@
+G102 ways=1349 segments=16071 samples=38328 crossTrack=[0.0]
+[g102-samples] resumed completed audit 38328 records
+[g102-seeds] unique seeds=12311
+[g102-graph] requests=12295 discovered=100554 pending=16 roads=6816 errors=53
+[g102-graph] requests=12311 discovered=100554 pending=0 roads=6816 errors=53
+{
+  "ref": "G102",
+  "slug": "g102",
+  "records": 100550,
+  "seeds": 12311,
+  "metadataRequests": 12311,
+  "pending": 0,
+  "output": "E:\\workbuddy data work\\2026-09-19-13-38-01\\outputs\\g102-tencent-panoramas.json",
+  "report": "E:\\workbuddy data work\\2026-09-19-13-38-01\\outputs\\g102-tencent-scan-report.json"
+}
