@@ -1,0 +1,47 @@
+Traceback (most recent call last):
+  File "E:\workbuddy data work\2026-09-19-13-38-01\scripts\publish_workbenches.py", line 306, in <module>
+    main()
+    ~~~~^^
+  File "E:\workbuddy data work\2026-09-19-13-38-01\scripts\publish_workbenches.py", line 298, in main
+    commit_sha = commit_tree(token, root, arguments.branch, entries, message)
+  File "E:\workbuddy data work\2026-09-19-13-38-01\scripts\publish_workbenches.py", line 163, in commit_tree
+    status, commit, _ = github_request(token, "POST", f"{root}/git/commits", {
+                        ~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+        "message": message,
+        ^^^^^^^^^^^^^^^^^^^
+        "tree": tree["sha"],
+        ^^^^^^^^^^^^^^^^^^^^
+        "parents": [parent_sha],
+        ^^^^^^^^^^^^^^^^^^^^^^^^
+    })
+    ^^
+  File "E:\workbuddy data work\2026-09-19-13-38-01\scripts\publish_workbenches.py", line 96, in github_request
+    with urllib.request.urlopen(request, timeout=REQUEST_TIMEOUT_SECONDS) as response:
+         ~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\.workbuddy\binaries\python\versions\3.13.12\Lib\urllib\request.py", line 189, in urlopen
+    return opener.open(url, data, timeout)
+           ~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\.workbuddy\binaries\python\versions\3.13.12\Lib\urllib\request.py", line 489, in open
+    response = self._open(req, data)
+  File "C:\Users\Administrator\.workbuddy\binaries\python\versions\3.13.12\Lib\urllib\request.py", line 506, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+                              '_open', req)
+  File "C:\Users\Administrator\.workbuddy\binaries\python\versions\3.13.12\Lib\urllib\request.py", line 466, in _call_chain
+    result = func(*args)
+  File "C:\Users\Administrator\.workbuddy\binaries\python\versions\3.13.12\Lib\urllib\request.py", line 1367, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+                        context=self._context)
+                        ^^^^^^^^^^^^^^^^^^^^^^
+  File "C:\Users\Administrator\.workbuddy\binaries\python\versions\3.13.12\Lib\urllib\request.py", line 1323, in do_open
+    r = h.getresponse()
+  File "C:\Users\Administrator\.workbuddy\binaries\python\versions\3.13.12\Lib\http\client.py", line 1459, in getresponse
+    response.begin()
+    ~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrator\.workbuddy\binaries\python\versions\3.13.12\Lib\http\client.py", line 336, in begin
+    version, status, reason = self._read_status()
+                              ~~~~~~~~~~~~~~~~~^^
+  File "C:\Users\Administrator\.workbuddy\binaries\python\versions\3.13.12\Lib\http\client.py", line 305, in _read_status
+    raise RemoteDisconnected("Remote end closed connection without"
+                             " response")
+http.client.RemoteDisconnected: Remote end closed connection without response
