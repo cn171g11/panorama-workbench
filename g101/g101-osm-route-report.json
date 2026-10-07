@@ -1,0 +1,291 @@
+{
+  "ref": "G101",
+  "source": "OpenStreetMap via Overpass API (ODbL)",
+  "osmTimestamp": "2026-10-06T14:34:05Z",
+  "wayCount": 622,
+  "routeRefs": [
+    "G101",
+    "G101 G111",
+    "G101;G111",
+    "G101;G112",
+    "G101;G233",
+    "G101;G234",
+    "G101;G304;G505",
+    "G101;G305",
+    "G101;G306;S315",
+    "G101;G505",
+    "G505",
+    "G505;S105"
+  ],
+  "nameCount": 25,
+  "sampleNames": [
+    "G101",
+    "中山广场",
+    "京密路",
+    "京沈线",
+    "京沈路",
+    "兴光街",
+    "半壁山桥",
+    "南京北街",
+    "开放环岛",
+    "枯柳树环岛",
+    "正良桥",
+    "武烈路",
+    "环城公路",
+    "畅远东路",
+    "畅远西路",
+    "蒲河桥",
+    "迎宾路",
+    "道义北大街",
+    "道义南大街",
+    "锡伯大街",
+    "香河园南街",
+    "香河园路",
+    "马虎山大桥",
+    "黄河北大街",
+    "黄河南大街"
+  ],
+  "membership": {
+    "memberPolicy": "connected",
+    "keptWays": 622,
+    "keptTagged": 593,
+    "keptRelationOnly": 29,
+    "keptConcurrent": 0,
+    "coRoutes": [],
+    "concurrency": [],
+    "droppedRelationMemberCount": 32,
+    "droppedRelationMemberSample": [
+      {
+        "id": 102776101,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "1",
+          "source": "bing"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 102776209,
+        "tags": {
+          "highway": "trunk",
+          "source": "bing"
+        },
+        "nodeCount": 8,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 102776217,
+        "tags": {
+          "highway": "trunk",
+          "source": "bing"
+        },
+        "nodeCount": 8,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 102776283,
+        "tags": {
+          "highway": "trunk",
+          "source": "bing"
+        },
+        "nodeCount": 4,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 102776305,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "1",
+          "source": "bing"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 102776329,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "1",
+          "source": "bing"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 102776343,
+        "tags": {
+          "highway": "primary",
+          "source": "bing"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 102778340,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "1",
+          "source": "bing"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 102778387,
+        "tags": {
+          "highway": "trunk",
+          "source": "bing"
+        },
+        "nodeCount": 9,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 102778388,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "1",
+          "source": "bing"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 120495325,
+        "tags": {
+          "highway": "secondary",
+          "lanes": "2",
+          "maxheight": "4",
+          "name": "京密路",
+          "name:en": "Jingmi Road",
+          "oneway": "yes"
+        },
+        "nodeCount": 9,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 120495327,
+        "tags": {
+          "bridge": "yes",
+          "highway": "secondary",
+          "lanes": "2",
+          "layer": "2",
+          "maxheight": "4",
+          "name": "京密路",
+          "name:en": "Jingmi Road",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 120496998,
+        "tags": {
+          "bridge": "yes",
+          "highway": "secondary",
+          "lanes": "2",
+          "layer": "2",
+          "maxheight": "4",
+          "name": "京密路",
+          "name:en": "Jingmi Road",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 148724127,
+        "tags": {
+          "highway": "secondary",
+          "name": "京密路",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 154117646,
+        "tags": {
+          "bridge": "yes",
+          "cycleway:right": "lane",
+          "highway": "secondary",
+          "layer": "1",
+          "name": "京密路",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 154117648,
+        "tags": {
+          "bridge": "yes",
+          "cycleway:right": "lane",
+          "highway": "secondary",
+          "layer": "1",
+          "name": "京密路",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 154117672,
+        "tags": {
+          "cycleway:right": "lane",
+          "highway": "secondary",
+          "name": "京密路",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 154117673,
+        "tags": {
+          "cycleway:right": "lane",
+          "highway": "secondary",
+          "lanes": "3",
+          "name": "京密路",
+          "oneway": "yes"
+        },
+        "nodeCount": 9,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 154117676,
+        "tags": {
+          "bicycle": "no",
+          "foot": "no",
+          "highway": "secondary",
+          "name": "京密路",
+          "name:zh": "京密路",
+          "name:zh-Hans": "京密路",
+          "name:zh-Hant": "京密路",
+          "oneway": "yes"
+        },
+        "nodeCount": 6,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 184275842,
+        "tags": {
+          "highway": "trunk",
+          "source": "bing"
+        },
+        "nodeCount": 4,
+        "endpointsOnRoute": false
+      }
+    ]
+  },
+  "geometryNodeCount": 8008,
+  "warnings": [
+    "OSM geometry is used as a route reference and corridor fence; Tencent panorama completeness is verified separately.",
+    "Ways may be split, duplicated for carriageways, or disconnected in OSM and must be stitched/deduplicated by the scanner."
+  ]
+}
