@@ -1,0 +1,17 @@
+G312 ways=4200 segments=42050 samples=94343 crossTrack=[0.0]
+[g312-samples] resumed completed audit 94343 records
+[g312-seeds] unique seeds=24120
+[g312-graph] requests=24001 discovered=240589 pending=119 roads=10747 errors=69
+[g312-graph] requests=24057 discovered=240589 pending=63 roads=10749 errors=69
+[g312-graph] requests=24113 discovered=240589 pending=7 roads=10753 errors=69
+[g312-graph] requests=24120 discovered=240589 pending=0 roads=10753 errors=69
+{
+  "ref": "G312",
+  "slug": "g312",
+  "records": 240585,
+  "seeds": 24120,
+  "metadataRequests": 24120,
+  "pending": 0,
+  "output": "outputs\\g312-tencent-panoramas.json",
+  "report": "outputs\\g312-tencent-scan-report.json"
+}
