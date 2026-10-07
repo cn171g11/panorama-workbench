@@ -1,0 +1,61 @@
+{
+  "ref": "G106",
+  "routeFile": "E:\\workbuddy data work\\2026-09-19-13-38-01\\g106-osm-route.json",
+  "osmTimestamp": "2026-09-20T23:33:05Z",
+  "wayCount": 1820,
+  "deduplicatedSegmentCount": 33580,
+  "deduplicatedLengthKilometers": 3379.81,
+  "bounds": {
+    "minLatitude": 23.2106832,
+    "maxLatitude": 41.0858826,
+    "minLongitude": 113.2543379,
+    "maxLongitude": 123.0020627
+  },
+  "refCounts": {
+    "G106": 1467,
+    "G45;G106": 31,
+    "G106;G355": 8,
+    "G319;G106": 24,
+    "G106;G316": 16,
+    "": 41,
+    "G106;G358": 14,
+    "G106;G323": 5,
+    "G106;G319": 3,
+    "G106;G345": 10,
+    "G106;G311": 8,
+    "G106;G357": 16,
+    "G106;S252": 21,
+    "G106;G341": 17,
+    "G106;G322": 3,
+    "G106;G356": 6,
+    "G106;G240": 33,
+    "G106;G310": 6,
+    "G106;G336": 9,
+    "G106;G337": 4,
+    "G106;G309": 7,
+    "G240": 2,
+    "G106;G344": 6,
+    "G106;S215": 2,
+    "G106;G312": 4,
+    "G106;S118": 2,
+    "G106;G318": 15,
+    "G106;G329": 35,
+    "G106;S328": 1,
+    "G106;S381": 2,
+    "G106;S382": 2
+  },
+  "oldRefOnlyWayCount": 24,
+  "relationMemberWayCount": 1733,
+  "concurrentWayCount": 0,
+  "accidentalNonG106WayCount": 0,
+  "accidentalWayIds": [],
+  "acceptance": {
+    "noAccidentalForeignWays": true,
+    "containsCurrentOrOldReferenceOrRelationMember": true
+  },
+  "notes": [
+    "Shared refs such as G106;G240 remain in the corridor because the OSM way is explicitly tagged as carrying G106.",
+    "old_ref=G106 ways remain included when the current ref is absent, preserving mapped legacy alignments for audit rather than silently dropping them.",
+    "Ways tagged only with a concurrent route (e.g. G30) are included where OSM files them under the G106 relation as well; those stretches are one carriageway carrying both numbers."
+  ]
+}
