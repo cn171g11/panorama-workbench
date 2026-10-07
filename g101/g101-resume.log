@@ -1,0 +1,14 @@
+G101 ways=622 segments=7386 samples=14245 crossTrack=[0.0]
+[g101-samples] resumed completed audit 14245 records
+[g101-seeds] unique seeds=6062
+[g101-graph] requests=6062 discovered=55723 pending=0 roads=3570 errors=13
+{
+  "ref": "G101",
+  "slug": "g101",
+  "records": 55723,
+  "seeds": 6062,
+  "metadataRequests": 6062,
+  "pending": 0,
+  "output": "E:\\workbuddy data work\\2026-09-19-13-38-01\\outputs\\g101-tencent-panoramas.json",
+  "report": "E:\\workbuddy data work\\2026-09-19-13-38-01\\outputs\\g101-tencent-scan-report.json"
+}
