@@ -1,0 +1,154 @@
+G101 ways=622 segments=7386 samples=14245 crossTrack=[0.0]
+[g101-samples] 1000/14245 hits=483
+[g101-samples] 2000/14245 hits=872
+[g101-samples] 3000/14245 hits=1449
+[g101-samples] 4000/14245 hits=2270
+[g101-samples] 5000/14245 hits=2778
+[g101-samples] 6000/14245 hits=2974
+[g101-samples] 7000/14245 hits=3502
+[g101-samples] 8000/14245 hits=3919
+[g101-samples] 9000/14245 hits=3946
+[g101-samples] 10000/14245 hits=4626
+[g101-samples] 11000/14245 hits=5059
+[g101-samples] 12000/14245 hits=5567
+[g101-samples] 13000/14245 hits=6348
+[g101-samples] 14000/14245 hits=6486
+[g101-samples] 14245/14245 hits=6531
+[g101-samples] saved 14245 records to E:\workbuddy data work\2026-09-19-13-38-01\outputs\g101-tencent-sample-audit.json
+[g101-seeds] unique seeds=6030
+[g101-graph] requests=48 discovered=2844 pending=5982 roads=253 errors=0
+[g101-graph] requests=96 discovered=4709 pending=5934 roads=407 errors=0
+[g101-graph] requests=144 discovered=5284 pending=5886 roads=441 errors=1
+[g101-graph] requests=192 discovered=5742 pending=5838 roads=465 errors=1
+[g101-graph] requests=240 discovered=6221 pending=5790 roads=481 errors=1
+[g101-graph] requests=288 discovered=6833 pending=5742 roads=512 errors=2
+[g101-graph] requests=336 discovered=7765 pending=5694 roads=565 errors=3
+[g101-graph] requests=384 discovered=8464 pending=5646 roads=579 errors=3
+[g101-graph] requests=432 discovered=9138 pending=5598 roads=614 errors=3
+[g101-graph] requests=480 discovered=9339 pending=5550 roads=634 errors=3
+[g101-graph] requests=528 discovered=9341 pending=5502 roads=655 errors=5
+[g101-graph] requests=576 discovered=9421 pending=5454 roads=672 errors=5
+[g101-graph] requests=624 discovered=9506 pending=5406 roads=698 errors=5
+[g101-graph] requests=672 discovered=9558 pending=5358 roads=713 errors=5
+[g101-graph] requests=720 discovered=9605 pending=5310 roads=734 errors=6
+[g101-graph] requests=768 discovered=9887 pending=5262 roads=752 errors=7
+[g101-graph] requests=816 discovered=10312 pending=5214 roads=825 errors=7
+[g101-graph] requests=864 discovered=10312 pending=5166 roads=860 errors=7
+[g101-graph] requests=912 discovered=10503 pending=5118 roads=919 errors=8
+[g101-graph] requests=960 discovered=12109 pending=5070 roads=973 errors=8
+[g101-graph] requests=1008 discovered=13460 pending=5022 roads=1022 errors=9
+[g101-graph] requests=1056 discovered=14102 pending=4974 roads=1052 errors=9
+[g101-graph] requests=1104 discovered=14924 pending=4926 roads=1080 errors=10
+[g101-graph] requests=1152 discovered=15054 pending=4878 roads=1083 errors=10
+[g101-graph] requests=1200 discovered=15054 pending=4830 roads=1096 errors=10
+[g101-graph] requests=1248 discovered=15136 pending=4782 roads=1116 errors=10
+[g101-graph] requests=1296 discovered=15138 pending=4734 roads=1139 errors=11
+[g101-graph] requests=1344 discovered=15241 pending=4686 roads=1189 errors=11
+[g101-graph] requests=1392 discovered=15709 pending=4638 roads=1224 errors=11
+[g101-graph] requests=1440 discovered=16341 pending=4590 roads=1243 errors=11
+[g101-graph] requests=1488 discovered=16947 pending=4542 roads=1264 errors=12
+[g101-graph] requests=1536 discovered=17482 pending=4494 roads=1304 errors=12
+[g101-graph] requests=1584 discovered=18176 pending=4446 roads=1336 errors=12
+[g101-graph] requests=1632 discovered=18551 pending=4398 roads=1360 errors=12
+[g101-graph] requests=1680 discovered=18897 pending=4350 roads=1381 errors=13
+[g101-graph] requests=1728 discovered=19505 pending=4302 roads=1398 errors=13
+[g101-graph] requests=1776 discovered=19922 pending=4254 roads=1417 errors=13
+[g101-graph] requests=1824 discovered=20159 pending=4206 roads=1426 errors=13
+[g101-graph] requests=1872 discovered=20400 pending=4158 roads=1439 errors=13
+[g101-graph] requests=1920 discovered=20662 pending=4110 roads=1455 errors=13
+[g101-graph] requests=1968 discovered=20948 pending=4062 roads=1462 errors=13
+[g101-graph] requests=2016 discovered=21287 pending=4014 roads=1475 errors=13
+[g101-graph] requests=2064 discovered=21999 pending=3966 roads=1504 errors=13
+[g101-graph] requests=2112 discovered=22465 pending=3918 roads=1529 errors=13
+[g101-graph] requests=2160 discovered=22842 pending=3870 roads=1543 errors=13
+[g101-graph] requests=2208 discovered=23248 pending=3822 roads=1552 errors=13
+[g101-graph] requests=2256 discovered=23678 pending=3774 roads=1576 errors=13
+[g101-graph] requests=2304 discovered=23995 pending=3726 roads=1589 errors=13
+[g101-graph] requests=2352 discovered=24372 pending=3678 roads=1627 errors=13
+[g101-graph] requests=2400 discovered=24775 pending=3630 roads=1657 errors=13
+[g101-graph] requests=2448 discovered=25135 pending=3582 roads=1669 errors=13
+[g101-graph] requests=2496 discovered=25563 pending=3534 roads=1683 errors=13
+[g101-graph] requests=2544 discovered=25840 pending=3486 roads=1700 errors=13
+[g101-graph] requests=2592 discovered=25840 pending=3438 roads=1715 errors=13
+[g101-graph] requests=2640 discovered=25930 pending=3390 roads=1735 errors=13
+[g101-graph] requests=2688 discovered=26411 pending=3342 roads=1770 errors=13
+[g101-graph] requests=2736 discovered=26462 pending=3294 roads=1779 errors=13
+[g101-graph] requests=2784 discovered=26469 pending=3246 roads=1792 errors=13
+[g101-graph] requests=2832 discovered=27111 pending=3198 roads=1820 errors=13
+[g101-graph] requests=2880 discovered=27655 pending=3150 roads=1839 errors=13
+[g101-graph] requests=2928 discovered=27838 pending=3102 roads=1869 errors=13
+[g101-graph] requests=2976 discovered=28091 pending=3054 roads=1882 errors=13
+[g101-graph] requests=3024 discovered=28180 pending=3006 roads=1901 errors=13
+[g101-graph] requests=3072 discovered=28845 pending=2958 roads=1943 errors=13
+[g101-graph] requests=3120 discovered=28845 pending=2910 roads=1969 errors=13
+[g101-graph] requests=3168 discovered=29116 pending=2862 roads=1993 errors=13
+[g101-graph] requests=3216 discovered=30111 pending=2814 roads=2065 errors=13
+[g101-graph] requests=3264 discovered=30487 pending=2766 roads=2078 errors=13
+[g101-graph] requests=3312 discovered=30751 pending=2718 roads=2090 errors=13
+[g101-graph] requests=3360 discovered=31428 pending=2670 roads=2100 errors=13
+[g101-graph] requests=3408 discovered=31517 pending=2622 roads=2104 errors=13
+[g101-graph] requests=3456 discovered=31867 pending=2574 roads=2119 errors=13
+[g101-graph] requests=3504 discovered=32149 pending=2526 roads=2125 errors=13
+[g101-graph] requests=3552 discovered=32455 pending=2478 roads=2135 errors=13
+[g101-graph] requests=3600 discovered=32684 pending=2430 roads=2143 errors=13
+[g101-graph] requests=3648 discovered=32965 pending=2382 roads=2145 errors=13
+[g101-graph] requests=3696 discovered=33355 pending=2334 roads=2154 errors=13
+[g101-graph] requests=3744 discovered=33736 pending=2286 roads=2169 errors=13
+[g101-graph] requests=3792 discovered=34164 pending=2238 roads=2180 errors=13
+[g101-graph] requests=3840 discovered=34798 pending=2190 roads=2202 errors=13
+[g101-graph] requests=3888 discovered=35561 pending=2142 roads=2222 errors=13
+[g101-graph] requests=3936 discovered=36122 pending=2094 roads=2233 errors=13
+[g101-graph] requests=3984 discovered=36122 pending=2046 roads=2259 errors=13
+[g101-graph] requests=4032 discovered=36300 pending=1998 roads=2280 errors=13
+[g101-graph] requests=4080 discovered=36834 pending=1950 roads=2313 errors=13
+[g101-graph] requests=4128 discovered=37270 pending=1902 roads=2331 errors=13
+[g101-graph] requests=4176 discovered=37665 pending=1854 roads=2345 errors=13
+[g101-graph] requests=4224 discovered=38048 pending=1806 roads=2355 errors=13
+[g101-graph] requests=4272 discovered=38464 pending=1758 roads=2373 errors=13
+[g101-graph] requests=4320 discovered=38775 pending=1710 roads=2394 errors=13
+[g101-graph] requests=4368 discovered=39256 pending=1662 roads=2407 errors=13
+[g101-graph] requests=4416 discovered=39652 pending=1614 roads=2417 errors=13
+[g101-graph] requests=4464 discovered=40006 pending=1566 roads=2437 errors=13
+[g101-graph] requests=4512 discovered=40688 pending=1518 roads=2449 errors=13
+[g101-graph] requests=4560 discovered=41392 pending=1470 roads=2483 errors=13
+[g101-graph] requests=4608 discovered=41626 pending=1422 roads=2507 errors=13
+[g101-graph] requests=4656 discovered=41626 pending=1374 roads=2522 errors=13
+[g101-graph] requests=4704 discovered=41917 pending=1326 roads=2537 errors=13
+[g101-graph] requests=4752 discovered=42469 pending=1278 roads=2557 errors=13
+[g101-graph] requests=4800 discovered=42932 pending=1230 roads=2582 errors=13
+[g101-graph] requests=4848 discovered=43375 pending=1182 roads=2599 errors=13
+[g101-graph] requests=4896 discovered=43955 pending=1134 roads=2608 errors=13
+[g101-graph] requests=4944 discovered=44537 pending=1086 roads=2613 errors=13
+[g101-graph] requests=4992 discovered=45001 pending=1038 roads=2633 errors=13
+[g101-graph] requests=5040 discovered=45419 pending=990 roads=2652 errors=13
+[g101-graph] requests=5088 discovered=45792 pending=942 roads=2669 errors=13
+[g101-graph] requests=5136 discovered=46154 pending=894 roads=2685 errors=13
+[g101-graph] requests=5184 discovered=46565 pending=846 roads=2692 errors=13
+[g101-graph] requests=5232 discovered=46947 pending=798 roads=2701 errors=13
+[g101-graph] requests=5280 discovered=48075 pending=750 roads=2800 errors=13
+[g101-graph] requests=5328 discovered=48732 pending=702 roads=2826 errors=13
+[g101-graph] requests=5376 discovered=49368 pending=654 roads=2845 errors=13
+[g101-graph] requests=5424 discovered=50036 pending=606 roads=2870 errors=13
+[g101-graph] requests=5472 discovered=50401 pending=558 roads=2884 errors=13
+[g101-graph] requests=5520 discovered=50401 pending=510 roads=2897 errors=13
+[g101-graph] requests=5568 discovered=50401 pending=462 roads=2913 errors=13
+[g101-graph] requests=5616 discovered=50401 pending=414 roads=2939 errors=13
+[g101-graph] requests=5664 discovered=51461 pending=366 roads=3013 errors=13
+[g101-graph] requests=5712 discovered=52299 pending=318 roads=3167 errors=13
+[g101-graph] requests=5760 discovered=52890 pending=270 roads=3280 errors=13
+[g101-graph] requests=5808 discovered=53630 pending=222 roads=3408 errors=13
+[g101-graph] requests=5856 discovered=54553 pending=174 roads=3483 errors=13
+[g101-graph] requests=5904 discovered=55221 pending=126 roads=3513 errors=13
+[g101-graph] requests=5952 discovered=55604 pending=78 roads=3544 errors=13
+[g101-graph] requests=6000 discovered=55723 pending=30 roads=3560 errors=13
+[g101-graph] requests=6030 discovered=55723 pending=0 roads=3564 errors=13
+{
+  "ref": "G101",
+  "slug": "g101",
+  "records": 55723,
+  "seeds": 6030,
+  "metadataRequests": 6030,
+  "pending": 0,
+  "output": "E:\\workbuddy data work\\2026-09-19-13-38-01\\outputs\\g101-tencent-panoramas.json",
+  "report": "E:\\workbuddy data work\\2026-09-19-13-38-01\\outputs\\g101-tencent-scan-report.json"
+}
