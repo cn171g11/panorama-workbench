@@ -1,0 +1,344 @@
+{
+  "ref": "G102",
+  "source": "OpenStreetMap via Overpass API (ODbL)",
+  "osmTimestamp": "2026-10-06T16:42:00Z",
+  "wayCount": 1349,
+  "routeRefs": [
+    "G102",
+    "G102;G201",
+    "G102;G202",
+    "G102;G205",
+    "G102;G221",
+    "G102;G230",
+    "G102;G301",
+    "G102;G302",
+    "G102;G304",
+    "G102;G305",
+    "G102;G306",
+    "G102;G331",
+    "G102;G334",
+    "G102;S102",
+    "G102;S102;S107",
+    "G102;S261",
+    "G102;S262",
+    "G102;S301",
+    "G102;S307",
+    "G102;X005",
+    "G102;X012",
+    "G102;X024",
+    "G102;X059",
+    "G102;X064",
+    "G205",
+    "G505",
+    "S102;G102"
+  ],
+  "nameCount": 108,
+  "sampleNames": [
+    "102国道",
+    "㦤路中桥",
+    "万宝大道",
+    "三环路辅路",
+    "世纪大街",
+    "世纪广场",
+    "东南湖大路",
+    "东沙河桥",
+    "乌金屯松花江大桥",
+    "九江河桥",
+    "五里河大桥",
+    "京哈公路",
+    "京哈线",
+    "京抚公路",
+    "京抚旧线",
+    "京抚线",
+    "京抚线/庄林线",
+    "京抚线;丹阿线",
+    "京抚线;同哈线",
+    "京抚线;庄林线",
+    "京抚线;沈盘线",
+    "京榆大街",
+    "伯雍东街",
+    "伯雍西街",
+    "佳木斯松花江公路大桥",
+    "八里河大桥",
+    "六股河大桥",
+    "关城北路",
+    "凡河大桥",
+    "利民大道",
+    "北一经街",
+    "北环路",
+    "北环路东段",
+    "北环路中段",
+    "北环路西段",
+    "北邱河桥",
+    "南一经街",
+    "南四环快速路",
+    "南四环路",
+    "博士营中桥",
+    "卫星路",
+    "哈双路",
+    "外环路",
+    "大通河大街",
+    "岔林河大桥",
+    "岛东线",
+    "岭东街",
+    "强流河大桥",
+    "振兴大街",
+    "振兴街",
+    "揽军路辅路",
+    "昌盛大街",
+    "朝阳北路",
+    "朝阳路",
+    "朝阳门外大街",
+    "杨闸环岛",
+    "松北大道",
+    "松花江",
+    "柴河街南段",
+    "榆林大街",
+    "段甲岭大街",
+    "沈辽路",
+    "沈铁路",
+    "泃阳东大街",
+    "泃阳西大街",
+    "洋浦大街",
+    "滦河特大桥",
+    "滨河东路",
+    "烟台河桥",
+    "狗河大桥",
+    "玉滨公路",
+    "电厂大桥",
+    "白山东路",
+    "白山路",
+    "祥安北大街",
+    "祥安南大街",
+    "繁盛路",
+    "红旗街",
+    "胜利西路",
+    "萧红大道"
+  ],
+  "membership": {
+    "memberPolicy": "connected",
+    "keptWays": 1349,
+    "keptTagged": 1341,
+    "keptRelationOnly": 8,
+    "keptConcurrent": 0,
+    "coRoutes": [],
+    "concurrency": [],
+    "droppedRelationMemberCount": 47,
+    "droppedRelationMemberSample": [
+      {
+        "id": 35821282,
+        "tags": {
+          "highway": "trunk",
+          "lanes": "4",
+          "name": "达康路",
+          "oneway": "yes",
+          "source": "Yahoo"
+        },
+        "nodeCount": 26,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 52330660,
+        "tags": {
+          "highway": "trunk",
+          "name": "哈肇公路",
+          "oneway": "yes",
+          "ref": "G222",
+          "source": "GPS"
+        },
+        "nodeCount": 59,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 52330661,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "1",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 165827948,
+        "tags": {
+          "highway": "trunk_link",
+          "oneway": "yes"
+        },
+        "nodeCount": 24,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 205666322,
+        "tags": {
+          "highway": "trunk",
+          "name": "哈肇公路",
+          "oneway": "yes",
+          "ref": "G222",
+          "source": "GPS"
+        },
+        "nodeCount": 56,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 205666323,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "1",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 205666336,
+        "tags": {
+          "highway": "trunk",
+          "oneway": "yes"
+        },
+        "nodeCount": 22,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 205666337,
+        "tags": {
+          "highway": "trunk",
+          "oneway": "yes"
+        },
+        "nodeCount": 21,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 208010938,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "1"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 208010939,
+        "tags": {
+          "highway": "trunk"
+        },
+        "nodeCount": 4,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 208847096,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "lanes": "4",
+          "layer": "1",
+          "name": "阳明滩大桥",
+          "oneway": "yes",
+          "surface": "asphalt"
+        },
+        "nodeCount": 61,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 208847119,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "lanes": "4",
+          "layer": "1",
+          "name": "阳明滩大桥",
+          "oneway": "yes",
+          "surface": "asphalt"
+        },
+        "nodeCount": 59,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 243665757,
+        "tags": {
+          "highway": "trunk",
+          "lanes": "4",
+          "name": "达康路",
+          "oneway": "yes"
+        },
+        "nodeCount": 28,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 264304813,
+        "tags": {
+          "highway": "trunk_link"
+        },
+        "nodeCount": 8,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 320211689,
+        "tags": {
+          "highway": "trunk",
+          "junction": "roundabout",
+          "name": "大洲广场",
+          "oneway": "yes"
+        },
+        "nodeCount": 44,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 320214038,
+        "tags": {
+          "highway": "trunk_link",
+          "layer": "1",
+          "oneway": "yes"
+        },
+        "nodeCount": 14,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 320214041,
+        "tags": {
+          "highway": "trunk_link",
+          "layer": "1",
+          "oneway": "yes"
+        },
+        "nodeCount": 12,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 320214044,
+        "tags": {
+          "highway": "trunk",
+          "oneway": "yes"
+        },
+        "nodeCount": 10,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 320214047,
+        "tags": {
+          "highway": "trunk_link",
+          "oneway": "yes"
+        },
+        "nodeCount": 6,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 394468540,
+        "tags": {
+          "highway": "trunk",
+          "oneway": "yes",
+          "ref": "S261"
+        },
+        "nodeCount": 4,
+        "endpointsOnRoute": false
+      }
+    ]
+  },
+  "geometryNodeCount": 17420,
+  "warnings": [
+    "OSM geometry is used as a route reference and corridor fence; Tencent panorama completeness is verified separately.",
+    "Ways may be split, duplicated for carriageways, or disconnected in OSM and must be stitched/deduplicated by the scanner."
+  ]
+}
