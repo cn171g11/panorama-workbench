@@ -1,0 +1,315 @@
+{
+  "ref": "G103",
+  "source": "OpenStreetMap via Overpass API (ODbL)",
+  "osmTimestamp": "2026-10-07T02:31:35Z",
+  "wayCount": 428,
+  "routeRefs": [
+    "G103",
+    "G103;G205",
+    "G103;G233"
+  ],
+  "nameCount": 30,
+  "sampleNames": [
+    "中心桥立交桥",
+    "九棵树东路",
+    "于庄子通道桥",
+    "京塘路",
+    "京滨线",
+    "京滨线（新港四号路）",
+    "京滨线（津塘公路）",
+    "京通快速",
+    "京通快速路",
+    "京通快速道路",
+    "军粮城立交桥",
+    "北京排污河一号桥",
+    "北苑南路",
+    "北运河桥",
+    "国贸桥",
+    "外环东路（京滨线）",
+    "外环北路（京滨线）",
+    "外环调整路（京滨线）",
+    "大望桥",
+    "大柳树桥",
+    "建国路",
+    "建国门外大街",
+    "建国门桥",
+    "新港四号路",
+    "新立村立交桥",
+    "无瑕邨立交桥",
+    "民族路通道桥",
+    "津塘公路",
+    "津宁高速跨线桥",
+    "高碑店桥"
+  ],
+  "membership": {
+    "memberPolicy": "connected",
+    "keptWays": 428,
+    "keptTagged": 427,
+    "keptRelationOnly": 1,
+    "keptConcurrent": 0,
+    "coRoutes": [],
+    "concurrency": [],
+    "droppedRelationMemberCount": 42,
+    "droppedRelationMemberSample": [
+      {
+        "id": 48163787,
+        "tags": {
+          "foot": "yes",
+          "highway": "trunk",
+          "lanes": "3",
+          "name": "外环东路（克黄线）",
+          "name:en": "Out Ring",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 34,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 134034441,
+        "tags": {
+          "highway": "trunk",
+          "lanes": "4",
+          "name": "外环东路（克黄线）",
+          "name:en": "Out Ring",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 13,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 350465138,
+        "tags": {
+          "foot": "yes",
+          "highway": "trunk_link",
+          "oneway": "yes"
+        },
+        "nodeCount": 16,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 350465146,
+        "tags": {
+          "foot": "yes",
+          "highway": "trunk_link",
+          "oneway": "yes"
+        },
+        "nodeCount": 12,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 350465158,
+        "tags": {
+          "foot": "yes",
+          "highway": "trunk_link",
+          "junction": "roundabout",
+          "oneway": "yes"
+        },
+        "nodeCount": 20,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 468577731,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "2",
+          "name": "津汉立交桥",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 3,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 554040722,
+        "tags": {
+          "highway": "trunk_link",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 554040723,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk_link",
+          "layer": "1",
+          "motorroad": "yes",
+          "oneway": "yes"
+        },
+        "nodeCount": 4,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 554040724,
+        "tags": {
+          "highway": "trunk_link",
+          "oneway": "yes"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 554040725,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk_link",
+          "layer": "1",
+          "motorroad": "yes",
+          "oneway": "yes"
+        },
+        "nodeCount": 3,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 606691331,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "lanes": "5",
+          "layer": "5",
+          "name": "外环东路（克黄线）",
+          "name:en": "Out Ring",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 4,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 606691332,
+        "tags": {
+          "foot": "yes",
+          "highway": "trunk",
+          "lanes": "5",
+          "layer": "2",
+          "name": "外环东路（克黄线）",
+          "name:en": "Out Ring",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 5,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 606691333,
+        "tags": {
+          "highway": "trunk",
+          "lanes": "5",
+          "name": "外环东路（克黄线）",
+          "name:en": "Out Ring",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 12,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 606691334,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "lanes": "5",
+          "layer": "5",
+          "name": "外环东路（克黄线）",
+          "name:en": "Out Ring",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 4,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 606725304,
+        "tags": {
+          "highway": "trunk_link",
+          "name": "克黄线",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 7,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 606725306,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk_link",
+          "layer": "1",
+          "name": "克黄线",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 8,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 606725308,
+        "tags": {
+          "foot": "yes",
+          "highway": "trunk",
+          "lanes": "4",
+          "name": "外环东路（克黄线）",
+          "name:en": "Out Ring",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 35,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 606725310,
+        "tags": {
+          "bridge": "yes",
+          "highway": "trunk",
+          "layer": "1",
+          "name": "津汉立交桥",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 3,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 825097999,
+        "tags": {
+          "bridge": "yes",
+          "foot": "yes",
+          "highway": "trunk",
+          "lanes": "4",
+          "layer": "1",
+          "name": "外环东路（克黄线）",
+          "name:en": "Out Ring",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      },
+      {
+        "id": 825098001,
+        "tags": {
+          "bridge": "yes",
+          "foot": "yes",
+          "highway": "trunk",
+          "lanes": "3",
+          "layer": "1",
+          "name": "外环东路（克黄线）",
+          "name:en": "Out Ring",
+          "oneway": "yes",
+          "ref": "G233"
+        },
+        "nodeCount": 2,
+        "endpointsOnRoute": false
+      }
+    ]
+  },
+  "geometryNodeCount": 3974,
+  "warnings": [
+    "OSM geometry is used as a route reference and corridor fence; Tencent panorama completeness is verified separately.",
+    "Ways may be split, duplicated for carriageways, or disconnected in OSM and must be stitched/deduplicated by the scanner."
+  ]
+}
