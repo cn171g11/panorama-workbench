@@ -1,0 +1,888 @@
+audit records=94343 failed=693
+  31.248996,121.383862 -> hit routeDistance=0.2868952946258801
+  31.253115,121.367731 -> hit routeDistance=1.2582796724640335
+  31.260149,121.344182 -> hit routeDistance=3.760002773629948
+  31.263820,121.332062 -> hit routeDistance=3.8068359474972358
+  31.266822,121.312915 -> hit routeDistance=5.60386078775638
+  31.267103,121.309872 -> hit routeDistance=5.22431055233018
+  31.270365,121.284791 -> hit routeDistance=2.7831073665341126
+  31.271901,121.272935 -> hit routeDistance=1.0898773113106677
+  31.275187,121.222947 -> hit routeDistance=3.2439875260945255
+  31.275299,121.224003 -> hit routeDistance=8.153379913251667
+  31.275399,121.221258 -> hit routeDistance=2.9610083554162743
+  31.275523,121.221290 -> hit routeDistance=7.415462438757904
+  31.276507,121.236732 -> hit routeDistance=9.175181934036814
+  31.277422,121.261126 -> hit routeDistance=9.399202187455748
+  31.277612,121.248056 -> hit routeDistance=8.990589200092119
+  31.277775,121.251065 -> hit routeDistance=3.7140281858467086
+  31.290832,121.166919 -> hit routeDistance=6.205075988826577
+  31.304026,121.108142 -> hit routeDistance=2.301543168119818
+  31.319273,121.046345 -> hit routeDistance=5.936745273761842
+  31.342579,120.610274 -> hit routeDistance=8.838579546028466
+  31.431032,120.466581 -> hit routeDistance=1.6698923962246262
+  31.431703,120.465966 -> hit routeDistance=4.012231634346026
+  31.441446,120.461509 -> hit routeDistance=1.111028103290373
+  31.444989,120.418276 -> hit routeDistance=2.658853306229327
+  31.453981,120.416231 -> hit routeDistance=4.060525281158812
+  31.458719,120.414925 -> hit routeDistance=2.2138832476484502
+  31.462022,120.413104 -> hit routeDistance=3.8354000891586315
+  31.521999,120.426939 -> hit routeDistance=5.4051001505711875
+  31.547346,120.395949 -> hit routeDistance=3.491579087653153
+  31.549245,120.395201 -> hit routeDistance=5.8865489441985375
+  31.554682,120.392644 -> hit routeDistance=3.0470652170784014
+  31.581383,120.377122 -> hit routeDistance=7.870933082111461
+  31.628285,120.236945 -> hit routeDistance=3.6021751239700754
+  31.633313,120.244048 -> hit routeDistance=2.569798242247631
+  31.634876,120.295073 -> hit routeDistance=8.829671000737582
+  31.637560,120.255544 -> hit routeDistance=6.392943488866819
+  31.637585,120.179784 -> hit routeDistance=8.244370508593555
+  31.637695,120.256331 -> hit routeDistance=6.618855094347806
+  31.637838,120.265094 -> hit routeDistance=2.703538529318245
+  31.652896,120.166858 -> hit routeDistance=9.046254892753367
+  31.655992,120.162773 -> hit routeDistance=4.61101057259393
+  31.656577,120.160961 -> hit routeDistance=2.432428330999585
+  31.657125,120.156272 -> hit routeDistance=3.490703969119411
+  31.657785,120.149627 -> hit routeDistance=3.1055177723878526
+  31.659033,120.138932 -> hit routeDistance=1.048797818669833
+  31.663615,120.127976 -> hit routeDistance=4.7252646296382395
+  31.683085,120.092190 -> empty routeDistance=None
+  31.687783,120.066309 -> empty routeDistance=None
+  31.691836,120.034008 -> hit routeDistance=9.124783631711992
+  31.695571,120.019805 -> hit routeDistance=3.3495327045137313
+  31.718136,116.470469 -> hit routeDistance=5.081566801795735
+  31.725126,116.506848 -> hit routeDistance=2.7831064436927186
+  31.726557,116.510013 -> hit routeDistance=5.036498052671314
+  31.727232,116.438464 -> empty routeDistance=None
+  31.730797,119.994275 -> hit routeDistance=2.90065953517817
+  31.730799,116.519180 -> hit routeDistance=2.0814399458086332
+  31.734682,116.412514 -> empty routeDistance=None
+  31.734725,116.414348 -> empty routeDistance=None
+  31.738712,116.532057 -> hit routeDistance=4.0826056107955715
+  31.774088,117.753269 -> empty routeDistance=None
+  31.781997,116.814231 -> empty routeDistance=None
+  31.787614,116.828569 -> empty routeDistance=None
+  31.789475,117.700889 -> empty routeDistance=None
+  31.791844,117.688891 -> empty routeDistance=None
+  31.792658,116.839933 -> empty routeDistance=None
+  31.792741,116.839878 -> empty routeDistance=None
+  31.793119,117.401389 -> hit routeDistance=113.49261284872871
+  31.793318,117.682823 -> empty routeDistance=None
+  31.796730,117.320005 -> hit routeDistance=6.231250928708251
+  31.871811,117.489047 -> hit routeDistance=8.770071186582618
+  31.905359,117.971576 -> empty routeDistance=None
+  31.905879,117.968260 -> empty routeDistance=None
+  31.908094,118.030176 -> empty routeDistance=None
+  31.909452,118.019322 -> empty routeDistance=None
+  31.910598,118.057727 -> empty routeDistance=None
+  31.930403,118.074607 -> empty routeDistance=None
+  31.940004,119.564408 -> empty routeDistance=None
+  31.949787,118.092998 -> empty routeDistance=None
+  31.952361,118.102149 -> empty routeDistance=None
+  31.994789,118.157873 -> empty routeDistance=None
+  32.010815,118.178552 -> empty routeDistance=None
+  32.013991,118.196295 -> empty routeDistance=None
+  32.013995,118.234348 -> empty routeDistance=None
+  32.018248,118.247302 -> empty routeDistance=None
+  32.019092,118.248356 -> empty routeDistance=None
+  32.072018,118.636852 -> hit routeDistance=33.721401965230484
+  32.085824,118.620415 -> hit routeDistance=3.81799254836764
+  32.089784,118.599486 -> hit routeDistance=3.8033888487041634
+  32.090039,118.597416 -> hit routeDistance=9.008311519343675
+  32.090516,118.595024 -> hit routeDistance=5.224061694878258
+  32.101173,118.750537 -> hit routeDistance=34.44141839212601
+  32.103157,118.586529 -> hit routeDistance=7.043500061580861
+  32.103194,118.750076 -> hit routeDistance=136.80663397658094
+  32.115235,118.700187 -> hit routeDistance=5.713662442409374
+  32.115607,118.738457 -> hit routeDistance=2.906093870828018
+  32.116899,118.735883 -> hit routeDistance=1.5666161856586045
+  32.118191,118.733309 -> hit routeDistance=2.4632489254384473
+  32.118267,118.577352 -> hit routeDistance=5.359764534526791
+  32.124189,118.718256 -> hit routeDistance=7.9569956208544985
+  32.124479,118.718694 -> hit routeDistance=352.23499699463105
+  32.125390,118.726992 -> hit routeDistance=46.744934224855946
+  32.126606,114.800769 -> empty routeDistance=None
+  32.127108,118.723313 -> hit routeDistance=9.403565801275962
+  32.129920,114.782889 -> empty routeDistance=None
+  32.130384,114.779344 -> empty routeDistance=None
+  32.132019,118.555283 -> hit routeDistance=2.5868718585028097
+  32.134887,114.755674 -> empty routeDistance=None
+  32.138227,118.956875 -> hit routeDistance=8.822123426354786
+  32.140981,118.972135 -> hit routeDistance=3.078354040448646
+  32.142257,118.977031 -> hit routeDistance=4.50664804888718
+  32.142400,114.729251 -> empty routeDistance=None
+  32.143134,118.981309 -> hit routeDistance=2.167195492179554
+  32.143143,114.726617 -> empty routeDistance=None
+  32.143302,118.982091 -> hit routeDistance=2.167195492179554
+  32.145066,118.990694 -> hit routeDistance=199.4643689556709
+  32.148253,119.007553 -> hit routeDistance=2.232964386270086
+  32.152425,114.322759 -> empty routeDistance=None
+  32.156848,114.693471 -> empty routeDistance=None
+  32.157874,115.263424 -> empty routeDistance=None
+  32.159523,114.107916 -> hit routeDistance=10.345810373549847
+  32.159573,114.683191 -> empty routeDistance=None
+  32.159686,114.401811 -> empty routeDistance=None
+  32.160840,114.071552 -> hit routeDistance=3.4349390131632744
+  32.162014,114.411868 -> empty routeDistance=None
+  32.162143,114.092981 -> hit routeDistance=3.056942711476268
+  32.163669,114.670264 -> empty routeDistance=None
+  32.163774,114.355970 -> empty routeDistance=None
+  32.164665,114.058799 -> hit routeDistance=3.6370477630620646
+  32.164732,115.277764 -> empty routeDistance=None
+  32.165137,114.418195 -> empty routeDistance=None
+  32.165715,115.279290 -> empty routeDistance=None
+  32.166698,115.280816 -> empty routeDistance=None
+  32.169862,114.444141 -> empty routeDistance=None
+  32.170936,114.620142 -> empty routeDistance=None
+  32.173493,115.291422 -> empty routeDistance=None
+  32.175585,118.493872 -> empty routeDistance=None
+  32.176149,115.569263 -> empty routeDistance=None
+  32.180655,115.353460 -> empty routeDistance=None
+  32.182218,115.463221 -> empty routeDistance=None
+  32.184982,114.020376 -> empty routeDistance=None
+  32.191071,114.480732 -> empty routeDistance=None
+  32.194851,114.013134 -> empty routeDistance=None
+  32.205170,114.003242 -> empty routeDistance=None
+  32.222046,114.531566 -> empty routeDistance=None
+  32.222096,113.978305 -> empty routeDistance=None
+  32.262908,113.853588 -> empty routeDistance=None
+  32.270318,113.843295 -> empty routeDistance=None
+  32.345893,113.590691 -> empty routeDistance=None
+  32.345988,113.592647 -> empty routeDistance=None
+  32.346484,113.539437 -> empty routeDistance=None
+  32.346491,113.611559 -> empty routeDistance=None
+  32.346753,113.606558 -> empty routeDistance=None
+  32.349806,113.569591 -> empty routeDistance=None
+  32.350756,113.574906 -> empty routeDistance=None
+  32.547342,113.109048 -> empty routeDistance=None
+  32.556089,113.082866 -> empty routeDistance=None
+  32.556381,113.092131 -> empty routeDistance=None
+  32.558759,113.039206 -> empty routeDistance=None
+  32.560022,113.036254 -> empty routeDistance=None
+  32.697963,112.868157 -> empty routeDistance=None
+  32.701830,112.857253 -> empty routeDistance=None
+  32.708007,112.836510 -> empty routeDistance=None
+  33.018342,112.624796 -> hit routeDistance=8.854446934737368
+  33.020350,112.615387 -> hit routeDistance=6.754627062354641
+  33.026467,112.588412 -> hit routeDistance=3.831284419708897
+  33.028062,112.384655 -> empty routeDistance=None
+  33.029543,112.573948 -> hit routeDistance=4.086793912044942
+  33.030954,112.568169 -> hit routeDistance=8.557172399424367
+  33.032755,112.560046 -> hit routeDistance=3.537624784834872
+  33.033310,112.556108 -> hit routeDistance=2.296244262597932
+  33.038974,111.985008 -> empty routeDistance=None
+  33.039335,112.365026 -> empty routeDistance=None
+  33.041626,112.360782 -> empty routeDistance=None
+  33.042218,112.299179 -> empty routeDistance=None
+  33.044524,112.307295 -> empty routeDistance=None
+  33.045318,112.347205 -> empty routeDistance=None
+  33.045867,112.339748 -> empty routeDistance=None
+  33.081218,111.913551 -> empty routeDistance=None
+  33.316548,111.455022 -> hit routeDistance=191.9308504903078
+  33.448097,111.089676 -> empty routeDistance=None
+  33.459016,111.073434 -> empty routeDistance=None
+  33.480675,111.037421 -> empty routeDistance=None
+  33.481203,111.033180 -> empty routeDistance=None
+  33.486903,111.024928 -> empty routeDistance=None
+  33.517343,110.883602 -> empty routeDistance=None
+  33.521007,110.899354 -> empty routeDistance=None
+  33.521128,110.870200 -> empty routeDistance=None
+  33.533015,110.856051 -> empty routeDistance=None
+  33.535482,110.840145 -> empty routeDistance=None
+  33.556071,110.758455 -> empty routeDistance=None
+  33.557213,110.771524 -> empty routeDistance=None
+  33.557950,110.765476 -> empty routeDistance=None
+  33.567560,110.696516 -> empty routeDistance=None
+  33.611933,110.603437 -> empty routeDistance=None
+  33.622831,110.554632 -> empty routeDistance=None
+  33.623382,110.553245 -> empty routeDistance=None
+  33.623928,110.546701 -> empty routeDistance=None
+  33.628323,110.533021 -> empty routeDistance=None
+  33.628814,110.532511 -> empty routeDistance=None
+  33.646372,110.447768 -> empty routeDistance=None
+  33.663674,110.370958 -> empty routeDistance=None
+  33.701203,110.296594 -> empty routeDistance=None
+  33.745778,110.154788 -> empty routeDistance=None
+  33.771787,110.114459 -> empty routeDistance=None
+  33.779526,110.097142 -> empty routeDistance=None
+  33.781353,110.082190 -> empty routeDistance=None
+  33.783888,110.076257 -> empty routeDistance=None
+  33.791012,110.068624 -> empty routeDistance=None
+  33.791295,110.067933 -> empty routeDistance=None
+  33.895159,109.899231 -> empty routeDistance=None
+  33.902540,109.876774 -> empty routeDistance=None
+  33.906734,109.866653 -> empty routeDistance=None
+  33.908022,109.865569 -> empty routeDistance=None
+  33.917629,109.866235 -> empty routeDistance=None
+  33.942522,109.827482 -> empty routeDistance=None
+  33.950815,109.794008 -> empty routeDistance=None
+  33.954378,109.780676 -> empty routeDistance=None
+  33.965570,109.780199 -> empty routeDistance=None
+  33.971209,109.782518 -> empty routeDistance=None
+  33.979478,109.781438 -> empty routeDistance=None
+  34.026201,109.689024 -> empty routeDistance=None
+  34.034300,109.670154 -> empty routeDistance=None
+  34.036584,109.641186 -> empty routeDistance=None
+  34.037371,109.631017 -> empty routeDistance=None
+  34.044187,109.574858 -> empty routeDistance=None
+  34.049780,109.564153 -> empty routeDistance=None
+  34.053642,109.561364 -> empty routeDistance=None
+  34.175943,109.295670 -> hit routeDistance=6.342683350522051
+  34.276748,109.127035 -> hit routeDistance=6.946032915850119
+  34.318311,108.701666 -> hit routeDistance=1.7446428614222615
+  34.320410,108.701374 -> hit routeDistance=4.892396808813321
+  34.321033,108.752757 -> hit routeDistance=0.09310429931179108
+  34.346706,108.696527 -> hit routeDistance=3.6958927055103072
+  34.349191,108.692614 -> hit routeDistance=4.258116773609508
+  34.351108,108.691208 -> hit routeDistance=4.884910202428052
+  34.353888,108.690223 -> hit routeDistance=4.8910923904905355
+  34.361175,108.681629 -> hit routeDistance=8.57707792154612
+  34.376663,108.663744 -> hit routeDistance=5.914492361962039
+  34.391270,108.642572 -> hit routeDistance=7.049994512849423
+  34.399773,108.624776 -> hit routeDistance=6.00125266573411
+  34.416126,108.569839 -> hit routeDistance=2.8878098535689634
+  34.509611,108.310553 -> hit routeDistance=2.4553074282423535
+  34.521596,108.269942 -> hit routeDistance=2.717865735182181
+  34.524490,108.257818 -> hit routeDistance=3.8762731305464877
+  34.556318,108.234415 -> hit routeDistance=5.076713121549481
+  34.599671,108.224427 -> empty routeDistance=None
+  35.097303,107.934297 -> empty routeDistance=None
+  35.097589,107.930308 -> empty routeDistance=None
+  35.105623,107.928360 -> empty routeDistance=None
+  35.118718,107.923033 -> empty routeDistance=None
+  35.124040,107.919817 -> empty routeDistance=None
+  35.153291,107.889393 -> empty routeDistance=None
+  35.161935,107.880095 -> empty routeDistance=None
+  35.196523,107.810664 -> empty routeDistance=None
+  35.206917,107.778198 -> empty routeDistance=None
+  35.222873,107.753517 -> empty routeDistance=None
+  35.224932,107.747664 -> empty routeDistance=None
+  35.299953,107.592624 -> empty routeDistance=None
+  35.329250,107.511865 -> empty routeDistance=None
+  35.490424,106.861997 -> empty routeDistance=None
+  35.500561,106.834458 -> empty routeDistance=None
+  35.501867,106.820983 -> empty routeDistance=None
+  35.508584,106.794027 -> empty routeDistance=None
+  35.519182,106.765442 -> empty routeDistance=None
+  35.530245,105.756375 -> empty routeDistance=None
+  35.532543,105.764235 -> empty routeDistance=None
+  35.534707,105.766283 -> empty routeDistance=None
+  35.536246,105.765818 -> empty routeDistance=None
+  35.539809,105.772167 -> empty routeDistance=None
+  35.562602,105.803301 -> empty routeDistance=None
+  35.562909,105.825163 -> empty routeDistance=None
+  35.575228,106.618419 -> empty routeDistance=None
+  35.578525,106.614393 -> empty routeDistance=None
+  35.602522,106.587801 -> empty routeDistance=None
+  35.605120,105.566819 -> empty routeDistance=None
+  35.605252,106.584866 -> empty routeDistance=None
+  35.608092,105.503594 -> empty routeDistance=None
+  35.612867,105.531060 -> empty routeDistance=None
+  35.645471,106.447672 -> empty routeDistance=None
+  35.645857,106.470695 -> empty routeDistance=None
+  35.646067,106.443438 -> empty routeDistance=None
+  35.647813,106.432110 -> empty routeDistance=None
+  35.654254,105.459797 -> empty routeDistance=None
+  35.656064,106.421190 -> empty routeDistance=None
+  35.657968,106.419147 -> empty routeDistance=None
+  35.659816,106.299055 -> empty routeDistance=None
+  35.660274,105.453653 -> empty routeDistance=None
+  35.663696,104.703614 -> empty routeDistance=None
+  35.665080,104.769835 -> empty routeDistance=None
+  35.665240,104.763993 -> empty routeDistance=None
+  35.665301,104.766428 -> empty routeDistance=None
+  35.666107,104.688430 -> empty routeDistance=None
+  35.666592,104.739142 -> empty routeDistance=None
+  35.667163,104.746182 -> empty routeDistance=None
+  35.667670,104.692952 -> empty routeDistance=None
+  35.673822,106.216010 -> empty routeDistance=None
+  35.681503,106.238520 -> empty routeDistance=None
+  35.681757,105.051649 -> empty routeDistance=None
+  35.683187,106.235602 -> empty routeDistance=None
+  35.687180,106.236800 -> empty routeDistance=None
+  35.690328,105.276342 -> empty routeDistance=None
+  35.690492,105.256497 -> empty routeDistance=None
+  35.691198,105.253563 -> empty routeDistance=None
+  35.694971,105.031770 -> empty routeDistance=None
+  35.697850,105.026599 -> empty routeDistance=None
+  35.704633,105.331690 -> empty routeDistance=None
+  35.705313,105.328450 -> empty routeDistance=None
+  35.705804,105.013820 -> empty routeDistance=None
+  35.707439,105.012695 -> empty routeDistance=None
+  35.708004,104.947914 -> empty routeDistance=None
+  35.709484,104.951402 -> empty routeDistance=None
+  35.712093,104.955994 -> empty routeDistance=None
+  35.716558,104.960098 -> empty routeDistance=None
+  36.027212,103.950204 -> hit routeDistance=1.5382115077461733
+  36.035410,103.943212 -> hit routeDistance=6.146877675086224
+  36.137982,103.514961 -> hit routeDistance=4.082155901161158
+  36.176816,103.445415 -> empty routeDistance=None
+  36.201991,103.438089 -> empty routeDistance=None
+  36.222947,103.434010 -> empty routeDistance=None
+  36.245725,103.434779 -> empty routeDistance=None
+  36.282583,103.429250 -> empty routeDistance=None
+  36.304192,103.417181 -> empty routeDistance=None
+  36.579163,103.365318 -> empty routeDistance=None
+  36.697070,103.282224 -> empty routeDistance=None
+  36.697678,103.282298 -> empty routeDistance=None
+  36.698286,103.282372 -> empty routeDistance=None
+  36.698895,103.282448 -> empty routeDistance=None
+  36.712956,103.275389 -> empty routeDistance=None
+  36.720135,103.270502 -> empty routeDistance=None
+  36.754460,103.293033 -> empty routeDistance=None
+  36.757949,103.241495 -> empty routeDistance=None
+  36.789529,103.222428 -> empty routeDistance=None
+  36.794731,103.221179 -> empty routeDistance=None
+  36.812633,103.210729 -> empty routeDistance=None
+  36.830559,103.204503 -> empty routeDistance=None
+  36.834981,103.204436 -> empty routeDistance=None
+  36.892681,103.159782 -> empty routeDistance=None
+  36.918104,103.146883 -> empty routeDistance=None
+  36.922421,103.144751 -> empty routeDistance=None
+  37.136178,102.900935 -> empty routeDistance=None
+  37.276574,102.873564 -> empty routeDistance=None
+  37.493831,102.909500 -> empty routeDistance=None
+  37.501832,102.912701 -> empty routeDistance=None
+  37.547596,102.881586 -> hit routeDistance=9.455957273696919
+  37.592593,102.869962 -> hit routeDistance=13.546404053157012
+  37.596953,102.869458 -> hit routeDistance=10.174929302381955
+  37.754888,102.716781 -> hit routeDistance=6.01044043350723
+  37.771877,102.707368 -> hit routeDistance=8.081052228593085
+  37.784987,102.702572 -> hit routeDistance=8.86371240901464
+  37.787646,102.701601 -> hit routeDistance=2.073601357872569
+  38.074586,102.352789 -> hit routeDistance=11.73904022111771
+  38.829430,101.042383 -> hit routeDistance=5.479855186564629
+  38.918490,100.402310 -> hit routeDistance=13.136878956234865
+  38.937821,100.399653 -> hit routeDistance=3.9680733086823112
+  39.233799,99.421531 -> empty routeDistance=None
+  39.234460,99.963315 -> empty routeDistance=None
+  39.246948,99.377170 -> empty routeDistance=None
+  39.252720,99.357694 -> empty routeDistance=None
+  39.273944,99.915864 -> empty routeDistance=None
+  39.275548,99.913371 -> empty routeDistance=None
+  39.280210,99.907264 -> empty routeDistance=None
+  39.287092,99.892005 -> empty routeDistance=None
+  39.289493,99.850424 -> empty routeDistance=None
+  39.289494,99.846255 -> empty routeDistance=None
+  39.290479,99.862226 -> empty routeDistance=None
+  39.305017,99.804612 -> empty routeDistance=None
+  39.317743,99.184870 -> empty routeDistance=None
+  39.323191,99.175523 -> empty routeDistance=None
+  39.324028,99.173619 -> empty routeDistance=None
+  39.343147,99.098330 -> empty routeDistance=None
+  39.355175,99.073669 -> hit routeDistance=inf
+  39.356032,99.067360 -> empty routeDistance=None
+  39.366292,99.033158 -> empty routeDistance=None
+  39.754846,98.477852 -> hit routeDistance=3.9017886284888035
+  39.757859,98.474382 -> hit routeDistance=3.634413662982405
+  39.759851,98.471054 -> hit routeDistance=4.072565317805459
+  39.761408,98.449215 -> hit routeDistance=2.2567787496650107
+  39.763363,98.431436 -> hit routeDistance=1.3297122025684232
+  39.773844,98.378736 -> hit routeDistance=3.644038003578042
+  39.775523,98.369247 -> hit routeDistance=9.184706599873692
+  39.775693,98.368263 -> hit routeDistance=3.3963420883500635
+  39.779080,98.346498 -> hit routeDistance=7.031558160216546
+  39.779290,98.343597 -> hit routeDistance=2.855628065788795
+  39.797470,98.113315 -> hit routeDistance=7.944259002554737
+  39.819494,98.055084 -> hit routeDistance=175.95878623399517
+  39.819776,98.054237 -> hit routeDistance=172.59364520196993
+  39.834711,98.223700 -> hit routeDistance=5.28086131963311
+  39.835028,98.224344 -> hit routeDistance=5.926018833692084
+  39.835278,98.225040 -> hit routeDistance=5.811144977216859
+  39.844749,98.244674 -> hit routeDistance=3.823868244100895
+  39.876482,98.270220 -> hit routeDistance=6.964071581626101
+  39.918265,97.762141 -> hit routeDistance=124.87684931625269
+  39.940549,97.696610 -> hit routeDistance=143.2833458462371
+  39.955524,97.665710 -> hit routeDistance=175.88121447251277
+  39.958274,97.656822 -> hit routeDistance=113.61570610916984
+  39.970650,97.627280 -> hit routeDistance=277.62657842111497
+  40.332318,97.049155 -> hit routeDistance=388.0235478707585
+  40.360439,97.068111 -> empty routeDistance=None
+  40.399409,97.054698 -> empty routeDistance=None
+  40.401343,97.052430 -> empty routeDistance=None
+  40.403277,97.050162 -> empty routeDistance=None
+  40.407145,97.045626 -> empty routeDistance=None
+  40.534412,95.854682 -> hit routeDistance=53.64861355796762
+  40.551220,96.914419 -> hit routeDistance=34.16005261995424
+  40.564663,96.225594 -> hit routeDistance=99.03182368761614
+  40.571274,96.530420 -> hit routeDistance=282.57748477472654
+  40.573850,96.503598 -> hit routeDistance=157.14463477639043
+  40.578510,96.418250 -> hit routeDistance=340.71922554912385
+  40.581063,96.442151 -> hit routeDistance=453.32236266277874
+  41.082683,95.452254 -> empty routeDistance=None
+  41.145017,95.393667 -> empty routeDistance=None
+  41.199328,95.376121 -> empty routeDistance=None
+  41.228476,95.372926 -> empty routeDistance=None
+  41.284818,95.358148 -> empty routeDistance=None
+  41.315486,95.349782 -> empty routeDistance=None
+  41.365073,95.339829 -> empty routeDistance=None
+  41.399696,95.336943 -> empty routeDistance=None
+  41.535216,95.314114 -> empty routeDistance=None
+  41.686183,95.198412 -> empty routeDistance=None
+  41.689777,95.195269 -> empty routeDistance=None
+  41.810091,94.998492 -> empty routeDistance=None
+  41.823235,95.095851 -> empty routeDistance=None
+  41.841925,94.906733 -> empty routeDistance=None
+  41.914954,94.791275 -> empty routeDistance=None
+  41.943356,94.734477 -> empty routeDistance=None
+  41.985739,94.669053 -> empty routeDistance=None
+  42.008155,94.626764 -> empty routeDistance=None
+  42.035365,94.574661 -> empty routeDistance=None
+  42.074461,94.503290 -> empty routeDistance=None
+  42.111680,94.460042 -> empty routeDistance=None
+  42.216725,94.330442 -> empty routeDistance=None
+  42.254393,94.277853 -> empty routeDistance=None
+  42.367945,94.158853 -> empty routeDistance=None
+  42.439456,94.153612 -> empty routeDistance=None
+  42.498835,94.162653 -> empty routeDistance=None
+  42.603611,94.096137 -> empty routeDistance=None
+  42.653284,94.037148 -> empty routeDistance=None
+  42.702638,93.978866 -> empty routeDistance=None
+  42.766767,93.863740 -> empty routeDistance=None
+  42.817098,93.761551 -> empty routeDistance=None
+  42.819541,93.742246 -> empty routeDistance=None
+  42.819713,93.733844 -> empty routeDistance=None
+  42.820244,93.708444 -> empty routeDistance=None
+  42.820397,93.701165 -> empty routeDistance=None
+  42.820475,93.697563 -> empty routeDistance=None
+  42.820625,93.685791 -> empty routeDistance=None
+  42.820653,93.684616 -> empty routeDistance=None
+  42.820753,93.685805 -> empty routeDistance=None
+  42.820873,93.675213 -> empty routeDistance=None
+  42.830971,93.646133 -> empty routeDistance=None
+  42.844134,93.622517 -> empty routeDistance=None
+  42.852266,93.608199 -> empty routeDistance=None
+  42.853324,93.606312 -> empty routeDistance=None
+  42.859087,93.594095 -> empty routeDistance=None
+  42.860522,93.578144 -> empty routeDistance=None
+  42.860721,93.571912 -> empty routeDistance=None
+  42.860777,93.570876 -> empty routeDistance=None
+  42.862687,93.563943 -> empty routeDistance=None
+  42.875024,89.996390 -> empty routeDistance=None
+  42.876068,89.988130 -> empty routeDistance=None
+  42.878513,90.010935 -> empty routeDistance=None
+  42.882960,89.956892 -> empty routeDistance=None
+  42.883083,90.040616 -> empty routeDistance=None
+  42.883318,90.041548 -> empty routeDistance=None
+  42.883972,90.079689 -> empty routeDistance=None
+  42.884886,90.150633 -> empty routeDistance=None
+  42.884973,90.138434 -> empty routeDistance=None
+  42.887444,93.515405 -> empty routeDistance=None
+  42.887635,93.520782 -> empty routeDistance=None
+  42.887677,93.519644 -> empty routeDistance=None
+  42.887803,90.105525 -> empty routeDistance=None
+  42.888014,90.107376 -> empty routeDistance=None
+  42.893848,89.915537 -> empty routeDistance=None
+  42.894565,90.249487 -> empty routeDistance=None
+  42.896653,93.485612 -> empty routeDistance=None
+  42.905890,90.267694 -> empty routeDistance=None
+  42.911191,89.795748 -> empty routeDistance=None
+  42.911502,93.447658 -> empty routeDistance=None
+  42.913314,93.442537 -> empty routeDistance=None
+  42.913316,89.515081 -> hit routeDistance=4.70579295187036
+  42.913944,90.275511 -> empty routeDistance=None
+  42.915380,93.437544 -> empty routeDistance=None
+  42.915769,89.536745 -> hit routeDistance=3.7110577646810303
+  42.915851,89.535375 -> hit routeDistance=4.818962402394089
+  42.918467,89.772646 -> empty routeDistance=None
+  42.929474,90.289491 -> empty routeDistance=None
+  42.931496,93.395972 -> empty routeDistance=None
+  42.931945,90.292894 -> empty routeDistance=None
+  42.940359,90.304486 -> empty routeDistance=None
+  42.947716,93.352128 -> empty routeDistance=None
+  42.965205,89.224392 -> hit routeDistance=6.490323955484051
+  42.967584,89.218776 -> hit routeDistance=2.0395678542097593
+  42.971312,89.203788 -> hit routeDistance=3.3632927168407405
+  42.971803,89.199594 -> hit routeDistance=5.366062436966898
+  42.973704,89.186997 -> hit routeDistance=6.007986483827406
+  42.973797,89.187239 -> hit routeDistance=9.656523226445913
+  42.978710,89.169215 -> hit routeDistance=6.304583032355838
+  42.979941,89.164844 -> hit routeDistance=6.7427775211049665
+  42.981047,90.433028 -> empty routeDistance=None
+  42.986388,89.145816 -> hit routeDistance=4.612217304351966
+  42.987594,90.478114 -> empty routeDistance=None
+  42.993882,93.217029 -> empty routeDistance=None
+  43.001315,90.527790 -> empty routeDistance=None
+  43.003891,89.097624 -> hit routeDistance=4.038439660962972
+  43.006462,89.089990 -> hit routeDistance=6.674512334473912
+  43.006499,89.079417 -> hit routeDistance=11.75223432607938
+  43.007025,90.562224 -> empty routeDistance=None
+  43.007210,89.061125 -> hit routeDistance=13.4625598396771
+  43.007542,89.052588 -> hit routeDistance=11.291340475846994
+  43.008836,89.021916 -> hit routeDistance=3.811929764847379
+  43.010085,90.581749 -> empty routeDistance=None
+  43.011935,89.004392 -> hit routeDistance=1.9826606256153247
+  43.032283,90.703213 -> empty routeDistance=None
+  43.033858,90.712003 -> empty routeDistance=None
+  43.068093,93.001142 -> empty routeDistance=None
+  43.096009,92.918257 -> empty routeDistance=None
+  43.145739,88.501332 -> empty routeDistance=None
+  43.150897,92.757418 -> empty routeDistance=None
+  43.163925,90.941246 -> empty routeDistance=None
+  43.164398,92.710777 -> empty routeDistance=None
+  43.165061,92.707279 -> empty routeDistance=None
+  43.172562,88.482800 -> empty routeDistance=None
+  43.180353,88.480602 -> empty routeDistance=None
+  43.180894,92.681832 -> empty routeDistance=None
+  43.184214,88.479456 -> empty routeDistance=None
+  43.187825,91.049399 -> empty routeDistance=None
+  43.199922,88.470124 -> empty routeDistance=None
+  43.201869,92.649444 -> empty routeDistance=None
+  43.253499,92.511961 -> empty routeDistance=None
+  43.254007,92.536508 -> empty routeDistance=None
+  43.265605,92.304865 -> empty routeDistance=None
+  43.269037,92.300805 -> empty routeDistance=None
+  43.317935,88.341199 -> hit routeDistance=232.75783681536316
+  43.330864,88.326508 -> hit routeDistance=24.975769074537126
+  43.335021,88.326359 -> hit routeDistance=7.84185699205983
+  43.336580,88.325371 -> hit routeDistance=9.491744492988582
+  43.341958,88.322482 -> hit routeDistance=7.89465572290703
+  43.382534,92.084504 -> empty routeDistance=None
+  43.386626,91.746522 -> empty routeDistance=None
+  43.386695,91.747439 -> empty routeDistance=None
+  43.386764,91.748356 -> empty routeDistance=None
+  43.386827,91.749546 -> empty routeDistance=None
+  43.402482,91.886075 -> empty routeDistance=None
+  43.635855,87.696330 -> hit routeDistance=5.717843462358058
+  43.650644,87.677279 -> hit routeDistance=1.4526920749078944
+  43.652443,87.669680 -> hit routeDistance=9.653841783416562
+  43.672233,87.632827 -> hit routeDistance=3.7012649471555146
+  43.763000,87.584916 -> hit routeDistance=3.4904289450097754
+  43.763308,87.584740 -> hit routeDistance=4.358044539701137
+  43.766899,87.585805 -> hit routeDistance=3.638830995501102
+  43.767789,87.586199 -> hit routeDistance=1.8970954448194892
+  43.783755,87.583463 -> hit routeDistance=4.772043680741879
+  43.810914,87.558785 -> hit routeDistance=8.485057375854739
+  43.811509,87.558548 -> hit routeDistance=7.001711455786863
+  43.816303,87.556818 -> hit routeDistance=2.8647747119110556
+  44.031783,87.235394 -> empty routeDistance=None
+  44.034346,87.227679 -> empty routeDistance=None
+  44.036542,87.221987 -> empty routeDistance=None
+  44.037567,87.218559 -> empty routeDistance=None
+  44.040807,87.209441 -> empty routeDistance=None
+  44.042383,87.205006 -> empty routeDistance=None
+  44.050399,87.182151 -> empty routeDistance=None
+  44.053811,87.172521 -> empty routeDistance=None
+  44.060501,87.154332 -> empty routeDistance=None
+  44.062834,87.147037 -> empty routeDistance=None
+  44.090705,87.060059 -> empty routeDistance=None
+  44.101664,87.017231 -> empty routeDistance=None
+  44.127662,86.919682 -> empty routeDistance=None
+  44.140537,86.890596 -> empty routeDistance=None
+  44.144226,86.882274 -> empty routeDistance=None
+  44.147914,86.873952 -> empty routeDistance=None
+  44.166977,86.805728 -> empty routeDistance=None
+  44.167792,86.799991 -> empty routeDistance=None
+  44.182609,80.661180 -> empty routeDistance=None
+  44.199530,80.418892 -> empty routeDistance=None
+  44.204214,80.415488 -> empty routeDistance=None
+  44.206166,80.414265 -> empty routeDistance=None
+  44.282907,85.855179 -> empty routeDistance=None
+  44.283360,85.868131 -> empty routeDistance=None
+  44.283441,85.870487 -> empty routeDistance=None
+  44.284120,85.897321 -> empty routeDistance=None
+  44.284816,85.908694 -> empty routeDistance=None
+  44.284869,85.912143 -> empty routeDistance=None
+  44.286423,85.831270 -> empty routeDistance=None
+  44.292412,85.978774 -> empty routeDistance=None
+  44.293027,85.981013 -> empty routeDistance=None
+  44.294869,85.987728 -> empty routeDistance=None
+  44.314538,85.661155 -> empty routeDistance=None
+  44.321155,86.058154 -> empty routeDistance=None
+  44.373826,84.382172 -> empty routeDistance=None
+  44.375943,80.997548 -> empty routeDistance=None
+  44.383496,81.006883 -> empty routeDistance=None
+  44.392530,84.454222 -> empty routeDistance=None
+  44.395555,84.465618 -> empty routeDistance=None
+  44.396348,84.769171 -> empty routeDistance=None
+  44.396579,81.016125 -> empty routeDistance=None
+  44.397101,84.471433 -> empty routeDistance=None
+  44.397515,81.016881 -> empty routeDistance=None
+  44.399471,84.480614 -> empty routeDistance=None
+  44.404514,84.750460 -> empty routeDistance=None
+  44.409680,84.720643 -> empty routeDistance=None
+  44.420213,84.651826 -> empty routeDistance=None
+  44.420514,84.647609 -> empty routeDistance=None
+  44.423243,84.617891 -> empty routeDistance=None
+  44.423850,84.614298 -> empty routeDistance=None
+  44.456915,81.154689 -> empty routeDistance=None
+  44.459612,83.873086 -> empty routeDistance=None
+  44.460989,83.748904 -> empty routeDistance=None
+  44.461102,83.750910 -> empty routeDistance=None
+  44.462849,83.765032 -> empty routeDistance=None
+  44.463013,83.719320 -> empty routeDistance=None
+  44.463360,83.850381 -> empty routeDistance=None
+  44.464791,83.820590 -> empty routeDistance=None
+  44.465457,83.805704 -> empty routeDistance=None
+  44.465984,83.791156 -> empty routeDistance=None
+  44.472312,83.650486 -> empty routeDistance=None
+  44.475372,81.135997 -> empty routeDistance=None
+  44.479073,83.635404 -> empty routeDistance=None
+  44.481845,81.150679 -> empty routeDistance=None
+  44.489852,83.628200 -> empty routeDistance=None
+  44.493341,81.181959 -> empty routeDistance=None
+  44.493548,83.625913 -> empty routeDistance=None
+  44.494010,81.185768 -> empty routeDistance=None
+  44.494286,81.186629 -> empty routeDistance=None
+  44.497113,81.194076 -> empty routeDistance=None
+  44.504303,81.214014 -> empty routeDistance=None
+  44.507130,83.616932 -> empty routeDistance=None
+  44.507926,81.223606 -> empty routeDistance=None
+  44.514061,83.612310 -> empty routeDistance=None
+  44.516200,81.247518 -> empty routeDistance=None
+  44.519619,81.261029 -> empty routeDistance=None
+  44.522937,81.273744 -> empty routeDistance=None
+  44.525100,83.592037 -> empty routeDistance=None
+  44.525479,82.400657 -> empty routeDistance=None
+  44.526767,83.587757 -> empty routeDistance=None
+  44.527183,83.586687 -> empty routeDistance=None
+  44.527502,82.332467 -> empty routeDistance=None
+  44.529682,83.580268 -> empty routeDistance=None
+  44.530909,81.304290 -> empty routeDistance=None
+  44.534682,81.325268 -> empty routeDistance=None
+  44.536937,81.329220 -> empty routeDistance=None
+  44.538129,82.275765 -> empty routeDistance=None
+  44.541096,82.262872 -> empty routeDistance=None
+  44.543988,82.257064 -> empty routeDistance=None
+  44.545163,83.468856 -> empty routeDistance=None
+  44.547386,83.489772 -> empty routeDistance=None
+  44.547670,83.493493 -> empty routeDistance=None
+  44.547887,83.494699 -> empty routeDistance=None
+  44.547933,81.340122 -> empty routeDistance=None
+  44.549676,83.513203 -> empty routeDistance=None
+  44.550477,83.392812 -> empty routeDistance=None
+  44.552876,81.344747 -> empty routeDistance=None
+  44.556825,81.346989 -> empty routeDistance=None
+  44.558758,82.230801 -> empty routeDistance=None
+  44.561912,82.222170 -> empty routeDistance=None
+  44.563445,83.346224 -> empty routeDistance=None
+  44.563462,81.346655 -> empty routeDistance=None
+  44.564114,83.342580 -> empty routeDistance=None
+  44.565198,82.802572 -> empty routeDistance=None
+  44.569359,82.820196 -> empty routeDistance=None
+  44.570000,82.822486 -> empty routeDistance=None
+  44.578309,82.847460 -> empty routeDistance=None
+  44.581711,82.857550 -> empty routeDistance=None
+  44.595636,81.582340 -> empty routeDistance=None
+  44.599278,81.400832 -> empty routeDistance=None
+  44.601068,81.410660 -> empty routeDistance=None
+  44.604881,81.426259 -> empty routeDistance=None
+  44.606214,81.434593 -> empty routeDistance=None
+  44.606507,82.161725 -> empty routeDistance=None
+  44.610791,81.621815 -> empty routeDistance=None
+  44.610817,81.588390 -> empty routeDistance=None
+  44.612842,81.467228 -> empty routeDistance=None
+  44.613525,81.484049 -> empty routeDistance=None
+  44.613734,81.526412 -> empty routeDistance=None
+  44.613807,81.475385 -> empty routeDistance=None
+  44.614198,81.526799 -> empty routeDistance=None
+  44.614472,81.739606 -> empty routeDistance=None
+  44.614583,81.495026 -> empty routeDistance=None
+  44.614807,81.679411 -> empty routeDistance=None
+  44.615013,81.747569 -> empty routeDistance=None
+  44.615041,81.706609 -> empty routeDistance=None
+  44.615136,81.749722 -> empty routeDistance=None
+  44.615285,81.701730 -> empty routeDistance=None
+  44.616430,83.084441 -> empty routeDistance=None
+  44.619752,83.064082 -> empty routeDistance=None
+  44.628584,82.937354 -> empty routeDistance=None
+  44.629916,81.889989 -> empty routeDistance=None
+  44.631547,81.903102 -> empty routeDistance=None
+  44.632041,82.017215 -> empty routeDistance=None
+  44.634480,81.942570 -> empty routeDistance=None
+  44.641903,82.942483 -> empty routeDistance=None
+  44.643263,82.943153 -> empty routeDistance=None
+  44.644613,82.963865 -> empty routeDistance=None
+{
+  "patched": 693,
+  "remainingErrors": 0,
+  "newSeedsFromRetry": [
+    "10021010130910154532800",
+    "10021010150411142223200",
+    "10021030140721121138900",
+    "10021030140721122119500",
+    "10021030140721132612400",
+    "10021030140721133137500",
+    "10021036150805155544500",
+    "10021049141017121126700",
+    "10021049141017121308500",
+    "10021049141017121517200",
+    "10021049141017121536400",
+    "10021049141017122709700",
+    "10021049141017125724300",
+    "10021049141017130219500",
+    "10021049141017130424300",
+    "10021049141017130933100",
+    "10021049141017131119300",
+    "10021049141121115009400",
+    "10101019121106100850600",
+    "10101019121106102937800",
+    "10101019121107153401300",
+    "10101022121015103901500",
+    "10101022121124120713500",
+    "10101030141001113228500",
+    "10101030141001113254100",
+    "10101030141001113317900",
+    "10101030141010104136800",
+    "10101030141010104707200",
+    "10101030141010121732400",
+    "10101030141010132516700",
+    "10101030141010132608000",
+    "10101030141010132852000",
+    "10101030141011142019400",
+    "10101050141220102841200",
+    "10101150141223103438800",
+    "10101150141223104055100",
+    "10101150141223104506900",
+    "10101150141223143219100",
+    "10101150141223143242700",
+    "10101150141223144407200",
+    "10101150141223150612200",
+    "10121010130101100748400",
+    "10121013121002113958000",
+    "10121019140611143823500",
+    "10161032150430114754600",
+    "10161032150704135312600",
+    "10161032150704163518800",
+    "17021033151011102028700",
+    "17021033151011102322000",
+    "17021037140429121224200",
+    "17031010130108131406200",
+    "17031010130108131413500",
+    "17031010130108131550900",
+    "17031010141012123347600",
+    "17031010141018140636700",
+    "17031010141018140643700",
+    "17031010141018140824700",
+    "17031010141018142618500",
+    "17031010141018143026300",
+    "17031010141105133847800",
+    "17031010141105134356700",
+    "17031010141105134457100",
+    "17031010141105134517100",
+    "17031010141105143256300",
+    "17031010141213120901100",
+    "17031010141213120940200",
+    "17031010141213121314900",
+    "17031019141220105209900",
+    "17031019141220105329900",
+    "17031019141220105404200",
+    "17031019141220105620200",
+    "17031019141220105759200",
+    "17031019141220110657900",
+    "17031019141220110903400",
+    "17031019141220111734700",
+    "19011050150812111139500",
+    "19011050150828140154100",
+    "19011057150920140910300",
+    "19141050140822102949800",
+    "19141050140822103038300",
+    "19141050140823102807400",
+    "19141050140823103040100",
+    "19141050140904114827900",
+    "23131044140624130104700",
+    "23131048140602160820500",
+    "23131048140605102618500",
+    "23131048140605103016300",
+    "23131048140605103120500",
+    "23131048140605130101400",
+    "23131048140605130706800",
+    "23131048140605130818400",
+    "23151017140507095057500",
+    "23151017140507110720000",
+    "23151017140507111008400",
+    "23151017140507111201900",
+    "31031037130820103725500",
+    "31031037130820110150700",
+    "31031037130820110744600",
+    "31031037130820120440000",
+    "31031037130820151139200",
+    "31031037130820152024400",
+    "31031037130820153239900",
+    "31031037130820162254300",
+    "31031037130820162629900",
+    "31031037130820163023400",
+    "31031037130820163334100",
+    "31031037130820163506900",
+    "31031037130820163746500",
+    "31031037130820164457700",
+    "31031037130820164525700",
+    "32011051150802151814000",
+    "32011051150821112557100",
+    "32011051150821112752100",
+    "32021003130731154510800",
+    "32021041130711152455400",
+    "32021041130715120253600",
+    "32021041130715120306900",
+    "32021041130715120313300",
+    "32021041130715143338000",
+    "32061047130716112456700",
+    "32061047130716112527500",
+    "32061047130716112746100",
+    "32061047130716113044100",
+    "32061047130716120046100",
+    "32061047130716120121600",
+    "32061047130716120817700",
+    "32071047130728115537900",
+    "32071047130730151832800",
+    "32071047130730154740800",
+    "32071048141116105807500",
+    "32091003130727141200300",
+    "32091041130729132445800",
+    "32091041130729135514300",
+    "32091041130729135826900",
+    "32091041130729141821100",
+    "32091047130810120043900",
+    "32091047130810120626000",
+    "32091047130810121042500",
+    "32091047130810121129300",
+    "32091047130810121414600",
+    "32091047130810155157600",
+    "32091047130810155201900",
+    "32091047130811134323900",
+    "32091047130811134433000",
+    "32091047130811135953400",
+    "32091047130811140442900",
+    "32091047130811140724700",
+    "32091047130811140731100",
+    "32091047130811140834900",
+    "32091047130811141449400",
+    "32091047130811141632400",
+    "32091047130811142016100",
+    "35011003130831173953400",
+    "35011041150721160653700",
+    "35011041150721160858200",
+    "35011041150913163208000",
+    "35011041150913163241700",
+    "35011041150913180220200",
+    "35011041150913180424600",
+    "35011041150922160940200",
+    "35011041150922161030500",
+    "35011041150922161036900",
+    "35011041151003170114400",
+    "35011041151003171041200",
+    "35011041151003171820500",
+    "35011041151003172212400",
+    "35011041151003185753300",
+    "35011041151003190011200",
+    "35011041151003190026900",
+    "35031003131003155134200",
+    "35031003131003155354900",
+    "35031003131003155612800",
+    "35031003131003155907800",
+    "35031003131003160452700",
+    "35031003131003160540000",
+    "35031003131003161211200",
+    "35031003131003165432600",
+    "35031003131003165702900",
+    "35031003131003165740000",
+    "35031003131003165902200",
+    "35031003131003170731200",
+    "35031003131004105746500",
+    "35031003131004105907800",
+    "35031003131004110133200",
+    "35031003131004110213000",
+    "35031003131004114033200",
+    "35031103131004162043900",
+    "35031103131004162050000"
+  ]
+}
