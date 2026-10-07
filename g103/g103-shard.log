@@ -1,0 +1,3 @@
+records=50703 full=41.9MB slim=13.1MB reduction=68.7%
+shards=4 targetBytes=4000000 largestShard=3.85MB
+shard_total_records=50703 (source 50703)
