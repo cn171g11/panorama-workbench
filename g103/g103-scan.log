@@ -1,0 +1,115 @@
+G103 ways=428 segments=3546 samples=5477 crossTrack=[0.0]
+[g103-samples] 1000/5477 hits=1000
+[g103-samples] 2000/5477 hits=1993
+[g103-samples] 3000/5477 hits=2988
+[g103-samples] 4000/5477 hits=3983
+[g103-samples] 5000/5477 hits=4978
+[g103-samples] 5477/5477 hits=5453
+[g103-samples] saved 5477 records to E:\workbuddy data work\2026-09-19-13-38-01\outputs\g103-tencent-sample-audit.json
+[g103-seeds] unique seeds=4606
+[g103-graph] requests=48 discovered=3102 pending=4558 roads=216 errors=0
+[g103-graph] requests=96 discovered=4260 pending=4510 roads=343 errors=1
+[g103-graph] requests=144 discovered=4778 pending=4462 roads=390 errors=1
+[g103-graph] requests=192 discovered=5698 pending=4414 roads=420 errors=1
+[g103-graph] requests=240 discovered=6472 pending=4366 roads=450 errors=1
+[g103-graph] requests=288 discovered=7005 pending=4318 roads=468 errors=2
+[g103-graph] requests=336 discovered=7424 pending=4270 roads=491 errors=2
+[g103-graph] requests=384 discovered=7922 pending=4222 roads=509 errors=2
+[g103-graph] requests=432 discovered=8556 pending=4174 roads=552 errors=2
+[g103-graph] requests=480 discovered=9087 pending=4126 roads=570 errors=3
+[g103-graph] requests=528 discovered=9634 pending=4078 roads=601 errors=3
+[g103-graph] requests=576 discovered=10135 pending=4030 roads=638 errors=3
+[g103-graph] requests=624 discovered=11142 pending=3982 roads=686 errors=3
+[g103-graph] requests=672 discovered=11333 pending=3934 roads=703 errors=4
+[g103-graph] requests=720 discovered=11423 pending=3886 roads=727 errors=4
+[g103-graph] requests=768 discovered=11423 pending=3838 roads=738 errors=4
+[g103-graph] requests=816 discovered=11424 pending=3790 roads=744 errors=4
+[g103-graph] requests=864 discovered=11443 pending=3742 roads=752 errors=5
+[g103-graph] requests=912 discovered=11450 pending=3694 roads=761 errors=5
+[g103-graph] requests=960 discovered=11450 pending=3646 roads=768 errors=5
+[g103-graph] requests=1008 discovered=11450 pending=3598 roads=781 errors=5
+[g103-graph] requests=1056 discovered=11450 pending=3550 roads=799 errors=6
+[g103-graph] requests=1104 discovered=11450 pending=3502 roads=827 errors=6
+[g103-graph] requests=1152 discovered=11626 pending=3454 roads=862 errors=6
+[g103-graph] requests=1200 discovered=11976 pending=3406 roads=911 errors=6
+[g103-graph] requests=1248 discovered=13534 pending=3358 roads=963 errors=7
+[g103-graph] requests=1296 discovered=15346 pending=3310 roads=996 errors=7
+[g103-graph] requests=1344 discovered=17102 pending=3262 roads=1010 errors=7
+[g103-graph] requests=1392 discovered=18414 pending=3214 roads=1028 errors=7
+[g103-graph] requests=1440 discovered=18414 pending=3166 roads=1054 errors=8
+[g103-graph] requests=1488 discovered=18414 pending=3118 roads=1075 errors=8
+[g103-graph] requests=1536 discovered=18414 pending=3070 roads=1102 errors=8
+[g103-graph] requests=1584 discovered=18414 pending=3022 roads=1134 errors=8
+[g103-graph] requests=1632 discovered=18757 pending=2974 roads=1202 errors=9
+[g103-graph] requests=1680 discovered=21084 pending=2926 roads=1351 errors=9
+[g103-graph] requests=1728 discovered=22160 pending=2878 roads=1468 errors=9
+[g103-graph] requests=1776 discovered=24532 pending=2830 roads=1633 errors=9
+[g103-graph] requests=1824 discovered=25922 pending=2782 roads=1716 errors=10
+[g103-graph] requests=1872 discovered=26557 pending=2734 roads=1801 errors=10
+[g103-graph] requests=1920 discovered=27269 pending=2686 roads=1874 errors=10
+[g103-graph] requests=1968 discovered=27770 pending=2638 roads=1892 errors=10
+[g103-graph] requests=2016 discovered=28584 pending=2590 roads=1923 errors=10
+[g103-graph] requests=2064 discovered=29435 pending=2542 roads=1963 errors=11
+[g103-graph] requests=2112 discovered=30316 pending=2494 roads=2014 errors=11
+[g103-graph] requests=2160 discovered=31098 pending=2446 roads=2038 errors=11
+[g103-graph] requests=2208 discovered=31916 pending=2398 roads=2061 errors=11
+[g103-graph] requests=2256 discovered=32552 pending=2350 roads=2098 errors=12
+[g103-graph] requests=2304 discovered=33251 pending=2302 roads=2147 errors=12
+[g103-graph] requests=2352 discovered=33548 pending=2254 roads=2158 errors=12
+[g103-graph] requests=2400 discovered=33635 pending=2206 roads=2176 errors=12
+[g103-graph] requests=2448 discovered=33635 pending=2158 roads=2178 errors=13
+[g103-graph] requests=2496 discovered=33635 pending=2110 roads=2188 errors=13
+[g103-graph] requests=2544 discovered=33635 pending=2062 roads=2197 errors=13
+[g103-graph] requests=2592 discovered=33635 pending=2014 roads=2211 errors=13
+[g103-graph] requests=2640 discovered=33635 pending=1966 roads=2224 errors=14
+[g103-graph] requests=2688 discovered=33635 pending=1918 roads=2249 errors=14
+[g103-graph] requests=2736 discovered=33635 pending=1870 roads=2268 errors=14
+[g103-graph] requests=2784 discovered=33636 pending=1822 roads=2280 errors=14
+[g103-graph] requests=2832 discovered=33636 pending=1774 roads=2281 errors=15
+[g103-graph] requests=2880 discovered=33777 pending=1726 roads=2296 errors=15
+[g103-graph] requests=2928 discovered=34063 pending=1678 roads=2307 errors=15
+[g103-graph] requests=2976 discovered=34290 pending=1630 roads=2315 errors=15
+[g103-graph] requests=3024 discovered=34503 pending=1582 roads=2319 errors=16
+[g103-graph] requests=3072 discovered=34743 pending=1534 roads=2322 errors=16
+[g103-graph] requests=3120 discovered=34945 pending=1486 roads=2332 errors=16
+[g103-graph] requests=3168 discovered=35233 pending=1438 roads=2345 errors=16
+[g103-graph] requests=3216 discovered=35461 pending=1390 roads=2348 errors=17
+[g103-graph] requests=3264 discovered=35816 pending=1342 roads=2370 errors=17
+[g103-graph] requests=3312 discovered=35816 pending=1294 roads=2373 errors=17
+[g103-graph] requests=3360 discovered=36698 pending=1246 roads=2418 errors=17
+[g103-graph] requests=3408 discovered=37348 pending=1198 roads=2452 errors=18
+[g103-graph] requests=3456 discovered=38111 pending=1150 roads=2475 errors=18
+[g103-graph] requests=3504 discovered=38878 pending=1102 roads=2491 errors=18
+[g103-graph] requests=3552 discovered=39517 pending=1054 roads=2504 errors=18
+[g103-graph] requests=3600 discovered=40517 pending=1006 roads=2542 errors=19
+[g103-graph] requests=3648 discovered=41693 pending=958 roads=2686 errors=19
+[g103-graph] requests=3696 discovered=42562 pending=910 roads=2774 errors=19
+[g103-graph] requests=3744 discovered=43457 pending=862 roads=2840 errors=19
+[g103-graph] requests=3792 discovered=43457 pending=814 roads=2866 errors=19
+[g103-graph] requests=3840 discovered=43457 pending=766 roads=2883 errors=20
+[g103-graph] requests=3888 discovered=43457 pending=718 roads=2908 errors=20
+[g103-graph] requests=3936 discovered=43585 pending=670 roads=2935 errors=20
+[g103-graph] requests=3984 discovered=44876 pending=622 roads=2977 errors=20
+[g103-graph] requests=4032 discovered=45526 pending=574 roads=2995 errors=21
+[g103-graph] requests=4080 discovered=45980 pending=526 roads=3011 errors=21
+[g103-graph] requests=4128 discovered=45986 pending=478 roads=3032 errors=21
+[g103-graph] requests=4176 discovered=46081 pending=430 roads=3059 errors=21
+[g103-graph] requests=4224 discovered=46557 pending=382 roads=3086 errors=22
+[g103-graph] requests=4272 discovered=47408 pending=334 roads=3149 errors=22
+[g103-graph] requests=4320 discovered=48311 pending=286 roads=3204 errors=22
+[g103-graph] requests=4368 discovered=48458 pending=238 roads=3266 errors=22
+[g103-graph] requests=4416 discovered=48467 pending=190 roads=3292 errors=23
+[g103-graph] requests=4464 discovered=49107 pending=142 roads=3334 errors=23
+[g103-graph] requests=4512 discovered=49457 pending=94 roads=3407 errors=23
+[g103-graph] requests=4560 discovered=50244 pending=46 roads=3475 errors=23
+[g103-graph] requests=4606 discovered=50703 pending=0 roads=3504 errors=24
+{
+  "ref": "G103",
+  "slug": "g103",
+  "records": 50703,
+  "seeds": 4606,
+  "metadataRequests": 4606,
+  "pending": 0,
+  "output": "E:\\workbuddy data work\\2026-09-19-13-38-01\\outputs\\g103-tencent-panoramas.json",
+  "report": "E:\\workbuddy data work\\2026-09-19-13-38-01\\outputs\\g103-tencent-scan-report.json"
+}
