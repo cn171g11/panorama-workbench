@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>街景查看器 - 漠河 / 额尔古纳</title>
+<title>街景查看器 - 城市全量扫描</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.css">
 <style>
   :root { --bg:#14181d; --panel:#1d232b; --line:#2c3540; --fg:#dce3ea; --dim:#8b98a5; --accent:#4da3ff; --gold:#e8b45a; }
@@ -13,23 +13,24 @@
   h1 { font-size:15px; margin:0 8px 0 0; white-space:nowrap; }
   .tab { padding:3px 12px; border-radius:14px; border:1px solid var(--line); background:transparent; color:var(--dim); cursor:pointer; }
   .tab.active { background:#173455; border-color:var(--accent); color:#fff; }
-  #search { flex:1; min-width:220px; padding:6px 10px; border-radius:6px; border:1px solid var(--line); background:#10141a; color:var(--fg); }
+  #search { flex:1; min-width:200px; padding:6px 10px; border-radius:6px; border:1px solid var(--line); background:#10141a; color:var(--fg); }
   #search:focus { outline:none; border-color:var(--accent); }
-  select { padding:5px 8px; border-radius:6px; border:1px solid var(--line); background:#10141a; color:var(--fg); max-width:200px; }
+  select { padding:5px 8px; border-radius:6px; border:1px solid var(--line); background:#10141a; color:var(--fg); max-width:170px; }
   label.chk { display:flex; gap:4px; align-items:center; color:var(--dim); cursor:pointer; user-select:none; white-space:nowrap; }
   #stats { color:var(--dim); white-space:nowrap; }
-  .layout { display:grid; grid-template-columns:minmax(340px,44%) 1fr; gap:10px; padding:10px 12px; align-items:start; }
-  .map-panel { position:sticky; top:58px; height:calc(100vh - 78px); min-height:420px; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
+  .layout { display:grid; grid-template-columns:minmax(420px,62%) 1fr; gap:10px; padding:10px 12px; align-items:start; }
+  .map-panel { position:sticky; top:58px; height:calc(100vh - 78px); min-height:460px; border:1px solid var(--line); border-radius:8px; overflow:hidden; }
   #map { width:100%; height:100%; background:#0d1117; }
+  #map.map-dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.75); }
+  #map.map-dark .leaflet-container { background:#0b0f13; }
   .legend { position:absolute; left:10px; bottom:10px; z-index:600; display:flex; gap:12px; padding:6px 10px; border:1px solid var(--line); border-radius:7px; background:rgba(15,20,26,.85); font-size:12px; }
   .legend-item { display:inline-flex; align-items:center; gap:5px; color:var(--dim); }
   .dot { width:9px; height:9px; border-radius:50%; display:inline-block; }
   .dot.gold { background:var(--gold); }
   .dot.blue { background:#58a6ff; }
-  .dot.gray { background:#5b6b7a; }
-  #mapHint { position:absolute; left:10px; top:10px; z-index:600; padding:5px 10px; border:1px solid var(--line); border-radius:7px; background:rgba(15,20,26,.85); color:var(--dim); font-size:12px; }
+  #mapHint { position:absolute; left:10px; top:10px; z-index:600; padding:5px 10px; border:1px solid var(--line); border-radius:7px; background:rgba(15,20,26,.85); color:var(--dim); font-size:12px; max-width:60%; }
   .list-panel { min-width:0; }
-  #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(172px,1fr)); gap:10px; }
+  #grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(160px,1fr)); gap:10px; }
   .card { background:var(--panel); border:1px solid var(--line); border-radius:8px; overflow:hidden; cursor:pointer; }
   .card:hover { border-color:var(--accent); }
   .card.active { border-color:var(--gold); }
@@ -57,7 +58,7 @@
   #mFooter { display:flex; gap:10px; align-items:center; justify-content:center; padding:8px; background:var(--panel); border-top:1px solid var(--line); }
   #mPos { color:var(--dim); min-width:140px; text-align:center; }
   #hint { position:absolute; right:10px; bottom:10px; color:var(--dim); font-size:11px; background:rgba(0,0,0,.5); padding:3px 8px; border-radius:6px; pointer-events:none; }
-  #loading { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:var(--dim); display:none; }
+  #loading { position:absolute; left:50%; top:50%; transform:translate(-50%,-50%); color:var(--dim); display:none; max-width:80%; text-align:center; }
   .leaflet-container { background:#0d1117; font-family:inherit; }
   @media (max-width:900px){ .layout{grid-template-columns:1fr;} .map-panel{position:relative;top:0;height:52vh;} }
 </style>
@@ -65,7 +66,8 @@
 <body>
 <header>
   <h1>街景查看器</h1>
-  <span id="cityTabs"></span>
+  <span id="provinceTabs"></span>
+  <select id="citySelect" title="城市"></select>
   <input id="search" placeholder="搜索: panoid / 路名 / 日期(2013-07) / 坐标(53.47,122.36)">
   <select id="roadFilter"></select>
   <select id="basemapSelect" title="底图"></select>
@@ -80,7 +82,6 @@
     <div class="legend">
       <span class="legend-item"><i class="dot gold"></i>含全景</span>
       <span class="legend-item"><i class="dot blue"></i>仅缩略图</span>
-      <span class="legend-item"><i class="dot gray"></i>其他</span>
     </div>
   </div>
   <div class="list-panel">
@@ -112,32 +113,61 @@
   </div>
 </div>
 
+<script src="data_meta.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
-<script src="data_mohe.js"></script>
-<script src="data_erguna.js"></script>
 <script>
 (function(){
   'use strict';
   var TENCENT_VIEWER = 'https://qq-map.netlify.app/';
-  var CITY_DEF = {
-    mohe:   { name:'漠河', imgBase:'../mohe/',   center:[52.97,122.53], zoom:11 },
-    erguna: { name:'额尔古纳', imgBase:'../erguna/', center:[50.24,120.18], zoom:10 }
-  };
   var BASEMAPS = [
-    { id:'amapStandard', label:'高德·标准', datum:'GCJ-02', url:'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图' },
-    { id:'amapSatellite', label:'高德·影像', datum:'GCJ-02', url:'https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图' },
-    { id:'tencentStandard', label:'腾讯·标准', datum:'GCJ-02', url:'https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=0', subdomains:['0','1','2','3'], maxZoom:18, attribution:'© 腾讯地图' },
-    { id:'tencentDark', label:'腾讯·暗色', datum:'GCJ-02', url:'https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=4', subdomains:['0','1','2','3'], maxZoom:18, attribution:'© 腾讯地图' }
+    { id:'amapStandard', label:'高德·标准', url:'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图', dark:false },
+    { id:'amapDark', label:'高德·暗色', url:'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图', dark:true },
+    { id:'amapSatellite', label:'高德·影像', url:'https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图', dark:false },
+    { id:'tencentStandard', label:'腾讯·标准', url:'https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=0', subdomains:['0','1','2','3'], maxZoom:18, attribution:'© 腾讯地图', dark:false },
+    { id:'tencentDark', label:'腾讯·暗色', url:'https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=4', subdomains:['0','1','2','3'], maxZoom:18, attribution:'© 腾讯地图', dark:false }
   ];
   var PAGE_SIZE = 96;
   var POINT_LIMIT = 60000;
 
   var state = {
-    city: 'mohe', entries: [], results: [], distMode: false, center: null,
-    rendered: 0, current: -1, currentEntry: null, activePid: null
+    province: '', cityFilter: '',
+    entries: [], results: [], distMode: false, center: null,
+    rendered: 0, current: -1, currentEntry: null, activePid: null,
+    bounds: null, provinceKeys: []
   };
   var map = null, tileLayer = null, pointLayer = null;
 
+  var els = {
+    provTabs: document.getElementById('provinceTabs'),
+    city: document.getElementById('citySelect'),
+    search: document.getElementById('search'),
+    road: document.getElementById('roadFilter'),
+    basemap: document.getElementById('basemapSelect'),
+    onlyPano: document.getElementById('onlyPano'),
+    stats: document.getElementById('stats'),
+    grid: document.getElementById('grid'),
+    loadMore: document.getElementById('loadMore'),
+    loadMoreWrap: document.getElementById('loadMoreWrap'),
+    mapHint: document.getElementById('mapHint'),
+    modal: document.getElementById('modal'),
+    mTitle: document.getElementById('mTitle'),
+    mPos: document.getElementById('mPos'),
+    pano: document.getElementById('pano'),
+    stage: document.getElementById('stage'),
+    loading: document.getElementById('loading')
+  };
+
+  function fmtDist(m){ if (m==null) return ''; return m<1000 ? Math.round(m)+' m' : (m/1000).toFixed(2)+' km'; }
+  function haversine(lat1,lng1,lat2,lng2){
+    var R=6371000, D=Math.PI/180;
+    var dLat=(lat2-lat1)*D, dLng=(lng2-lng1)*D;
+    var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*D)*Math.cos(lat2*D)*Math.sin(dLng/2)*Math.sin(dLng/2);
+    return 2*R*Math.asin(Math.sqrt(a));
+  }
+  function cityMeta(key){ return (window.PANO_META||{})[key] || {name:key, province:''}; }
+  function imgBase(e){ return '../' + e[8] + '/'; }
+
+  // ---------- point canvas layer ----------
   var PointCanvasLayer = (window.L && L.Layer) ? L.Layer.extend({
     initialize: function(){ this._base = []; this._hits = []; this._active = null; },
     onAdd: function(m){
@@ -204,49 +234,40 @@
     }
   }) : null;
 
-  var els = {
-    tabs: document.getElementById('cityTabs'),
-    search: document.getElementById('search'),
-    road: document.getElementById('roadFilter'),
-    basemap: document.getElementById('basemapSelect'),
-    onlyPano: document.getElementById('onlyPano'),
-    stats: document.getElementById('stats'),
-    grid: document.getElementById('grid'),
-    loadMore: document.getElementById('loadMore'),
-    loadMoreWrap: document.getElementById('loadMoreWrap'),
-    mapHint: document.getElementById('mapHint'),
-    modal: document.getElementById('modal'),
-    mTitle: document.getElementById('mTitle'),
-    mPos: document.getElementById('mPos'),
-    pano: document.getElementById('pano'),
-    stage: document.getElementById('stage'),
-    loading: document.getElementById('loading')
-  };
-
-  function fmtDist(m){ if (m==null) return ''; return m<1000 ? Math.round(m)+' m' : (m/1000).toFixed(2)+' km'; }
-  function haversine(lat1,lng1,lat2,lng2){
-    var R=6371000, D=Math.PI/180;
-    var dLat=(lat2-lat1)*D, dLng=(lng2-lng1)*D;
-    var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*D)*Math.cos(lat2*D)*Math.sin(dLng/2)*Math.sin(dLng/2);
-    return 2*R*Math.asin(Math.sqrt(a));
-  }
-
   // ---------- jump url ----------
   function buildJumpUrl(e){
     return TENCENT_VIEWER + '#center=' + e[2].toFixed(6) + ',' + e[1].toFixed(6)
       + '&zoom=17&pano=' + encodeURIComponent(e[0]) + '&heading=' + (e[5]||0) + '&pitch=0&svz=0';
   }
 
-  // ---------- tabs & data ----------
-  function buildTabs(){
-    els.tabs.innerHTML = '';
-    Object.keys(CITY_DEF).forEach(function(key){
-      if (!window.PANO_CITY[key]) return;
+  // ---------- provinces & data loading ----------
+  function provinceGroups(){
+    var groups = {};
+    Object.keys(window.PANO_META).forEach(function(k){
+      var p = window.PANO_META[k].province || '其他';
+      (groups[p] = groups[p] || []).push(k);
+    });
+    return groups;
+  }
+  function buildProvinceTabs(){
+    var groups = provinceGroups();
+    els.provTabs.innerHTML = '';
+    Object.keys(groups).forEach(function(p){
       var b = document.createElement('button');
-      b.className = 'tab' + (key===state.city?' active':'');
-      b.textContent = CITY_DEF[key].name;
-      b.onclick = function(){ if (key!==state.city) switchCity(key); };
-      els.tabs.appendChild(b);
+      b.className = 'tab' + (p===state.province ? ' active' : '');
+      b.textContent = p + ' (' + groups[p].length + ')';
+      b.onclick = function(){ if (p!==state.province) selectProvince(p); };
+      els.provTabs.appendChild(b);
+    });
+  }
+  function loadCityScript(key){
+    return new Promise(function(resolve, reject){
+      if (window.PANO_CITY && window.PANO_CITY[key]) { resolve(); return; }
+      var s = document.createElement('script');
+      s.src = 'data_' + key + '.js';
+      s.onload = function(){ resolve(); };
+      s.onerror = function(){ reject(new Error('data_' + key + '.js 加载失败')); };
+      document.head.appendChild(s);
     });
   }
   function computeBounds(){
@@ -257,30 +278,51 @@
     });
     return { minLng:minLng, maxLng:maxLng, minLat:minLat, maxLat:maxLat };
   }
-  function switchCity(key){
-    state.city = key;
-    state.entries = window.PANO_CITY[key] || [];
-    state.bounds = computeBounds();
-    state.rendered = 0; state.current = -1; state.currentEntry = null; state.activePid = null;
-    state.distMode = false; state.center = null;
-    els.search.value = ''; els.onlyPano.checked = false;
-    fillRoads();
-    buildTabs();
-    rerender();
-    if (map){
-      map.setView(CITY_DEF[key].center, CITY_DEF[key].zoom);
-    }
-  }
-  function fillRoads(){
-    var counts = {};
-    state.entries.forEach(function(e){ var r = e[3] || '（无名道路）'; counts[r] = (counts[r]||0)+1; });
-    var list = Object.keys(counts).sort(function(a,b){ return counts[b]-counts[a]; });
-    els.road.innerHTML = '<option value="">全部道路</option>';
-    list.forEach(function(r){
-      var o = document.createElement('option');
-      o.value = r; o.textContent = r + ' (' + counts[r] + ')';
-      els.road.appendChild(o);
+  function buildEntries(keys){
+    var arr = [];
+    keys.forEach(function(k){
+      (window.PANO_CITY[k]||[]).forEach(function(e){
+        arr.push([e[0], e[1], e[2], e[3], e[4], e[5], e[6], e[7], k]);
+      });
     });
+    state.entries = arr;
+    state.bounds = computeBounds();
+  }
+  function fillCitySelect(keys){
+    els.city.innerHTML = '';
+    var all = document.createElement('option');
+    all.value = '';
+    all.textContent = '全部城市';
+    els.city.appendChild(all);
+    keys.forEach(function(k){
+      var o = document.createElement('option');
+      o.value = k;
+      o.textContent = cityMeta(k).name;
+      els.city.appendChild(o);
+    });
+  }
+  function selectProvince(p){
+    state.province = p;
+    buildProvinceTabs();
+    var keys = provinceGroups()[p] || [];
+    state.provinceKeys = keys;
+    state.cityFilter = '';
+    els.stats.textContent = '加载数据…';
+    Promise.all(keys.map(loadCityScript)).then(function(){
+      buildEntries(keys);
+      fillCitySelect(keys);
+      rerender();
+      fitMap();
+    }).catch(function(err){
+      els.stats.textContent = err.message;
+      els.grid.innerHTML = '<div style="color:var(--dim);padding:20px">' + err.message + '</div>';
+    });
+  }
+  function fitMap(){
+    if (!map) return;
+    var b = state.bounds;
+    if (!b || b.minLng > b.maxLng) return;
+    map.fitBounds([[b.minLat, b.minLng], [b.maxLat, b.maxLng]], { padding:[20,20] });
   }
 
   // ---------- search ----------
@@ -298,6 +340,7 @@
   function computeResults(){
     var q = els.search.value.trim();
     var roadSel = els.road.value;
+    var citySel = els.city.value;
     var onlyPano = els.onlyPano.checked;
     var coord = q ? parseCoord(q) : null;
     state.distMode = false; state.center = null;
@@ -306,6 +349,7 @@
     var out = [];
     for (var i=0;i<state.entries.length;i++){
       var e = state.entries[i];
+      if (citySel && e[8] !== citySel) continue;
       if (onlyPano && !e[7]) continue;
       if (roadSel && ((e[3]||'（无名道路）') !== roadSel)) continue;
       if (tokens){
@@ -355,7 +399,7 @@
     card.dataset.pid = e[0];
     var img = document.createElement('img');
     img.className = 'thumb';
-    img.src = CITY_DEF[state.city].imgBase + 'images/' + e[0] + '.jpg';
+    img.src = imgBase(e) + 'images/' + e[0] + '.jpg';
     img.alt = '';
     img.onerror = function(){
       var ph = document.createElement('div');
@@ -369,7 +413,8 @@
     var road = document.createElement('div'); road.className='road'; road.textContent = e[3]||'（无名道路）';
     meta.appendChild(road);
     var sub = document.createElement('div'); sub.className='sub';
-    var left = document.createElement('span'); left.textContent = e[4] ? e[4].slice(0,10) : '';
+    var left = document.createElement('span');
+    left.textContent = cityMeta(e[8]).name + (e[4] ? ' · ' + e[4].slice(0,10) : '');
     var right = document.createElement('span'); right.className='badge'+(e[7]?' pano':'');
     right.textContent = e[7] ? (d!=null?'全景 · '+fmtDist(d):'全景') : (d!=null?fmtDist(d):'缩略图');
     sub.appendChild(left); sub.appendChild(right); meta.appendChild(sub);
@@ -383,8 +428,7 @@
   // ---------- map ----------
   function initMap(){
     if (!window.L){ els.mapHint.textContent = '地图组件加载失败(Leaflet CDN 不可达), 仅列表可用'; return; }
-    var c = CITY_DEF[state.city];
-    map = L.map('map', { center:c.center, zoom:c.zoom, zoomControl:true, preferCanvas:true, attributionControl:true });
+    map = L.map('map', { center:[36,110], zoom:4, zoomControl:true, preferCanvas:true, attributionControl:true });
     pointLayer = new PointCanvasLayer();
     pointLayer.addTo(map);
     populateBasemaps();
@@ -407,6 +451,8 @@
     tileLayer.addTo(map);
     tileLayer.bringToBack();
     els.basemap.value = def.id;
+    var mapEl = document.getElementById('map');
+    if (def.dark) mapEl.classList.add('map-dark'); else mapEl.classList.remove('map-dark');
   }
   function renderMapPoints(){
     if (!map || !pointLayer) return;
@@ -425,8 +471,9 @@
     }
     var active = null;
     if (state.activePid){
-      var a = entries.filter(function(x){ return x[0]===state.activePid; })[0];
-      if (a) active = [a[2], a[1]];
+      for (var q=0;q<entries.length;q++){
+        if (entries[q][0]===state.activePid){ active = [entries[q][2], entries[q][1]]; break; }
+      }
     }
     pointLayer.setData(base, hits, active);
   }
@@ -452,7 +499,7 @@
     } else {
       els.search.value = e[2].toFixed(5) + ',' + e[1].toFixed(5);
       rerender();
-      els.mapHint.textContent = '已按点击位置排序, 最近点: ' + (e[3]||e[0]);
+      els.mapHint.textContent = '已按点击位置排序, 最近点: ' + cityMeta(e[8]).name + ' ' + (e[3]||e[0]);
     }
   }
   var movePending = false, moveEv = null;
@@ -502,14 +549,14 @@
     state.activePid = e[0];
     els.modal.classList.add('open');
     document.body.style.overflow = 'hidden';
-    var imgBase = CITY_DEF[state.city].imgBase;
-    var panoPath = imgBase + 'panoramas/' + e[0] + '.jpg';
-    var thumbPath = imgBase + 'images/' + e[0] + '.jpg';
+    var base = imgBase(e);
+    var panoPath = base + 'panoramas/' + e[0] + '.jpg';
+    var thumbPath = base + 'images/' + e[0] + '.jpg';
+    els.loading.textContent = '加载中...';
     els.loading.style.display = 'block';
     els.pano.onload = function(){ els.loading.style.display='none'; fitPano(); };
     els.pano.onerror = function(){
-      els.loading.style.display='none';
-      els.loading.textContent = '图片未上传（本仓库仅含清单数据，完整图片在本地数据目录）';
+      els.loading.textContent = '图片未上传（仓库版仅含清单数据，完整图片在本地数据目录）';
       els.loading.style.display = 'block';
     };
     els.pano.src = e[7] ? panoPath : thumbPath;
@@ -518,7 +565,7 @@
     els.mTitle.appendChild(document.createTextNode(e[0]));
     var sub = document.createElement('span');
     sub.className = 'sub';
-    sub.textContent = '　' + (e[3]||'（无名道路）') + ' · ' + (e[4]||'') + ' · ' + e[2].toFixed(5) + ',' + e[1].toFixed(5) + (e[7]?'':' · 无全景(缩略图)');
+    sub.textContent = '　' + cityMeta(e[8]).name + ' · ' + (e[3]||'（无名道路）') + ' · ' + (e[4]||'') + ' · ' + e[2].toFixed(5) + ',' + e[1].toFixed(5) + (e[7]?'':' · 无全景(缩略图)');
     els.mTitle.appendChild(sub);
     els.mPos.textContent = (navIdx>=0 ? (navIdx+1).toLocaleString()+' / '+state.results.length.toLocaleString() : '地图选点');
     document.getElementById('mOpenJj').href = buildJumpUrl(e);
@@ -612,9 +659,14 @@
   var searchTimer=null;
   els.search.addEventListener('input', function(){
     clearTimeout(searchTimer);
-    searchTimer = setTimeout(function(){ rerender(); }, 300);
+    searchTimer = setTimeout(rerender, 300);
   });
   els.road.addEventListener('change', rerender);
+  els.city.addEventListener('change', function(){
+    state.cityFilter = els.city.value;
+    rerender();
+    fitMap();
+  });
   els.onlyPano.addEventListener('change', rerender);
   els.loadMore.addEventListener('click', appendPage);
   window.addEventListener('scroll', function(){
@@ -623,13 +675,13 @@
   });
 
   // ---------- init ----------
-  if (!window.PANO_CITY || (!window.PANO_CITY.mohe && !window.PANO_CITY.erguna)){
-    els.grid.innerHTML = '<div style="color:var(--dim);padding:20px">数据文件未加载: 请确认 data_mohe.js / data_erguna.js 与 viewer.html 在同一目录</div>';
+  if (!window.PANO_META || !Object.keys(window.PANO_META).length){
+    els.grid.innerHTML = '<div style="color:var(--dim);padding:20px">数据文件未加载: 请确认 data_meta.js 与 viewer.html 在同一目录</div>';
     return;
   }
-  var startCity = window.PANO_CITY.mohe ? 'mohe' : 'erguna';
   initMap();
-  switchCity(startCity);
+  var firstProvince = Object.keys(provinceGroups())[0];
+  selectProvince(firstProvince);
   setTimeout(function(){ if (map) map.invalidateSize(); }, 300);
   window.addEventListener('resize', function(){ if (map) map.invalidateSize(); });
 })();

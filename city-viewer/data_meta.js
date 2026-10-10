@@ -1,0 +1,1 @@
+window.PANO_META={"mohe":{"name":"漠河市","province":"黑龙江省"},"erguna":{"name":"额尔古纳市","province":"内蒙古自治区"}};
