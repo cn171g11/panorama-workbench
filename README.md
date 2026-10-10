@@ -4,6 +4,13 @@
 
 在线地址：<https://cn171g11.github.io/s341-panorama-workbench/>
 
+## 城市全量扫描（新增）
+
+- `city-viewer/`：城市街景查看器（Leaflet + 高德底图，街景点位展示、地图选点、元数据搜索、跳转 <https://qq-map.netlify.app/>）
+- `mohe/`：漠河市全量扫描数据（34565 街景点，2013，BFS + 市界过滤）
+- `erguna/`：额尔古纳市全量扫描数据（29213 街景点，2013）
+- `tools/city-scan/`：城市全量扫描流水线脚本（边界/种子/BFS/缩略图/全景/清单）
+
 ## 内容
 
 - `index.html`：Leaflet 可视化工作台，支持百度/腾讯数据筛选、街景跳转、底图切换。
