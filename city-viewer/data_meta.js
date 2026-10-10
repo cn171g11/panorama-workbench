@@ -1,1 +1,1 @@
-window.PANO_META={"mohe":{"name":"漠河市","province":"黑龙江省"},"erguna":{"name":"额尔古纳市","province":"内蒙古自治区"}};
+window.PANO_META={"mohe":{"name":"漠河市","province":"黑龙江省"},"erguna":{"name":"额尔古纳市","province":"内蒙古自治区"},"jgdaq":{"name":"加格达奇区","province":"黑龙江省"},"tahe":{"name":"塔河县","province":"黑龙江省"}};
