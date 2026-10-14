@@ -90,7 +90,7 @@
     var a=Math.sin(dLat/2)*Math.sin(dLat/2)+Math.cos(lat1*D)*Math.cos(lat2*D)*Math.sin(dLng/2)*Math.sin(dLng/2);
     return 2*R*Math.asin(Math.sqrt(a));
   }
-  function cityMeta(key){ return (window.PANO_META||{})[key]||{name:key,province:''}; }
+  function cityMeta(key){ var m=(window.PANO_META||{})[key]; return m||{name:key,province:''}; }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
 
   // ---------- canvas point layer ----------
@@ -155,21 +155,34 @@
   }
 
   // ---------- provinces & data ----------
-  function provinceGroups(){
-    var groups={};
+  // 只做 省 → 地级市(地级行政区) 两级，不区分县级行政区。
+  // 每个 meta 条目带 pref = 所属地级行政区键；省标签只列省，市下拉列地级市。
+  function prefOf(key){
+    var m=(window.PANO_META||{})[key]||{};
+    return m.pref||key;
+  }
+  function provinceMap(){
+    var out={};
     Object.keys(window.PANO_META).forEach(function(k){
-      var p=window.PANO_META[k].province||'其他';
-      (groups[p]=groups[p]||[]).push(k);
+      var m=window.PANO_META[k];
+      if(m.virtual) return;
+      var p=m.province||'其他';
+      (out[p]=out[p]||[]).push(k);
     });
-    return groups;
+    return out;
+  }
+  function prefList(keys){
+    var seen={},list=[];
+    keys.forEach(function(k){ var pf=prefOf(k); if(!seen[pf]){ seen[pf]=1; list.push(pf); } });
+    return list;
   }
   function buildProvinceTabs(){
-    var groups=provinceGroups();
+    var pm=provinceMap();
     els.provTabs.innerHTML='';
-    Object.keys(groups).forEach(function(p){
+    Object.keys(pm).forEach(function(p){
       var b=document.createElement('button');
       b.className='tab'+(p===state.province?' active':'');
-      b.textContent=p+' ('+groups[p].length+')';
+      b.textContent=p+' ('+prefList(pm[p]).length+')';
       b.onclick=function(){ if(p!==state.province) selectProvince(p); };
       els.provTabs.appendChild(b);
     });
@@ -195,24 +208,27 @@
   function buildEntries(keys){
     var arr=[];
     keys.forEach(function(k){
-      (window.PANO_CITY[k]||[]).forEach(function(e){ arr.push([e[0],e[1],e[2],e[3],e[4],e[5],e[6],e[7],k,e[8]]); });
+      var pf=prefOf(k);
+      (window.PANO_CITY[k]||[]).forEach(function(e){ arr.push([e[0],e[1],e[2],e[3],e[4],e[5],e[6],e[7],pf,e[8]]); });
     });
     state.entries=arr;
     state.bounds=computeBounds();
   }
-  function fillCitySelect(keys){
+  function fillCitySelect(keys,label){
     els.city.innerHTML='';
-    var all=document.createElement('option'); all.value=''; all.textContent='全部城市 ('+keys.length+')';
+    var prefs=prefList(keys);
+    var all=document.createElement('option'); all.value=''; all.textContent='全部 ('+prefs.length+')';
     els.city.appendChild(all);
-    keys.forEach(function(k){
-      var o=document.createElement('option'); o.value=k;
-      o.textContent=cityMeta(k).name;
+    prefs.forEach(function(pf){
+      var o=document.createElement('option'); o.value=pf;
+      o.textContent=cityMeta(pf).name;
       els.city.appendChild(o);
     });
+    els.city.title=label||'';
   }
   function selectProvince(p){
     state.province=p; buildProvinceTabs();
-    var keys=provinceGroups()[p]||[];
+    var keys=provinceMap()[p]||[];
     state.provinceKeys=keys; state.cityFilter='';
     if(currentPopup){ currentPopup.remove(); currentPopup=null; }
     state.activePid=null;
@@ -220,7 +236,7 @@
     els.stats.textContent='加载数据…';
     Promise.all(keys.map(loadCityScript)).then(function(){
       buildEntries(keys);
-      fillCitySelect(keys);
+      fillCitySelect(keys,p);
       fillRoadFilter();
       els.loading.style.display='none';
       rerender();
@@ -476,7 +492,7 @@
     return;
   }
   initMap();
-  var firstProvince=Object.keys(provinceGroups())[0];
+  var firstProvince=Object.keys(provinceMap())[0];
   selectProvince(firstProvince);
   setTimeout(function(){ if(map) map.invalidateSize(); },300);
 })();
