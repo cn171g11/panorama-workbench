@@ -21,7 +21,7 @@
   #map.map-dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.75); }
   #map.map-dark .leaflet-container { background:#0b0f13; }
   header, .leaflet-top.leaflet-right { z-index:1100; }
-  .leaflet-top.leaflet-right { margin-top:52px; }
+  .leaflet-top { margin-top:52px; }
   .hint { position:absolute; left:10px; top:64px; z-index:900; padding:5px 10px; border:1px solid var(--line); border-radius:7px; background:rgba(15,20,26,.88); color:var(--dim); font-size:12px; max-width:46%; }
   .legend { position:absolute; right:10px; bottom:14px; z-index:900; display:flex; gap:12px; padding:6px 10px; border:1px solid var(--line); border-radius:7px; background:rgba(15,20,26,.85); font-size:12px; }
   .legend-item { display:inline-flex; align-items:center; gap:5px; color:var(--dim); }
@@ -46,6 +46,22 @@
   #nationGate .ng-sub { color:var(--dim); font-size:12.5px; line-height:1.6; margin-bottom:14px; }
   #nationGate button { padding:9px 22px; border-radius:8px; border:1px solid var(--accent); background:#173455; color:#fff; cursor:pointer; font-size:13px; }
   #nationGate button:hover { background:#1d4a7a; }
+  @media (max-width:680px){
+    header { padding:6px 8px; gap:6px; }
+    h1 { display:none; }
+    #provinceTabs { display:flex; gap:6px; width:100%; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; order:1; }
+    #provinceTabs::-webkit-scrollbar { display:none; }
+    .tab { flex:0 0 auto; padding:6px 12px; font-size:12.5px; }
+    #citySelect, #roadFilter, #basemapSelect { font-size:12.5px; max-width:32%; }
+    #citySelect { order:2; } #roadFilter { order:3; } #basemapSelect { order:4; }
+    #search { order:5; flex:1 1 100%; min-width:0; font-size:16px; }
+    #stats { order:6; width:100%; font-size:11px; }
+    .hint { left:8px; right:8px; top:auto; bottom:74px; max-width:92%; font-size:11px; line-height:1.4; }
+    .legend { right:8px; bottom:8px; gap:8px; font-size:11px; padding:5px 8px; }
+    .pv-meta { min-width:0; max-width:74vw; }
+    .leaflet-top { margin-top:88px; }
+    .leaflet-control-zoom a { width:34px; height:34px; line-height:34px; font-size:19px; }
+  }
 </style>
 </head>
 <body>
@@ -84,6 +100,9 @@
     { id:'tencentDark', label:'腾讯·暗色', url:'https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=4', subdomains:['0','1','2','3'], maxZoom:18, attribution:'© 腾讯地图', dark:true }
   ];
   var POINT_LIMIT = 1000000;
+  var IS_MOBILE = (window.matchMedia && window.matchMedia('(max-width:680px)').matches)
+    || /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent);
+  var CONFIRM_THRESHOLD = IS_MOBILE ? 10000 : 200000;
   var state = { province:'', cityFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateP:'' };
   var map=null, tileLayer=null, pointLayer=null, currentPopup=null;
 
@@ -285,7 +304,7 @@
     state.province=p; buildProvinceTabs();
     var keys=(p==='全国')?allKeys():(provinceMap()[p]||[]);
     var total=countOf(keys);
-    if(total>200000 && !state.confirmed[p]){
+    if(total>CONFIRM_THRESHOLD && !state.confirmed[p]){
       state.gateP=p;
       els.loading.style.display='none';
       els.ngTitle.textContent=(p==='全国')?'全国视图':p;
