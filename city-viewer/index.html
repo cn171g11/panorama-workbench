@@ -73,7 +73,7 @@
     { id:'amapSatellite', label:'高德·影像', url:'https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图', dark:false },
     { id:'tencentDark', label:'腾讯·暗色', url:'https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=4', subdomains:['0','1','2','3'], maxZoom:18, attribution:'© 腾讯地图', dark:true }
   ];
-  var POINT_LIMIT = 250000;
+  var POINT_LIMIT = 1000000;
   var state = { province:'', cityFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[] };
   var map=null, tileLayer=null, pointLayer=null, currentPopup=null;
 
@@ -133,12 +133,27 @@
         }
       }
       var R=2;
-      for(i=0;i<this._hits.length;i++){
-        p=this._hits[i];
-        if(p[0]<south||p[0]>north||p[1]<west||p[1]>east) continue;
-        pt=m.latLngToContainerPoint([p[0],p[1]]);
-        ctx.beginPath(); ctx.arc(pt.x,pt.y,R,0,Math.PI*2);
-        ctx.fillStyle=p[2]?'#FFD400':'#00E5FF'; ctx.fill();
+      if(this._hits.length>120000){
+        var pass,want,second;
+        for(pass=0;pass<2;pass++){
+          second=!!pass; want=!second;
+          ctx.fillStyle=want?'#FFD400':'#00E5FF';
+          for(i=0;i<this._hits.length;i++){
+            p=this._hits[i];
+            if((!!p[2])!==want) continue;
+            if(p[0]<south||p[0]>north||p[1]<west||p[1]>east) continue;
+            pt=m.latLngToContainerPoint([p[0],p[1]]);
+            ctx.fillRect(pt.x-1,pt.y-1,2,2);
+          }
+        }
+      } else {
+        for(i=0;i<this._hits.length;i++){
+          p=this._hits[i];
+          if(p[0]<south||p[0]>north||p[1]<west||p[1]>east) continue;
+          pt=m.latLngToContainerPoint([p[0],p[1]]);
+          ctx.beginPath(); ctx.arc(pt.x,pt.y,R,0,Math.PI*2);
+          ctx.fillStyle=p[2]?'#FFD400':'#00E5FF'; ctx.fill();
+        }
       }
       if(this._active){
         pt=m.latLngToContainerPoint([this._active[0],this._active[1]]);
@@ -176,9 +191,18 @@
     keys.forEach(function(k){ var pf=prefOf(k); if(!seen[pf]){ seen[pf]=1; list.push(pf); } });
     return list;
   }
+  function allKeys(){
+    return Object.keys(window.PANO_META).filter(function(k){ return !window.PANO_META[k].virtual; });
+  }
   function buildProvinceTabs(){
     var pm=provinceMap();
     els.provTabs.innerHTML='';
+    var all=document.createElement('button');
+    all.className='tab'+(state.province==='全国'?' active':'');
+    all.textContent='全国';
+    all.title='全国所有街景点位';
+    all.onclick=function(){ if(state.province!=='全国') selectProvince('全国'); };
+    els.provTabs.appendChild(all);
     Object.keys(pm).forEach(function(p){
       var b=document.createElement('button');
       b.className='tab'+(p===state.province?' active':'');
@@ -228,7 +252,7 @@
   }
   function selectProvince(p){
     state.province=p; buildProvinceTabs();
-    var keys=provinceMap()[p]||[];
+    var keys=(p==='全国')?allKeys():(provinceMap()[p]||[]);
     state.provinceKeys=keys; state.cityFilter='';
     if(currentPopup){ currentPopup.remove(); currentPopup=null; }
     state.activePid=null;
@@ -236,7 +260,7 @@
     els.stats.textContent='加载数据…';
     Promise.all(keys.map(loadCityScript)).then(function(){
       buildEntries(keys);
-      fillCitySelect(keys,p);
+      fillCitySelect(keys,(p==='全国')?'':p);
       fillRoadFilter();
       els.loading.style.display='none';
       rerender();
@@ -408,6 +432,7 @@
     requestAnimationFrame(function(){
       movePending=false;
       if(!moveEv||!state.entries.length) return;
+      if(state.entries.length>250000){ els.mapHint.textContent='地图选点: 点击任意位置查看最近街景'; return; }
       var i=nearestEntry(moveEv.latlng.lat,moveEv.latlng.lng);
       if(i<0) return;
       var e=state.entries[i];
@@ -492,8 +517,7 @@
     return;
   }
   initMap();
-  var firstProvince=Object.keys(provinceMap())[0];
-  selectProvince(firstProvince);
+  selectProvince('全国');
   setTimeout(function(){ if(map) map.invalidateSize(); },300);
 })();
 </script>
