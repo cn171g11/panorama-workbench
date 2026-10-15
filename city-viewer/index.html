@@ -91,6 +91,7 @@
 
 <script src="data_meta.js"></script>
 <script src="data_districts.js"></script>
+<script src="grid_all.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function(){
@@ -106,7 +107,8 @@
   var IS_MOBILE = (window.matchMedia && window.matchMedia('(max-width:680px)').matches)
     || /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent);
   var CONFIRM_THRESHOLD = IS_MOBILE ? 10000 : 200000;
-  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null, dispMode:'density' };
+  var GRID_RES = 0.004;
+  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null, dispMode:'density', mode:'overview', overviewCells:[], overviewMax:1, overviewTotal:0, cellPref:null };
   var DISP_MODES = [{ id:'density', label:'密度·省内存' }, { id:'points', label:'散点' }];
   var map=null, tileLayer=null, pointLayer=null, currentPopup=null;
 
@@ -132,7 +134,7 @@
 
   // ---------- canvas point layer ----------
   var PointCanvasLayer = (window.L && L.Layer) ? L.Layer.extend({
-    initialize:function(){ this._base=[]; this._hits=[]; this._active=null; this._density=null; this._distMode=false; this._grid=null; this._cellDeg=0; this._gminLng=0; this._gminLat=0; this._glnmax=1; },
+    initialize:function(){ this._base=[]; this._hits=[]; this._active=null; this._density=null; this._distMode=false; this._grid=null; this._cellDeg=0; this._gminLng=0; this._gminLat=0; this._glnmax=1; this._cells=null; this._cellLnmax=1; },
     onAdd:function(m){
       this._map=m;
       this._canvas=L.DomUtil.create('canvas','pano-point-layer');
@@ -147,7 +149,8 @@
       L.DomUtil.remove(this._canvas); this._canvas=null;
     },
     setData:function(base,hits,active){ this._base=base||[]; this._hits=hits||[]; this._active=active||null; this._density=null; if(this._canvas) this._full(); },
-    setDensity:function(source,distMode,active){ this._density=source||null; this._distMode=!!distMode; this._active=active||null; this._base=[]; this._hits=[]; if(this._density) this._buildGrid(); if(this._canvas) this._full(); },
+    setDensity:function(source,distMode,active){ this._cells=null; this._density=source||null; this._distMode=!!distMode; this._active=active||null; this._base=[]; this._hits=[]; if(this._density) this._buildGrid(); if(this._canvas) this._full(); },
+    setCells:function(cells,lnmax,active){ this._cells=cells||null; this._cellLnmax=lnmax||1; this._active=active||null; this._density=null; this._grid=null; this._base=[]; this._hits=[]; if(this._canvas) this._full(); },
     _buildGrid:function(){
       var src=this._density, dm=this._distMode, n=src.length, i, e;
       this._grid=null;
@@ -182,6 +185,26 @@
       var ctx=this._canvas.getContext('2d');
       ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,size.x,size.y);
       var b=m.getBounds().pad(0.2),south=b.getSouth(),north=b.getNorth(),west=b.getWest(),east=b.getEast(),i,p,pt;
+      if(this._cells){
+        var cells=this._cells, lnmax=this._cellLnmax;
+        var ctr0=m.getCenter();
+        var cpx=Math.abs(m.latLngToContainerPoint([ctr0.lat,ctr0.lng+GRID_RES]).x-m.latLngToContainerPoint([ctr0.lat,ctr0.lng]).x);
+        var sz0=Math.max(1,Math.round(cpx)+1);
+        for(i=0;i<cells.length;i++){
+          p=cells[i];
+          if(p[1]<south||p[1]>north||p[0]<west||p[0]>east) continue;
+          pt=m.latLngToContainerPoint([p[1],p[0]]);
+          var t0=Math.log(p[2]+1)/lnmax;
+          ctx.fillStyle='rgba('+Math.round(t0*255)+','+Math.round(229-17*t0)+','+Math.round(255-255*t0)+',0.85)';
+          ctx.fillRect(pt.x-sz0/2,pt.y-sz0/2,sz0,sz0);
+        }
+        if(this._active){
+          pt=m.latLngToContainerPoint([this._active[0],this._active[1]]);
+          ctx.strokeStyle='#ffffff'; ctx.lineWidth=2;
+          ctx.beginPath(); ctx.arc(pt.x,pt.y,9,0,Math.PI*2); ctx.stroke();
+        }
+        return;
+      }
       if(this._density){
         var src=this._density, dm=this._distMode, e2, ptc, g=this._grid;
         var ctr=m.getCenter();
@@ -421,6 +444,7 @@
     if(pointLayer) pointLayer.setData([],[],null);
   }
   function loadKeys(keys,city){
+    state.mode='detail';
     state.cityFilter=city||''; state.countyFilter='';
     if(currentPopup){ currentPopup.remove(); currentPopup=null; }
     state.activePid=null;
@@ -446,40 +470,54 @@
     els.stats.textContent='待确认加载（'+total.toLocaleString()+' 点）';
     state.gateRun=run;
   }
-  function selectCity(city){
-    city=city||'';
-    state.cityFilter=city; state.countyFilter='';
-    updateCountySelect(city);
-    var keys=city?keysWithPref(city,state.provinceKeys):state.provinceKeys;
-    var total=countOf(keys), key=city||state.province;
-    if(total>CONFIRM_THRESHOLD && !state.confirmed[key]){
-      showGate(city?cityMeta(city).name:'全国', total, function(){
-        state.confirmed[key]=true; els.nationGate.style.display='none'; selectCity(city);
-      });
-      return;
-    }
-    els.nationGate.style.display='none';
-    loadKeys(keys, city);
+  function buildOverview(keys){
+    var G=window.PANO_GRID_ALL||{}, cells=[], cp={}, maxn=1, tot=0;
+    var a=1e9,b=-1e9,c=1e9,d=-1e9;
+    keys.forEach(function(k){
+      var list=G[k]; if(!list) return;
+      var pf=prefOf(k);
+      for(var i=0;i<list.length;i++){
+        var cl=list[i], lng=(cl[0]+0.5)*GRID_RES, lat=(cl[1]+0.5)*GRID_RES;
+        cells.push([lng,lat,cl[2]]);
+        if(cl[2]>maxn) maxn=cl[2];
+        tot+=cl[2];
+        cp[cl[0]*100000+cl[1]]=pf;
+        if(lng<a)a=lng; if(lng>b)b=lng; if(lat<c)c=lat; if(lat>d)d=lat;
+      }
+    });
+    state.overviewCells=cells; state.cellPref=cp; state.overviewMax=maxn; state.overviewTotal=tot;
+    state.bounds=cells.length?{minLng:a,maxLng:b,minLat:c,maxLat:d}:null;
   }
   function selectProvince(p){
     state.province=p; buildProvinceTabs();
     var keys=(p==='全国')?allKeys():(provinceMap()[p]||[]);
     state.provinceKeys=keys;
-    state.cityFilter=''; state.countyFilter='';
+    state.cityFilter=''; state.countyFilter=''; state.mode='overview';
     fillCitySelect(keys,(p==='全国')?'':p);
     updateCountySelect('');
     if(currentPopup){ currentPopup.remove(); currentPopup=null; }
     state.activePid=null;
-    clearEntries();
+    state.entries=[]; state.results=[];
+    els.nationGate.style.display='none';
+    buildOverview(keys);
+    rerender();
+    fitMap();
+  }
+  function selectCity(city){
+    city=city||'';
+    if(!city){ selectProvince(state.province||'全国'); return; }
+    state.cityFilter=city; state.countyFilter='';
+    updateCountySelect(city);
+    var keys=keysWithPref(city,state.provinceKeys);
     var total=countOf(keys);
-    if(total>CONFIRM_THRESHOLD && !state.confirmed[p]){
-      showGate((p==='全国')?'全国':p, total, function(){
-        state.confirmed[p]=true; els.nationGate.style.display='none'; selectProvince(p);
+    if(total>CONFIRM_THRESHOLD && !state.confirmed[city]){
+      showGate(cityMeta(city).name, total, function(){
+        state.confirmed[city]=true; els.nationGate.style.display='none'; selectCity(city);
       });
       return;
     }
     els.nationGate.style.display='none';
-    loadKeys(keys,'');
+    loadKeys(keys, city);
   }
   function fitMap(){
     if(!map) return;
@@ -555,6 +593,11 @@
     state.results=out;
   }
   function rerender(){
+    if(state.mode==='overview'){
+      els.stats.textContent='概览 · 约 '+state.overviewTotal.toLocaleString()+' 点 · '+state.overviewCells.length.toLocaleString()+' 格';
+      renderMapPoints();
+      return;
+    }
     computeResults();
     els.stats.textContent='共 '+state.results.length.toLocaleString()+' 条'+(state.distMode?' · 按距离排序':'');
     renderMapPoints();
@@ -607,6 +650,7 @@
         if(entries[q][0]===state.activePid){ active=[entries[q][2],entries[q][1]]; break; }
       }
     }
+    if(state.mode==='overview'){ pointLayer.setCells(state.overviewCells, Math.log(state.overviewMax+1)||1, active); return; }
     if(state.dispMode==='density'){ pointLayer.setDensity(state.results,state.distMode,active); return; }
     var citySel=els.city.value;
     var filtered=state.results.length!==entries.length;
@@ -637,6 +681,16 @@
     return best;
   }
   function onMapClick(ev){
+    if(state.mode==='overview'){
+      var cs=state.overviewCells; if(!cs.length||!state.cellPref) return;
+      var bi=-1,bd=1e18,z,dx,dy,d;
+      for(z=0;z<cs.length;z++){ dx=cs[z][0]-ev.latlng.lng; dy=cs[z][1]-ev.latlng.lat; d=dx*dx+dy*dy; if(d<bd){ bd=d; bi=z; } }
+      if(bi<0) return;
+      var cl=cs[bi];
+      var pf=state.cellPref[Math.floor(cl[0]/GRID_RES)*100000+Math.floor(cl[1]/GRID_RES)];
+      if(pf){ els.city.value=pf; selectCity(pf); }
+      return;
+    }
     if(!state.entries.length) return;
     var i=nearestEntry(ev.latlng.lat,ev.latlng.lng);
     if(i<0) return;
