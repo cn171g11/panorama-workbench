@@ -52,8 +52,8 @@
     #provinceTabs { display:flex; gap:6px; width:100%; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; order:1; }
     #provinceTabs::-webkit-scrollbar { display:none; }
     .tab { flex:0 0 auto; padding:6px 12px; font-size:12.5px; }
-    #citySelect, #roadFilter, #basemapSelect { font-size:12.5px; max-width:32%; }
-    #citySelect { order:2; } #roadFilter { order:3; } #basemapSelect { order:4; }
+    #citySelect, #countySelect, #roadFilter, #basemapSelect { font-size:12.5px; max-width:32%; }
+    #citySelect { order:2; } #countySelect { order:2; } #roadFilter { order:3; } #basemapSelect { order:4; }
     #search { order:5; flex:1 1 100%; min-width:0; font-size:16px; }
     #stats { order:6; width:100%; font-size:11px; }
     .hint { left:8px; right:8px; top:auto; bottom:74px; max-width:92%; font-size:11px; line-height:1.4; }
@@ -68,7 +68,8 @@
 <header>
   <h1>街景元数据查看器</h1>
   <span id="provinceTabs"></span>
-  <select id="citySelect" title="城市"></select>
+  <select id="citySelect" title="地级市"></select>
+  <select id="countySelect" title="县级行政区" style="display:none"></select>
   <input id="search" placeholder="搜索: panoid / 路名 / 日期(2013-07) / 坐标(53.47,122.36)">
   <select id="roadFilter"></select>
   <select id="basemapSelect" title="底图"></select>
@@ -88,6 +89,7 @@
 </div>
 
 <script src="data_meta.js"></script>
+<script src="data_districts.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function(){
@@ -103,11 +105,12 @@
   var IS_MOBILE = (window.matchMedia && window.matchMedia('(max-width:680px)').matches)
     || /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent);
   var CONFIRM_THRESHOLD = IS_MOBILE ? 10000 : 200000;
-  var state = { province:'', cityFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateP:'' };
+  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null };
   var map=null, tileLayer=null, pointLayer=null, currentPopup=null;
 
   var els = {
     provTabs:document.getElementById('provinceTabs'), city:document.getElementById('citySelect'),
+    county:document.getElementById('countySelect'),
     search:document.getElementById('search'), road:document.getElementById('roadFilter'),
     basemap:document.getElementById('basemapSelect'), stats:document.getElementById('stats'),
     mapHint:document.getElementById('mapHint'), loading:document.getElementById('loadingData'),
@@ -226,6 +229,68 @@
     keys.forEach(function(k){ s+=c[k]||0; });
     return s;
   }
+  function pip(x,y,ring){
+    var inside=false,j=ring.length-1;
+    for(var i=0;i<ring.length;i++){
+      var xi=ring[i][0],yi=ring[i][1],xj=ring[j][0],yj=ring[j][1];
+      if(((yi>y)!==(yj>y))&&(x<(xj-xi)*(y-yi)/(yj-yi+1e-15)+xi)) inside=!inside;
+      j=i;
+    }
+    return inside;
+  }
+  function inPolys(x,y,polys){
+    for(var i=0;i<polys.length;i++){
+      var rings=polys[i];
+      if(pip(x,y,rings[0])){
+        var hole=false;
+        for(var h=1;h<rings.length;h++){ if(pip(x,y,rings[h])){ hole=true; break; } }
+        if(!hole) return true;
+      }
+    }
+    return false;
+  }
+  function polysBBox(polys){
+    var a=1e9,b=-1e9,c=1e9,d=-1e9;
+    polys.forEach(function(rings){ rings[0].forEach(function(p){ if(p[0]<a)a=p[0]; if(p[0]>b)b=p[0]; if(p[1]<c)c=p[1]; if(p[1]>d)d=p[1]; }); });
+    return [a,c,b,d];
+  }
+  function districtsOf(pref){
+    var d=(window.PANO_DISTRICTS||{})[pref];
+    if(!d) return null;
+    d.forEach(function(c){ if(!c._bb) c._bb=polysBBox(c.polys); });
+    return d;
+  }
+  function keysWithPref(pref,keys){ return keys.filter(function(k){ return prefOf(k)===pref; }); }
+  function assignCounties(){
+    if(!window.PANO_DISTRICTS) return;
+    var lists={};
+    for(var i=0;i<state.entries.length;i++){
+      var e=state.entries[i], pref=e[8];
+      var list=lists[pref]; if(list===undefined){ list=lists[pref]=districtsOf(pref); }
+      if(!list) continue;
+      var x=e[1],y=e[2],code='';
+      for(var j=0;j<list.length;j++){
+        var c=list[j],bb=c._bb;
+        if(x<bb[0]||x>bb[2]||y<bb[1]||y>bb[3]) continue;
+        if(inPolys(x,y,c.polys)){ code=c.code; break; }
+      }
+      e[10]=code;
+    }
+  }
+  function countyBBox(pref,code){
+    var list=districtsOf(pref); if(!list) return null;
+    for(var i=0;i<list.length;i++){ if(list[i].code===code){ var bb=list[i]._bb; return {minLng:bb[0],minLat:bb[1],maxLng:bb[2],maxLat:bb[3]}; } }
+    return null;
+  }
+  function updateCountySelect(city){
+    var list=city?districtsOf(city):null;
+    els.county.innerHTML='';
+    if(!list){ els.county.style.display='none'; return; }
+    var all=document.createElement('option'); all.value=''; all.textContent='全部区县 ('+list.length+')';
+    els.county.appendChild(all);
+    list.forEach(function(c){ var o=document.createElement('option'); o.value=c.code; o.textContent=c.name; els.county.appendChild(o); });
+    els.county.style.display='';
+  }
   function buildProvinceTabs(){
     var pm=provinceMap();
     els.provTabs.innerHTML='';
@@ -282,15 +347,19 @@
     });
     els.city.title=label||'';
   }
-  function loadProvince(p,keys){
-    state.provinceKeys=keys; state.cityFilter='';
+  function clearEntries(){
+    state.entries=[]; state.results=[];
+    if(pointLayer) pointLayer.setData([],[],null);
+  }
+  function loadKeys(keys,city){
+    state.cityFilter=city||''; state.countyFilter='';
     if(currentPopup){ currentPopup.remove(); currentPopup=null; }
     state.activePid=null;
     els.loading.style.display='block';
     els.stats.textContent='加载数据…';
     Promise.all(keys.map(loadCityScript)).then(function(){
       buildEntries(keys);
-      fillCitySelect(keys,(p==='全国')?'':p);
+      assignCounties();
       fillRoadFilter();
       els.loading.style.display='none';
       rerender();
@@ -300,26 +369,57 @@
       els.stats.textContent=err.message;
     });
   }
-  function selectProvince(p){
-    state.province=p; buildProvinceTabs();
-    var keys=(p==='全国')?allKeys():(provinceMap()[p]||[]);
-    var total=countOf(keys);
-    if(total>CONFIRM_THRESHOLD && !state.confirmed[p]){
-      state.gateP=p;
-      els.loading.style.display='none';
-      els.ngTitle.textContent=(p==='全国')?'全国视图':p;
-      els.ngSub.innerHTML='约 '+Math.round(total/10000)+' 万个街景点位，一次性加载可能较慢、地图卡顿。<br>确认后再加载。';
-      els.nationGate.style.display='block';
-      els.stats.textContent='待确认加载（'+total.toLocaleString()+' 点）';
+  function showGate(label,total,run){
+    els.loading.style.display='none';
+    els.ngTitle.textContent=(label==='全国')?'全国视图':label;
+    els.ngSub.innerHTML='约 '+Math.round(total/10000)+' 万个街景点位，一次性加载可能较慢、地图卡顿。<br>确认后再加载。';
+    els.nationGate.style.display='block';
+    els.stats.textContent='待确认加载（'+total.toLocaleString()+' 点）';
+    state.gateRun=run;
+  }
+  function selectCity(city){
+    city=city||'';
+    state.cityFilter=city; state.countyFilter='';
+    updateCountySelect(city);
+    var keys=city?keysWithPref(city,state.provinceKeys):state.provinceKeys;
+    var total=countOf(keys), key=city||state.province;
+    if(total>CONFIRM_THRESHOLD && !state.confirmed[key]){
+      showGate(city?cityMeta(city).name:'全国', total, function(){
+        state.confirmed[key]=true; els.nationGate.style.display='none'; selectCity(city);
+      });
       return;
     }
     els.nationGate.style.display='none';
-    loadProvince(p,keys);
+    loadKeys(keys, city);
+  }
+  function selectProvince(p){
+    state.province=p; buildProvinceTabs();
+    var keys=(p==='全国')?allKeys():(provinceMap()[p]||[]);
+    state.provinceKeys=keys;
+    state.cityFilter=''; state.countyFilter='';
+    fillCitySelect(keys,(p==='全国')?'':p);
+    updateCountySelect('');
+    if(currentPopup){ currentPopup.remove(); currentPopup=null; }
+    state.activePid=null;
+    clearEntries();
+    var total=countOf(keys);
+    if(total>CONFIRM_THRESHOLD && !state.confirmed[p]){
+      showGate((p==='全国')?'全国':p, total, function(){
+        state.confirmed[p]=true; els.nationGate.style.display='none'; selectProvince(p);
+      });
+      return;
+    }
+    els.nationGate.style.display='none';
+    loadKeys(keys,'');
   }
   function fitMap(){
     if(!map) return;
     var b=null;
     var citySel=els.city.value;
+    if(state.countyFilter && citySel){
+      var cb=countyBBox(citySel,state.countyFilter);
+      if(cb){ map.fitBounds([[cb.minLat,cb.minLng],[cb.maxLat,cb.maxLng]],{padding:[30,30]}); return; }
+    }
     if(citySel){
       var a=1e9,c=-1e9,d=1e9,f=-1e9,found=false;
       for(var i=0;i<state.entries.length;i++){
@@ -369,6 +469,7 @@
     for(var i=0;i<state.entries.length;i++){
       var e=state.entries[i];
       if(citySel&&e[8]!==citySel) continue;
+      if(state.countyFilter&&e[10]!==state.countyFilter) continue;
       if(roadSel&&((e[3]||'')!==roadSel)) continue;
       if(tokens){
         var hay=(e[0]+' '+(e[3]||'')+' '+(e[4]||'')).toLowerCase(),ok=true;
@@ -547,12 +648,11 @@
   });
   els.road.addEventListener('change',rerender);
   els.nationLoadBtn.addEventListener('click',function(){
-    var p=state.gateP||'全国';
-    state.confirmed[p]=true; els.nationGate.style.display='none';
-    selectProvince(p);
+    if(state.gateRun){ var r=state.gateRun; state.gateRun=null; r(); }
   });
-  els.city.addEventListener('change',function(){
-    state.cityFilter=els.city.value;
+  els.city.addEventListener('change',function(){ selectCity(els.city.value); });
+  els.county.addEventListener('change',function(){
+    state.countyFilter=els.county.value;
     if(currentPopup){ currentPopup.remove(); currentPopup=null; }
     state.activePid=null;
     rerender(); fitMap();
