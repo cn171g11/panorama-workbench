@@ -149,20 +149,25 @@
     setData:function(base,hits,active){ this._base=base||[]; this._hits=hits||[]; this._active=active||null; this._density=null; if(this._canvas) this._full(); },
     setDensity:function(source,distMode,active){ this._density=source||null; this._distMode=!!distMode; this._active=active||null; this._base=[]; this._hits=[]; if(this._density) this._buildGrid(); if(this._canvas) this._full(); },
     _buildGrid:function(){
-      var src=this._density, dm=this._distMode, n=src.length, i, e, lng, lat;
-      if(n<3000){ this._grid=null; return; }
+      var src=this._density, dm=this._distMode, n=src.length, i, e;
+      this._grid=null;
+      if(n<3000) return;
       var a=1e9,b=-1e9,c=1e9,d=-1e9;
-      for(i=0;i<n;i++){ e=dm?src[i].e:src[i]; lng=e[1]; lat=e[2]; if(lng<a)a=lng; if(lng>b)b=lng; if(lat<c)c=lat; if(lat>d)d=lat; }
-      if(!(b>a)||!(d>c)){ this._grid=null; return; }
+      for(i=0;i<n;i++){ e=dm?src[i].e:src[i]; if(e[1]<a)a=e[1]; if(e[1]>b)b=e[1]; if(e[2]<c)c=e[2]; if(e[2]>d)d=e[2]; }
+      if(!(b>a)||!(d>c)) return;
       var cell=Math.sqrt(((b-a)*(d-c))/30000);
-      if(!(cell>0)){ this._grid=null; return; }
-      var grid=new Map(), maxn=1, key, v;
-      for(i=0;i<n;i++){
-        e=dm?src[i].e:src[i]; lng=e[1]; lat=e[2];
-        key=Math.floor((lng-a)/cell)*100000 + Math.floor((lat-c)/cell);
-        v=(grid.get(key)||0)+1; grid.set(key,v); if(v>maxn) maxn=v;
-      }
-      this._grid=grid; this._cellDeg=cell; this._gminLng=a; this._gminLat=c; this._glnmax=Math.log(maxn+1)||1;
+      if(!(cell>0)) return;
+      var NX=Math.ceil((b-a)/cell)+1, NY=Math.ceil((d-c)/cell)+1, NC=NX*NY;
+      if(NC>4000000) return;
+      var counts=new Int32Array(NC), idx=new Int32Array(n), k, cx, cy, maxn=0;
+      for(i=0;i<n;i++){ e=dm?src[i].e:src[i]; cx=((e[1]-a)/cell)|0; cy=((e[2]-c)/cell)|0; k=cy*NX+cx; if(++counts[k]>maxn)maxn=counts[k]; }
+      var offsets=new Int32Array(NC+1), s=0;
+      for(k=0;k<NC;k++){ offsets[k]=s; s+=counts[k]; }
+      offsets[NC]=s;
+      var cur=offsets.slice(0,NC);
+      for(i=0;i<n;i++){ e=dm?src[i].e:src[i]; cx=((e[1]-a)/cell)|0; cy=((e[2]-c)/cell)|0; k=cy*NX+cx; idx[cur[k]++]=i; }
+      this._grid={counts:counts,offsets:offsets,idx:idx,NX:NX,NY:NY,NC:NC};
+      this._cellDeg=cell; this._gminLng=a; this._gminLat=c; this._glnmax=Math.log(maxn+1)||1;
     },
     _sync:function(){ if(this._canvas) L.DomUtil.setPosition(this._canvas,this._map.containerPointToLayerPoint([0,0])); },
     _full:function(){ if(!this._canvas) return; this._resize(); this._sync(); this._redraw(); },
@@ -178,29 +183,41 @@
       ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,size.x,size.y);
       var b=m.getBounds().pad(0.2),south=b.getSouth(),north=b.getNorth(),west=b.getWest(),east=b.getEast(),i,p,pt;
       if(this._density){
-        var src=this._density, dm=this._distMode, e2, lng, lat, ptc;
+        var src=this._density, dm=this._distMode, e2, ptc, g=this._grid;
         var ctr=m.getCenter();
         var cellPx=Math.abs(m.latLngToContainerPoint([ctr.lat,ctr.lng+this._cellDeg]).x
                             -m.latLngToContainerPoint([ctr.lat,ctr.lng]).x);
-        if(!this._grid || cellPx>=12){
-          var Rp=2, Tp=Math.PI*2, cp=0, Cp=20000;
+        var Rp=2, Tp=Math.PI*2, yy, xx, kk, j, o0, o1;
+        if(g && cellPx<12){
+          var a=this._gminLng, c=this._gminLat, cd=this._cellDeg, lnmax=this._glnmax, sz=Math.max(1,Math.round(cellPx)+1);
+          var counts=g.counts, NX=g.NX, k, cx, gyy, glng, glat, cnt, tt;
+          for(k=0;k<g.NC;k++){
+            cnt=counts[k]; if(!cnt) continue;
+            cx=k%NX; gyy=(k-cx)/NX; glng=a+(cx+0.5)*cd; glat=c+(gyy+0.5)*cd;
+            if(glat<south||glat>north||glng<west||glng>east) continue;
+            ptc=m.latLngToContainerPoint([glat,glng]); tt=Math.log(cnt+1)/lnmax;
+            ctx.fillStyle='rgba('+Math.round(tt*255)+','+Math.round(229-17*tt)+','+Math.round(255-255*tt)+',0.85)';
+            ctx.fillRect(ptc.x-sz/2,ptc.y-sz/2,sz,sz);
+          }
+        } else if(g){
+          var cd2=this._cellDeg, a2=this._gminLng, c2=this._gminLat, NX2=g.NX;
+          var cx0=Math.max(0,((west-a2)/cd2)|0), cx1=Math.min(g.NX-1,((east-a2)/cd2)|0);
+          var cy0=Math.max(0,((south-c2)/cd2)|0), cy1=Math.min(g.NY-1,((north-c2)/cd2)|0);
+          var idxs=g.idx, offs=g.offsets;
           ctx.fillStyle='#FFD400'; ctx.beginPath();
-          for(i=0;i<src.length;i++){ e2=dm?src[i].e:src[i]; lat=e2[2]; lng=e2[1]; if(lat<south||lat>north||lng<west||lng>east||!e2[7]) continue; ptc=m.latLngToContainerPoint([lat,lng]); ctx.moveTo(ptc.x+Rp,ptc.y); ctx.arc(ptc.x,ptc.y,Rp,0,Tp); if(++cp%Cp===0){ ctx.fill(); ctx.beginPath(); } }
+          for(yy=cy0;yy<=cy1;yy++){ for(xx=cx0;xx<=cx1;xx++){ kk=yy*NX2+xx; o0=offs[kk]; o1=offs[kk+1]; for(j=o0;j<o1;j++){ e2=dm?src[idxs[j]].e:src[idxs[j]]; if(!e2[7]) continue; ptc=m.latLngToContainerPoint([e2[2],e2[1]]); ctx.moveTo(ptc.x+Rp,ptc.y); ctx.arc(ptc.x,ptc.y,Rp,0,Tp); } } }
           ctx.fill();
           ctx.fillStyle='#00E5FF'; ctx.beginPath();
-          for(i=0;i<src.length;i++){ e2=dm?src[i].e:src[i]; lat=e2[2]; lng=e2[1]; if(lat<south||lat>north||lng<west||lng>east||e2[7]) continue; ptc=m.latLngToContainerPoint([lat,lng]); ctx.moveTo(ptc.x+Rp,ptc.y); ctx.arc(ptc.x,ptc.y,Rp,0,Tp); if(++cp%Cp===0){ ctx.fill(); ctx.beginPath(); } }
+          for(yy=cy0;yy<=cy1;yy++){ for(xx=cx0;xx<=cx1;xx++){ kk=yy*NX2+xx; o0=offs[kk]; o1=offs[kk+1]; for(j=o0;j<o1;j++){ e2=dm?src[idxs[j]].e:src[idxs[j]]; if(e2[7]) continue; ptc=m.latLngToContainerPoint([e2[2],e2[1]]); ctx.moveTo(ptc.x+Rp,ptc.y); ctx.arc(ptc.x,ptc.y,Rp,0,Tp); } } }
           ctx.fill();
         } else {
-          var grid=this._grid, a=this._gminLng, c=this._gminLat, lnmax=this._glnmax, cd=this._cellDeg, sz=Math.max(1,Math.round(cellPx)+1);
-          grid.forEach(function(cnt,key){
-            var gx=(key/100000)|0, gy=key-gx*100000;
-            var glng=a+(gx+0.5)*cd, glat=c+(gy+0.5)*cd;
-            if(glat<south||glat>north||glng<west||glng>east) return;
-            var pc=m.latLngToContainerPoint([glat,glng]);
-            var tt=Math.log(cnt+1)/lnmax;
-            ctx.fillStyle='rgba('+Math.round(tt*255)+','+Math.round(229-17*tt)+','+Math.round(255-255*tt)+',0.85)';
-            ctx.fillRect(pc.x-sz/2,pc.y-sz/2,sz,sz);
-          });
+          var cp=0, Cp=20000;
+          ctx.fillStyle='#FFD400'; ctx.beginPath();
+          for(i=0;i<src.length;i++){ e2=dm?src[i].e:src[i]; if(e2[2]<south||e2[2]>north||e2[1]<west||e2[1]>east||!e2[7]) continue; ptc=m.latLngToContainerPoint([e2[2],e2[1]]); ctx.moveTo(ptc.x+Rp,ptc.y); ctx.arc(ptc.x,ptc.y,Rp,0,Tp); if(++cp%Cp===0){ ctx.fill(); ctx.beginPath(); } }
+          ctx.fill();
+          ctx.fillStyle='#00E5FF'; ctx.beginPath();
+          for(i=0;i<src.length;i++){ e2=dm?src[i].e:src[i]; if(e2[2]<south||e2[2]>north||e2[1]<west||e2[1]>east||e2[7]) continue; ptc=m.latLngToContainerPoint([e2[2],e2[1]]); ctx.moveTo(ptc.x+Rp,ptc.y); ctx.arc(ptc.x,ptc.y,Rp,0,Tp); if(++cp%Cp===0){ ctx.fill(); ctx.beginPath(); } }
+          ctx.fill();
         }
         if(this._active){
           pt=m.latLngToContainerPoint([this._active[0],this._active[1]]);
