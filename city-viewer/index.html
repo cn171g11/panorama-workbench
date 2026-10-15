@@ -52,7 +52,7 @@
     #provinceTabs { display:flex; gap:6px; width:100%; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; order:1; }
     #provinceTabs::-webkit-scrollbar { display:none; }
     .tab { flex:0 0 auto; padding:6px 12px; font-size:12.5px; }
-    #citySelect, #countySelect, #roadFilter, #basemapSelect { font-size:12.5px; max-width:32%; }
+    #citySelect, #countySelect, #roadFilter, #basemapSelect, #dispMode { font-size:12.5px; max-width:32%; }
     #citySelect { order:2; } #countySelect { order:2; } #roadFilter { order:3; } #basemapSelect { order:4; }
     #search { order:5; flex:1 1 100%; min-width:0; font-size:16px; }
     #stats { order:6; width:100%; font-size:11px; }
@@ -73,6 +73,7 @@
   <input id="search" placeholder="搜索: panoid / 路名 / 日期(2013-07) / 坐标(53.47,122.36)">
   <select id="roadFilter"></select>
   <select id="basemapSelect" title="底图"></select>
+  <select id="dispMode" title="显示模式"></select>
   <span id="stats"></span>
 </header>
 <div id="map"></div>
@@ -105,14 +106,16 @@
   var IS_MOBILE = (window.matchMedia && window.matchMedia('(max-width:680px)').matches)
     || /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent);
   var CONFIRM_THRESHOLD = IS_MOBILE ? 10000 : 200000;
-  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null };
+  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null, dispMode:'density' };
+  var DISP_MODES = [{ id:'density', label:'密度·省内存' }, { id:'points', label:'散点' }];
   var map=null, tileLayer=null, pointLayer=null, currentPopup=null;
 
   var els = {
     provTabs:document.getElementById('provinceTabs'), city:document.getElementById('citySelect'),
     county:document.getElementById('countySelect'),
     search:document.getElementById('search'), road:document.getElementById('roadFilter'),
-    basemap:document.getElementById('basemapSelect'), stats:document.getElementById('stats'),
+    basemap:document.getElementById('basemapSelect'), dispMode:document.getElementById('dispMode'),
+    stats:document.getElementById('stats'),
     mapHint:document.getElementById('mapHint'), loading:document.getElementById('loadingData'),
     nationGate:document.getElementById('nationGate'), nationLoadBtn:document.getElementById('nationLoadBtn'),
     ngTitle:document.getElementById('ngTitle'), ngSub:document.getElementById('ngSub')
@@ -129,7 +132,7 @@
 
   // ---------- canvas point layer ----------
   var PointCanvasLayer = (window.L && L.Layer) ? L.Layer.extend({
-    initialize:function(){ this._base=[]; this._hits=[]; this._active=null; },
+    initialize:function(){ this._base=[]; this._hits=[]; this._active=null; this._density=null; this._distMode=false; },
     onAdd:function(m){
       this._map=m;
       this._canvas=L.DomUtil.create('canvas','pano-point-layer');
@@ -143,7 +146,8 @@
       m.off('move',this._sync,this); m.off('moveend zoomend resize viewreset',this._full,this);
       L.DomUtil.remove(this._canvas); this._canvas=null;
     },
-    setData:function(base,hits,active){ this._base=base||[]; this._hits=hits||[]; this._active=active||null; if(this._canvas) this._full(); },
+    setData:function(base,hits,active){ this._base=base||[]; this._hits=hits||[]; this._active=active||null; this._density=null; if(this._canvas) this._full(); },
+    setDensity:function(source,distMode,active){ this._density=source||null; this._distMode=!!distMode; this._active=active||null; this._base=[]; this._hits=[]; if(this._canvas) this._full(); },
     _sync:function(){ if(this._canvas) L.DomUtil.setPosition(this._canvas,this._map.containerPointToLayerPoint([0,0])); },
     _full:function(){ if(!this._canvas) return; this._resize(); this._sync(); this._redraw(); },
     _resize:function(){
@@ -157,6 +161,33 @@
       var ctx=this._canvas.getContext('2d');
       ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,size.x,size.y);
       var b=m.getBounds().pad(0.2),south=b.getSouth(),north=b.getNorth(),west=b.getWest(),east=b.getEast(),i,p,pt;
+      if(this._density){
+        var CELL=6, grid={}, src=this._density, dm=this._distMode, e2, lng, lat, ptc, gx, gy, kk, cell, maxn=1;
+        for(i=0;i<src.length;i++){
+          e2=dm?src[i].e:src[i];
+          lat=e2[2]; lng=e2[1];
+          if(lat<south||lat>north||lng<west||lng>east) continue;
+          ptc=m.latLngToContainerPoint([lat,lng]);
+          gx=(ptc.x/CELL)|0; gy=(ptc.y/CELL)|0;
+          kk=gx*100003+gy;
+          cell=grid[kk];
+          if(!cell){ cell=grid[kk]={x:gx,y:gy,n:0}; }
+          cell.n++; if(cell.n>maxn) maxn=cell.n;
+        }
+        var lnmax=Math.log(maxn+1)||1;
+        for(kk in grid){
+          cell=grid[kk];
+          var tt=Math.log(cell.n+1)/lnmax;
+          ctx.fillStyle='rgba('+Math.round(tt*255)+','+Math.round(229-17*tt)+','+Math.round(255-255*tt)+',0.9)';
+          ctx.fillRect(cell.x*CELL, cell.y*CELL, CELL, CELL);
+        }
+        if(this._active){
+          pt=m.latLngToContainerPoint([this._active[0],this._active[1]]);
+          ctx.strokeStyle='#ffffff'; ctx.lineWidth=2;
+          ctx.beginPath(); ctx.arc(pt.x,pt.y,9,0,Math.PI*2); ctx.stroke();
+        }
+        return;
+      }
       if(this._base.length){
         ctx.fillStyle='rgba(150,170,195,0.5)';
         for(i=0;i<this._base.length;i++){
@@ -265,7 +296,7 @@
     if(!window.PANO_DISTRICTS) return;
     var lists={};
     for(var i=0;i<state.entries.length;i++){
-      var e=state.entries[i], pref=e[8];
+      var e=state.entries[i], pref=e[9];
       var list=lists[pref]; if(list===undefined){ list=lists[pref]=districtsOf(pref); }
       if(!list) continue;
       var x=e[1],y=e[2],code='';
@@ -329,8 +360,8 @@
   function buildEntries(keys){
     var arr=[];
     keys.forEach(function(k){
-      var pf=prefOf(k);
-      (window.PANO_CITY[k]||[]).forEach(function(e){ arr.push([e[0],e[1],e[2],e[3],e[4],e[5],e[6],e[7],pf,e[8]]); });
+      var pf=prefOf(k), list=window.PANO_CITY[k]||[];
+      for(var i=0;i<list.length;i++){ var e=list[i]; e[9]=pf; arr.push(e); }
     });
     state.entries=arr;
     state.bounds=computeBounds();
@@ -424,7 +455,7 @@
       var a=1e9,c=-1e9,d=1e9,f=-1e9,found=false;
       for(var i=0;i<state.entries.length;i++){
         var e=state.entries[i];
-        if(e[8]!==citySel) continue;
+        if(e[9]!==citySel) continue;
         found=true;
         if(e[1]<a)a=e[1]; if(e[1]>c)c=e[1];
         if(e[2]<d)d=e[2]; if(e[2]>f)f=e[2];
@@ -468,7 +499,7 @@
     var out=[];
     for(var i=0;i<state.entries.length;i++){
       var e=state.entries[i];
-      if(citySel&&e[8]!==citySel) continue;
+      if(citySel&&e[9]!==citySel) continue;
       if(state.countyFilter&&e[10]!==state.countyFilter) continue;
       if(roadSel&&((e[3]||'')!==roadSel)) continue;
       if(tokens){
@@ -498,6 +529,7 @@
     pointLayer=new PointCanvasLayer();
     pointLayer.addTo(map);
     populateBasemaps();
+    populateDispMode();
     setBasemap('amapDark');
     map.on('click',onMapClick);
     map.on('mousemove',onMapMove);
@@ -509,6 +541,14 @@
       var o=document.createElement('option'); o.value=b.id; o.textContent=b.label; els.basemap.appendChild(o);
     });
     els.basemap.onchange=function(){ setBasemap(els.basemap.value); };
+  }
+  function populateDispMode(){
+    els.dispMode.innerHTML='';
+    DISP_MODES.forEach(function(d){
+      var o=document.createElement('option'); o.value=d.id; o.textContent=d.label; els.dispMode.appendChild(o);
+    });
+    els.dispMode.value=state.dispMode;
+    els.dispMode.onchange=function(){ state.dispMode=els.dispMode.value; renderMapPoints(); };
   }
   function setBasemap(id){
     var def=BASEMAPS.filter(function(b){ return b.id===id; })[0]||BASEMAPS[0];
@@ -523,6 +563,13 @@
   function renderMapPoints(){
     if(!map||!pointLayer) return;
     var entries=state.entries;
+    var active=null;
+    if(state.activePid){
+      for(var q=0;q<entries.length;q++){
+        if(entries[q][0]===state.activePid){ active=[entries[q][2],entries[q][1]]; break; }
+      }
+    }
+    if(state.dispMode==='density'){ pointLayer.setDensity(state.results,state.distMode,active); return; }
     var citySel=els.city.value;
     var filtered=state.results.length!==entries.length;
     var base=[];
@@ -530,7 +577,7 @@
       var added=0;
       for(var i=0;i<entries.length&&added<POINT_LIMIT;i++){
         var eb=entries[i];
-        if(citySel&&eb[8]!==citySel) continue;
+        if(citySel&&eb[9]!==citySel) continue;
         base.push([eb[2],eb[1]]);
         added++;
       }
@@ -539,12 +586,6 @@
     for(var j=0;j<m;j++){
       var e=state.distMode?state.results[j].e:state.results[j];
       hits.push([e[2],e[1],e[7]]);
-    }
-    var active=null;
-    if(state.activePid){
-      for(var q=0;q<entries.length;q++){
-        if(entries[q][0]===state.activePid){ active=[entries[q][2],entries[q][1]]; break; }
-      }
     }
     pointLayer.setData(base,hits,active);
   }
@@ -568,7 +609,7 @@
     if(dist<=55){ openPopup(e); }
     else {
       var d=haversine(ev.latlng.lat,ev.latlng.lng,e[2],e[1]);
-      els.mapHint.textContent='最近街景 '+fmtDist(d)+': '+(e[3]||'（无名道路）')+' · '+cityMeta(e[8]).name+' · 点击该点查看';
+      els.mapHint.textContent='最近街景 '+fmtDist(d)+': '+(e[3]||'（无名道路）')+' · '+cityMeta(e[9]).name+' · 点击该点查看';
     }
   }
   var movePending=false,moveEv=null;
@@ -603,7 +644,7 @@
     }
   }
   function popupHtml(e){
-    var meta=cityMeta(e[8]);
+    var meta=cityMeta(e[9]);
     var jump=buildJumpUrl(e);
     return '<div class="pv-meta">'
       +'<div class="pid">'+esc(e[0])+'</div>'
@@ -613,7 +654,7 @@
       +'<tr><td class="k">采集</td><td>'+esc(e[4]||'—')+'</td></tr>'
       +'<tr><td class="k">朝向</td><td>'+esc(e[5]||'—')+'°</td></tr>'
       +'<tr><td class="k">坐标</td><td>'+e[2].toFixed(6)+', '+e[1].toFixed(6)+' (GCJ-02)</td></tr>'
-      +(e[9]?'<tr><td class="k">来源</td><td>'+esc(e[9])+'</td></tr>':'')
+      +(e[8]?'<tr><td class="k">来源</td><td>'+esc(e[8])+'</td></tr>':'')
       +'<tr><td class="k">素材</td><td>'+(e[7]?'含全景 4096×2048':(e[6]?'仅缩略图':'仅元数据'))+'</td></tr>'
       +'</table>'
       +'<div class="pv-btns">'
