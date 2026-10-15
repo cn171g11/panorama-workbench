@@ -132,7 +132,7 @@
 
   // ---------- canvas point layer ----------
   var PointCanvasLayer = (window.L && L.Layer) ? L.Layer.extend({
-    initialize:function(){ this._base=[]; this._hits=[]; this._active=null; this._density=null; this._distMode=false; },
+    initialize:function(){ this._base=[]; this._hits=[]; this._active=null; this._density=null; this._distMode=false; this._grid=null; this._cellDeg=0; this._gminLng=0; this._gminLat=0; this._glnmax=1; },
     onAdd:function(m){
       this._map=m;
       this._canvas=L.DomUtil.create('canvas','pano-point-layer');
@@ -147,7 +147,23 @@
       L.DomUtil.remove(this._canvas); this._canvas=null;
     },
     setData:function(base,hits,active){ this._base=base||[]; this._hits=hits||[]; this._active=active||null; this._density=null; if(this._canvas) this._full(); },
-    setDensity:function(source,distMode,active){ this._density=source||null; this._distMode=!!distMode; this._active=active||null; this._base=[]; this._hits=[]; if(this._canvas) this._full(); },
+    setDensity:function(source,distMode,active){ this._density=source||null; this._distMode=!!distMode; this._active=active||null; this._base=[]; this._hits=[]; if(this._density) this._buildGrid(); if(this._canvas) this._full(); },
+    _buildGrid:function(){
+      var src=this._density, dm=this._distMode, n=src.length, i, e, lng, lat;
+      if(n<3000){ this._grid=null; return; }
+      var a=1e9,b=-1e9,c=1e9,d=-1e9;
+      for(i=0;i<n;i++){ e=dm?src[i].e:src[i]; lng=e[1]; lat=e[2]; if(lng<a)a=lng; if(lng>b)b=lng; if(lat<c)c=lat; if(lat>d)d=lat; }
+      if(!(b>a)||!(d>c)){ this._grid=null; return; }
+      var cell=Math.sqrt(((b-a)*(d-c))/30000);
+      if(!(cell>0)){ this._grid=null; return; }
+      var grid=new Map(), maxn=1, key, v;
+      for(i=0;i<n;i++){
+        e=dm?src[i].e:src[i]; lng=e[1]; lat=e[2];
+        key=Math.floor((lng-a)/cell)*100000 + Math.floor((lat-c)/cell);
+        v=(grid.get(key)||0)+1; grid.set(key,v); if(v>maxn) maxn=v;
+      }
+      this._grid=grid; this._cellDeg=cell; this._gminLng=a; this._gminLat=c; this._glnmax=Math.log(maxn+1)||1;
+    },
     _sync:function(){ if(this._canvas) L.DomUtil.setPosition(this._canvas,this._map.containerPointToLayerPoint([0,0])); },
     _full:function(){ if(!this._canvas) return; this._resize(); this._sync(); this._redraw(); },
     _resize:function(){
@@ -162,24 +178,29 @@
       ctx.setTransform(dpr,0,0,dpr,0,0); ctx.clearRect(0,0,size.x,size.y);
       var b=m.getBounds().pad(0.2),south=b.getSouth(),north=b.getNorth(),west=b.getWest(),east=b.getEast(),i,p,pt;
       if(this._density){
-        var CELL=6, grid={}, src=this._density, dm=this._distMode, e2, lng, lat, ptc, gx, gy, kk, cell, maxn=1;
-        for(i=0;i<src.length;i++){
-          e2=dm?src[i].e:src[i];
-          lat=e2[2]; lng=e2[1];
-          if(lat<south||lat>north||lng<west||lng>east) continue;
-          ptc=m.latLngToContainerPoint([lat,lng]);
-          gx=(ptc.x/CELL)|0; gy=(ptc.y/CELL)|0;
-          kk=gx*100003+gy;
-          cell=grid[kk];
-          if(!cell){ cell=grid[kk]={x:gx,y:gy,n:0}; }
-          cell.n++; if(cell.n>maxn) maxn=cell.n;
-        }
-        var lnmax=Math.log(maxn+1)||1;
-        for(kk in grid){
-          cell=grid[kk];
-          var tt=Math.log(cell.n+1)/lnmax;
-          ctx.fillStyle='rgba('+Math.round(tt*255)+','+Math.round(229-17*tt)+','+Math.round(255-255*tt)+',0.9)';
-          ctx.fillRect(cell.x*CELL, cell.y*CELL, CELL, CELL);
+        var src=this._density, dm=this._distMode, e2, lng, lat, ptc;
+        var ctr=m.getCenter();
+        var cellPx=Math.abs(m.latLngToContainerPoint([ctr.lat,ctr.lng+this._cellDeg]).x
+                            -m.latLngToContainerPoint([ctr.lat,ctr.lng]).x);
+        if(!this._grid || cellPx>=12){
+          var Rp=2, Tp=Math.PI*2, cp=0, Cp=20000;
+          ctx.fillStyle='#FFD400'; ctx.beginPath();
+          for(i=0;i<src.length;i++){ e2=dm?src[i].e:src[i]; lat=e2[2]; lng=e2[1]; if(lat<south||lat>north||lng<west||lng>east||!e2[7]) continue; ptc=m.latLngToContainerPoint([lat,lng]); ctx.moveTo(ptc.x+Rp,ptc.y); ctx.arc(ptc.x,ptc.y,Rp,0,Tp); if(++cp%Cp===0){ ctx.fill(); ctx.beginPath(); } }
+          ctx.fill();
+          ctx.fillStyle='#00E5FF'; ctx.beginPath();
+          for(i=0;i<src.length;i++){ e2=dm?src[i].e:src[i]; lat=e2[2]; lng=e2[1]; if(lat<south||lat>north||lng<west||lng>east||e2[7]) continue; ptc=m.latLngToContainerPoint([lat,lng]); ctx.moveTo(ptc.x+Rp,ptc.y); ctx.arc(ptc.x,ptc.y,Rp,0,Tp); if(++cp%Cp===0){ ctx.fill(); ctx.beginPath(); } }
+          ctx.fill();
+        } else {
+          var grid=this._grid, a=this._gminLng, c=this._gminLat, lnmax=this._glnmax, cd=this._cellDeg, sz=Math.max(1,Math.round(cellPx)+1);
+          grid.forEach(function(cnt,key){
+            var gx=(key/100000)|0, gy=key-gx*100000;
+            var glng=a+(gx+0.5)*cd, glat=c+(gy+0.5)*cd;
+            if(glat<south||glat>north||glng<west||glng>east) return;
+            var pc=m.latLngToContainerPoint([glat,glng]);
+            var tt=Math.log(cnt+1)/lnmax;
+            ctx.fillStyle='rgba('+Math.round(tt*255)+','+Math.round(229-17*tt)+','+Math.round(255-255*tt)+',0.85)';
+            ctx.fillRect(pc.x-sz/2,pc.y-sz/2,sz,sz);
+          });
         }
         if(this._active){
           pt=m.latLngToContainerPoint([this._active[0],this._active[1]]);
