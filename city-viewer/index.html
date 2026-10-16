@@ -108,7 +108,7 @@
     || /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent);
   var CONFIRM_THRESHOLD = IS_MOBILE ? 10000 : 200000;
   var GRID_RES = 0.004;
-  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null, dispMode:'density', mode:'overview', overviewCells:[], overviewMax:1, overviewTotal:0, cellPref:null };
+  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null, dispMode:'density', mode:'overview', overviewCells:[], overviewMax:1, overviewTotal:0, cellPref:null, dataCity:null };
   var DISP_MODES = [{ id:'density', label:'密度·省内存' }, { id:'points', label:'散点' }];
   var map=null, tileLayer=null, pointLayer=null, currentPopup=null;
 
@@ -443,9 +443,9 @@
     state.entries=[]; state.results=[];
     if(pointLayer) pointLayer.setData([],[],null);
   }
-  function loadKeys(keys,city){
+  function loadKeys(keys,city,cb){
     state.mode='detail';
-    state.cityFilter=city||''; state.countyFilter='';
+    state.cityFilter=city||'';
     if(currentPopup){ currentPopup.remove(); currentPopup=null; }
     state.activePid=null;
     els.loading.style.display='block';
@@ -455,8 +455,7 @@
       assignCounties();
       fillRoadFilter();
       els.loading.style.display='none';
-      rerender();
-      fitMap();
+      if(cb) cb(); else { rerender(); fitMap(); }
     }).catch(function(err){
       els.loading.style.display='none';
       els.stats.textContent=err.message;
@@ -506,18 +505,36 @@
   function selectCity(city){
     city=city||'';
     if(!city){ selectProvince(state.province||'全国'); return; }
-    state.cityFilter=city; state.countyFilter='';
+    state.cityFilter=city; state.countyFilter=''; state.dataCity=null;
+    state.mode='city';
+    if(currentPopup){ currentPopup.remove(); currentPopup=null; }
+    state.activePid=null;
+    state.entries=[]; state.results=[];
+    els.nationGate.style.display='none';
     updateCountySelect(city);
+    buildOverview(keysWithPref(city,state.provinceKeys));
+    rerender();
+    fitMap();
+  }
+  function ensureCityData(city,cb){
+    if(state.dataCity===city && state.entries.length){ cb(); return; }
     var keys=keysWithPref(city,state.provinceKeys);
     var total=countOf(keys);
     if(total>CONFIRM_THRESHOLD && !state.confirmed[city]){
       showGate(cityMeta(city).name, total, function(){
-        state.confirmed[city]=true; els.nationGate.style.display='none'; selectCity(city);
+        state.confirmed[city]=true; els.nationGate.style.display='none';
+        loadKeys(keys,city,function(){ state.dataCity=city; cb(); });
       });
       return;
     }
     els.nationGate.style.display='none';
-    loadKeys(keys, city);
+    loadKeys(keys,city,function(){ state.dataCity=city; cb(); });
+  }
+  function showCityGrid(city){
+    state.mode='city'; state.countyFilter='';
+    els.county.value='';
+    buildOverview(keysWithPref(city,state.provinceKeys));
+    rerender(); fitMap();
   }
   function fitMap(){
     if(!map) return;
@@ -598,6 +615,11 @@
       renderMapPoints();
       return;
     }
+    if(state.mode==='city'){
+      els.stats.textContent=(state.cityFilter?cityMeta(state.cityFilter).name:'市级')+'概览 · 约 '+state.overviewTotal.toLocaleString()+' 点 · 选择/点击区县查看点位';
+      renderMapPoints();
+      return;
+    }
     computeResults();
     els.stats.textContent='共 '+state.results.length.toLocaleString()+' 条'+(state.distMode?' · 按距离排序':'');
     renderMapPoints();
@@ -650,7 +672,7 @@
         if(entries[q][0]===state.activePid){ active=[entries[q][2],entries[q][1]]; break; }
       }
     }
-    if(state.mode==='overview'){ pointLayer.setCells(state.overviewCells, Math.log(state.overviewMax+1)||1, active); return; }
+    if(state.mode==='overview'||state.mode==='city'){ pointLayer.setCells(state.overviewCells, Math.log(state.overviewMax+1)||1, active); return; }
     if(state.dispMode==='density'){ pointLayer.setDensity(state.results,state.distMode,active); return; }
     var citySel=els.city.value;
     var filtered=state.results.length!==entries.length;
@@ -660,6 +682,7 @@
       for(var i=0;i<entries.length&&added<POINT_LIMIT;i++){
         var eb=entries[i];
         if(citySel&&eb[9]!==citySel) continue;
+        if(state.countyFilter&&eb[10]!==state.countyFilter) continue;
         base.push([eb[2],eb[1]]);
         added++;
       }
@@ -681,6 +704,25 @@
     return best;
   }
   function onMapClick(ev){
+    if(state.mode==='city'){
+      var cc=state.overviewCells; if(!cc.length||!state.cityFilter) return;
+      var cb2=-1,bd2=1e18,z2,dx2,dy2,dd2;
+      for(z2=0;z2<cc.length;z2++){ dx2=cc[z2][0]-ev.latlng.lng; dy2=cc[z2][1]-ev.latlng.lat; dd2=dx2*dx2+dy2*dy2; if(dd2<bd2){ bd2=dd2; cb2=z2; } }
+      if(cb2<0) return;
+      var cl2=cc[cb2], list2=districtsOf(state.cityFilter);
+      if(list2){
+        for(var j2=0;j2<list2.length;j2++){
+          var c2=list2[j2], bb2=c2._bb;
+          if(cl2[0]<bb2[0]||cl2[0]>bb2[2]||cl2[1]<bb2[1]||cl2[1]>bb2[3]) continue;
+          if(inPolys(cl2[0],cl2[1],c2.polys)){
+            els.county.value=c2.code; state.countyFilter=c2.code;
+            ensureCityData(state.cityFilter,function(){ state.mode='detail'; rerender(); fitMap(); });
+            return;
+          }
+        }
+      }
+      return;
+    }
     if(state.mode==='overview'){
       var cs=state.overviewCells; if(!cs.length||!state.cellPref) return;
       var bi=-1,bd=1e18,z,dx,dy,d;
@@ -788,7 +830,13 @@
     state.countyFilter=els.county.value;
     if(currentPopup){ currentPopup.remove(); currentPopup=null; }
     state.activePid=null;
-    rerender(); fitMap();
+    var city=state.cityFilter||els.city.value;
+    if((state.mode==='city'||state.mode==='detail')&&city){
+      if(state.countyFilter){
+        els.loading.style.display='block';
+        ensureCityData(city,function(){ state.mode='detail'; rerender(); fitMap(); });
+      } else { showCityGrid(city); }
+    } else { rerender(); fitMap(); }
   });
   window.addEventListener('resize',function(){ if(map) map.invalidateSize(); });
   document.addEventListener('keydown',function(ev){
