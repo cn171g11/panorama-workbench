@@ -521,14 +521,20 @@
     buildOverview(keysWithPref(city,state.provinceKeys));
     if(state.dispMode==='points'){
       els.loading.style.display='block';
-      ensureCityData(city,function(){ state.mode='detail'; rerender(); fitMap(); });
+      ensureCityData(city,function(){
+        els.loading.style.display='none';
+        state.mode='detail'; rerender(); fitMap();
+      });
       return;
     }
     rerender();
     fitMap();
   }
   function ensureCityData(city,cb){
-    if(state.dataCity===city && state.entries.length){ cb(); return; }
+    if(state.dataCity===city && state.entries.length){
+      els.loading.style.display='none';
+      cb(); return;
+    }
     var keys=keysWithPref(city,state.provinceKeys);
     var total=countOf(keys);
     if(total>CONFIRM_THRESHOLD && !state.confirmed[city]){
@@ -713,7 +719,10 @@
     state.autoLoaded=true;
     els.city.value=pref; updateCountySelect(pref);
     els.loading.style.display='block';
-    ensureCityData(pref,function(){ state.mode='detail'; rerender(); });
+    ensureCityData(pref,function(){
+      els.loading.style.display='none';
+      state.mode='detail'; rerender();
+    });
   }
   function setBasemap(id){
     var def=BASEMAPS.filter(function(b){ return b.id===id; })[0]||BASEMAPS[0];
@@ -897,7 +906,10 @@
       state.autoLoaded=false;
       if(state.countyFilter){
         els.loading.style.display='block';
-        ensureCityData(city,function(){ state.mode='detail'; rerender(); fitMap(); });
+        ensureCityData(city,function(){
+          els.loading.style.display='none';
+          state.mode='detail'; rerender(); fitMap();
+        });
       } else { showCityGrid(city); }
     } else { rerender(); fitMap(); }
   });
