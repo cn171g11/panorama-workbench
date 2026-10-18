@@ -1,7 +1,7 @@
 import json,ssl,os,time
 import urllib.request
 from concurrent.futures import ThreadPoolExecutor
-BASE='E:/Desktop/Github Tools/tencent-panorama-scan/mohe'
+BASE=os.environ.get('PANO_SCAN_BASE','E:/Desktop/Github Tools/tencent-panorama-scan/mohe')
 IMG=BASE+'/images'; os.makedirs(IMG,exist_ok=True)
 ctx=ssl.create_default_context(); ctx.check_hostname=False; ctx.verify_mode=ssl.CERT_NONE
 def load_targets():

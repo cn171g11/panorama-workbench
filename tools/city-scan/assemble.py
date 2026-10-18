@@ -1,5 +1,5 @@
 import json,os,collections
-BASE='E:/Desktop/Github Tools/tencent-panorama-scan/mohe'
+BASE=os.environ.get('PANO_SCAN_BASE','E:/Desktop/Github Tools/tencent-panorama-scan/mohe')
 st=json.load(open(BASE+'/raw/_state.json',encoding='utf-8'))
 recs=st['recs']
 def when(svid):

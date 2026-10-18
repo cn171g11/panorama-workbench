@@ -1,8 +1,8 @@
 import json
 import os
 
-ROOT = 'E:/Desktop/Github Tools/tencent-panorama-scan'
-VIEWER_DIR = ROOT + '/_viewer'
+ROOT = os.environ.get('PANO_SCAN_ROOT', 'E:/Desktop/Github Tools/tencent-panorama-scan')
+VIEWER_DIR = os.environ.get('PANO_VIEWER_DIR', ROOT + '/_viewer')
 os.makedirs(VIEWER_DIR, exist_ok=True)
 
 

@@ -10,7 +10,15 @@ Legacy Python pipeline for regional Tencent Street View metadata collection.
 - `assemble.py`: manifest and panoid list generation.
 - `build_viewer_data.py`: conversion to viewer data scripts.
 
-The scripts were written for completed historical scans and contain legacy local paths. Before using them for a new area, replace those paths with command-line or environment-based configuration and verify the request throttle for the current service behavior.
+The scripts were written for completed historical scans. They keep historical defaults for compatibility, but support local path overrides:
+
+```powershell
+$env:PANO_SCAN_BASE = 'D:\pano\mohe'
+$env:PANO_SCAN_ROOT = 'D:\pano'
+$env:PANO_VIEWER_DIR = 'D:\pano\viewer'
+```
+
+Before using them for a new area, verify the request throttle for the current service behavior.
 
 ## `g212-scan.mjs`
 
