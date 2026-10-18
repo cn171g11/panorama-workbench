@@ -1,0 +1,44 @@
+# Local credentials and machine-specific configuration
+*.key
+*.pem
+*.token
+*.secret
+.env
+.env.*
+!.env.example
+
+# Python and Node.js generated files
+__pycache__/
+*.py[cod]
+.pytest_cache/
+node_modules/
+npm-debug.log*
+
+# Scanner runtime state and logs
+**/raw/
+**/work/
+**/logs/
+**/*.log
+**/*.partial.json
+**/*.tmp
+
+# Downloaded media and generated panorama tiles
+**/images/
+**/panoramas/
+**/tiles/
+
+# Local build and packaging output
+build/
+dist/
+release/
+*.zip
+*.apk
+*.aab
+
+# Editor and operating-system files
+.vscode/
+.idea/
+*.code-workspace
+.DS_Store
+Thumbs.db
+desktop.ini

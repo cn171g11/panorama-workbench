@@ -1,21 +1,27 @@
 # 街景工作台 · Panorama Workbench
 
-腾讯 / 百度街景**元数据**的采集、整理与可视化工作台。纯静态站点，直接部署于 GitHub Pages。
+腾讯 / 百度街景元数据的采集、整理与可视化工作台。仓库包含可直接部署的静态查看器、路线工作台、已验证的元数据清单和采集工具。
 
-在线入口：<https://cn171g11.github.io/panorama-workbench/>
+- 在线入口: <https://cn171g11.github.io/panorama-workbench/>
+- 城市查看器: <https://cn171g11.github.io/panorama-workbench/city-viewer/>
+- 结构说明: [`docs/repository-layout.md`](docs/repository-layout.md)
+- 运维说明: [`docs/operations.md`](docs/operations.md)
 
-> 本仓库只收录**元数据**（点位坐标、道路、采集时间、panoid 等），**不含街景图片**。图片版权归腾讯 / 百度所有，仅供研究与个人使用。
+> 本仓库收录街景元数据, 不收录街景图片。图片版权归腾讯 / 百度所有, 内容仅供研究与个人使用。
 
 ---
 
-## 一、全国城市街景查看器 `city-viewer/`
+## 1. 全国城市街景查看器 `city-viewer/`
 
 在线：<https://cn171g11.github.io/panorama-workbench/city-viewer/>
 
-- 覆盖 **33 个省级行政区 / 306 个地级行政区**，约 **85 万**个街景点位
+- 覆盖多个省级行政区和地级行政区, 数据按 adcode 拆分并按需加载
 - 界面：Leaflet 全屏地图，省 → 地级市两级切换（不区分县级行政区）
 - 底图：高德标准 / 高德暗色 / 高德影像 / 腾讯暗色
-- 交互：点位渲染、点击地图查看最近街景、按 panoid / 路名 / 采集时间 / 坐标搜索、缩放到城市
+- 交互: 点位渲染、最近街景、panoid / 路名 / 采集时间 / 坐标搜索、城市和区县筛选、密度与散点模式
+- panoid 定位: 支持 `@16-20:SCENE`、`@1-6:350830` 等按字符位置匹配的查询
+- 小于 20,000 条结果强制散点, 大结果集允许密度优化或散点模式
+- 全国视图底图最低 zoom 为 3, 兼容移动端瓦片服务
 - 图例：**金色**＝含全景图，**青色**＝仅元数据
 - 街景跳转：<https://qq-map.netlify.app/>
 
@@ -27,7 +33,7 @@
 
 ---
 
-## 二、城市 / 区域全量扫描数据
+## 2. 城市 / 区域全量扫描数据
 
 每个目录含 `*-panoramas.json`（全量清单）、`*-panoids.json|.txt`（panoid 列表）、`*-boundary.geojson`（边界）。
 
@@ -46,7 +52,7 @@
 
 ---
 
-## 三、线路工作台（国道 / 省道）
+## 3. 线路工作台（国道 / 省道）
 
 | 入口 | 线路 | 说明 |
 |---|---|---|
@@ -59,7 +65,7 @@ G212 沿线腾讯街景预扫描：`g212-tencent-panoramas.json`（约 4 万条�
 
 ---
 
-## 四、采集方法
+## 4. 采集方法
 
 1. **边界**：DataV GeoAtlas `areas_v3/bound/<adcode>.json`（缺失时回退锐多宝行政区划）
 2. **种子**：边界内网格探测 `sv.map.qq.com/xf`（1–1.5 km 粗网格，密集区补 200 m 细网格）
@@ -72,7 +78,7 @@ G212 沿线腾讯街景预扫描：`g212-tencent-panoramas.json`（约 4 万条�
 
 ---
 
-## 五、工具
+## 5. 工具
 
 - `tools/city-scan/`：城市全量扫描流水线
   - `bfs.py`（短连边 BFS）、`panorama_batch.py`（全景/缩略图批量）、`thumbs.py`、`assemble.py`、`build_viewer_data.py`
@@ -80,7 +86,7 @@ G212 沿线腾讯街景预扫描：`g212-tencent-panoramas.json`（约 4 万条�
 
 ---
 
-## 六、说明与免责
+## 6. 说明与免责
 
 - 数据来自腾讯街景**非官方接口**，无 SLA，可能随时变更、限流或封禁
 - 仅收集**元数据**，未上传任何街景图片；图片版权归腾讯 / 百度，仅供研究用途
