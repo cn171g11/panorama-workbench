@@ -9,7 +9,7 @@ from concurrent.futures import ThreadPoolExecutor
 
 from PIL import Image
 
-BASE_DIR = 'E:/Desktop/Github Tools/tencent-panorama-scan/mohe'
+BASE_DIR = os.environ.get('PANO_SCAN_BASE', 'E:/Desktop/Github Tools/tencent-panorama-scan/mohe')
 OUTPUT_DIR = BASE_DIR + '/panoramas'
 SAMPLE_IDS_PATH = BASE_DIR + '/raw/_pano_sample_ids.json'
 TILE_HOST = 'sv1.map.qq.com'
