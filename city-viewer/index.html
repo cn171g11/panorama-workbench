@@ -67,7 +67,7 @@
   <span id="provinceTabs"></span>
   <select id="citySelect" title="地级市"></select>
   <select id="countySelect" title="县级行政区" style="display:none"></select>
-  <input id="search" placeholder="搜索: panoid / 路名 / 日期(2013-07) / 坐标(53.47,122.36)">
+  <input id="search" placeholder="搜索: panoid / 路名 / 日期(2013-07) / 坐标(53.47,122.36) / 定位 @16-20:SCENE">
   <select id="roadFilter"></select>
   <select id="basemapSelect" title="底图"></select>
   <select id="dispMode" title="显示模式"></select>
@@ -98,13 +98,16 @@
     { id:'tencentDark', label:'腾讯·暗色', url:'https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=4', subdomains:['0','1','2','3'], maxZoom:18, attribution:'© 腾讯地图', dark:true }
   ];
   var POINT_LIMIT = 1000000;
+  var MIN_ZOOM = 3;            // 高德底图 z<3 不返回瓦片（手机端窄视口会白屏）
+  var NATIONAL_ZOOM = 3;       // 全国视图默认瓦片层级
+  var FORCE_SCATTER = 20000;   // 结果少于该值强制散点查看
   var IS_MOBILE = (window.matchMedia && window.matchMedia('(max-width:680px)').matches)
     || /Android|iPhone|iPad|iPod|Mobile|Windows Phone/i.test(navigator.userAgent);
   var CONFIRM_THRESHOLD = IS_MOBILE ? 10000 : 200000;
   var GRID_RES = 0.004;
   var DEEP_IN = 15;
   var DEEP_OUT = 12;
-  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null, dispMode:'density', mode:'overview', overviewCells:[], overviewMax:1, overviewTotal:0, cellPref:null, dataCity:null, autoLoaded:false, prevMode:'', prevCity:'' };
+  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null, dispMode:'density', mode:'overview', overviewCells:[], overviewMax:1, overviewTotal:0, cellPref:null, dataCity:null, autoLoaded:false, prevMode:'', prevCity:'', posQuery:null, posError:null, dispAuto:false };
   var DISP_MODES = [{ id:'density', label:'密度·省内存' }, { id:'points', label:'散点' }];
   var map=null, tileLayer=null, pointLayer=null, currentPopup=null;
 
@@ -494,6 +497,7 @@
     state.bounds=cells.length?{minLng:a,maxLng:b,minLat:c,maxLat:d}:null;
   }
   function selectProvince(p){
+    restoreDispMode();
     state.province=p; buildProvinceTabs();
     var keys=(p==='全国')?allKeys():(provinceMap()[p]||[]);
     state.provinceKeys=keys;
@@ -511,6 +515,7 @@
   function selectCity(city){
     city=city||'';
     if(!city){ selectProvince(state.province||'全国'); return; }
+    restoreDispMode();
     state.cityFilter=city; state.countyFilter=''; state.dataCity=null;
     state.mode='city'; state.autoLoaded=false;
     if(currentPopup){ currentPopup.remove(); currentPopup=null; }
@@ -546,6 +551,22 @@
     }
     els.nationGate.style.display='none';
     loadKeys(keys,city,function(){ state.dataCity=city; cb(); });
+  }
+  // panoid 定位检索需要明细数据: 自动加载当前作用域(地级市 / 省 / 全国)
+  function ensureScopeData(cb){
+    if(state.mode==='detail'){ cb(); return; }
+    var city=els.city.value||state.cityFilter;
+    if(city){ ensureCityData(city,function(){ state.mode='detail'; cb(); }); return; }
+    var keys=(state.provinceKeys&&state.provinceKeys.length)?state.provinceKeys:allKeys();
+    var total=countOf(keys), tag='scope:'+(state.province||'全国');
+    var run=function(){ loadKeys(keys,'',function(){ state.dataCity=null; cb(); }); };
+    if(total>CONFIRM_THRESHOLD && !state.confirmed[tag]){
+      showGate(state.province||'全国', total, function(){
+        state.confirmed[tag]=true; els.nationGate.style.display='none'; run();
+      });
+      return;
+    }
+    run();
   }
   function showCityGrid(city){
     state.mode='city'; state.countyFilter=''; state.autoLoaded=false;
@@ -586,13 +607,16 @@
       else selectProvince(state.province||'全国');
     }
   }
+  function clampZoom(){
+    if(map&&map.getZoom()<MIN_ZOOM) map.setZoom(MIN_ZOOM);
+  }
   function fitMap(){
     if(!map) return;
     var b=null;
     var citySel=els.city.value;
     if(state.countyFilter && citySel){
       var cb=countyBBox(citySel,state.countyFilter);
-      if(cb){ map.fitBounds([[cb.minLat,cb.minLng],[cb.maxLat,cb.maxLng]],{padding:[30,30]}); return; }
+      if(cb){ map.fitBounds([[cb.minLat,cb.minLng],[cb.maxLat,cb.maxLng]],{padding:[30,30]}); clampZoom(); return; }
     }
     if(citySel){
       var a=1e9,c=-1e9,d=1e9,f=-1e9,found=false;
@@ -607,7 +631,13 @@
     }
     if(!b) b=state.bounds;
     if(!b||b.minLng>b.maxLng) return;
+    // 全国视图: 底图 z<3 不返回瓦片（手机端窄视口会白屏），固定到 zoom=3
+    if(state.province==='全国' && !citySel && !state.countyFilter){
+      map.setView([(b.minLat+b.maxLat)/2,(b.minLng+b.maxLng)/2],NATIONAL_ZOOM);
+      return;
+    }
     map.fitBounds([[b.minLat,b.minLng],[b.maxLat,b.maxLng]],{padding:[30,30]});
+    clampZoom();
   }
   function fillRoadFilter(){
     var set={};
@@ -623,6 +653,35 @@
   }
 
   // ---------- search ----------
+  // panoid 定位检索
+  //   语法: @起始位-结束位:值     (从 1 起, 含两端; 单个位置写 @16:1)
+  //   多条件用 & / 逗号 / 空格连接: @1-6:350830&@16-20:SCENE
+  //   例: 350830W01406200SCENE001 第16-20位为 SCENE, 第1-6位为 350830
+  function parsePosQuery(q){
+    if(!q||q.charAt(0)!=='@') return null;
+    var body=q.slice(1).trim();
+    if(!body) return {error:'@'};
+    var parts=body.split(/\s*[&,，、+＋]\s*|\s+/).filter(Boolean);
+    if(!parts.length) return {error:'@'};
+    var conds=[];
+    for(var i=0;i<parts.length;i++){
+      var m=parts[i].match(/^@?(\d{1,3})\s*(?:[-~—]\s*(\d{1,3}))?\s*[:：=]\s*(.+)$/);
+      if(!m) return {error:parts[i]};
+      var a=parseInt(m[1],10), b=m[2]?parseInt(m[2],10):a, v=m[3].trim();
+      if(!(a>=1)||b<a||!v) return {error:parts[i]};
+      conds.push([a,b,v.toUpperCase()]);
+    }
+    return {conds:conds};
+  }
+  function posMatch(pid,conds){
+    var s=String(pid).toUpperCase();
+    for(var i=0;i<conds.length;i++){
+      var c=conds[i];
+      if(s.length<c[1]) return false;
+      if(s.substring(c[0]-1,c[1])!==c[2]) return false;
+    }
+    return true;
+  }
   function parseCoord(q){
     var m=q.match(/^\s*(-?\d{1,3}(?:\.\d+)?)\s*[,，;；\s]\s*(-?\d{1,3}(?:\.\d+)?)\s*$/);
     if(!m) return null;
@@ -636,15 +695,20 @@
   function computeResults(){
     var q=els.search.value.trim();
     var roadSel=els.road.value, citySel=els.city.value;
-    var coord=q?parseCoord(q):null;
+    var posQ=q?parsePosQuery(q):null;
     state.distMode=false; state.center=null;
-    var tokens=(q&&!coord)?q.toLowerCase().split(/\s+/).filter(Boolean):null;
+    state.posQuery=null; state.posError=(posQ&&posQ.error)?posQ.error:null;
+    if(state.posError){ state.results=[]; return; }
+    state.posQuery=posQ;
+    var coord=(q&&!posQ)?parseCoord(q):null;
+    var tokens=(q&&!coord&&!posQ)?q.toLowerCase().split(/\s+/).filter(Boolean):null;
     var out=[];
     for(var i=0;i<state.entries.length;i++){
       var e=state.entries[i];
       if(citySel&&e[9]!==citySel) continue;
       if(state.countyFilter&&e[10]!==state.countyFilter) continue;
       if(roadSel&&((e[3]||'')!==roadSel)) continue;
+      if(posQ&&!posMatch(e[0],posQ.conds)) continue;
       if(tokens){
         var hay=(e[0]+' '+(e[3]||'')+' '+(e[4]||'')).toLowerCase(),ok=true;
         for(var t=0;t<tokens.length;t++){ if(hay.indexOf(tokens[t])<0){ ok=false; break; } }
@@ -671,14 +735,48 @@
       return;
     }
     computeResults();
-    els.stats.textContent='共 '+state.results.length.toLocaleString()+' 条'+(state.distMode?' · 按距离排序':'');
+    enforceDispMode(state.results.length);
+    var note='';
+    if(state.posError) note=' · panoid 定位写法有误';
+    else if(state.posQuery) note=' · panoid 定位';
+    if(state.distMode) note+=' · 按距离排序';
+    els.stats.textContent='共 '+state.results.length.toLocaleString()+' 条'+note;
+    if(state.posError){
+      els.mapHint.textContent='panoid 定位写法: @起始位-结束位:值  例 @16-20:SCENE 或 @1-6:350830';
+    } else if(state.posQuery){
+      els.mapHint.textContent='panoid 定位: '+state.posQuery.conds.map(function(c){
+        return '第'+c[0]+(c[1]>c[0]?'-'+c[1]:'')+'位='+c[2];
+      }).join(' 且 ');
+    }
     renderMapPoints();
+  }
+
+  // 离开明细视图时还原显示模式选项（避免上一次小结果集的"强制散点"残留）
+  function restoreDispMode(){
+    var sel=els.dispMode, opt=sel?sel.options[0]:null;
+    if(opt){ opt.disabled=false; opt.title=''; }
+    if(state.dispAuto){ state.dispAuto=false; state.dispMode='density'; }
+    if(sel && sel.value!==state.dispMode) sel.value=state.dispMode;
+  }
+
+  // 结果少于 FORCE_SCATTER 点强制散点查看；达到阈值后允许优化(密度)查看，散点仍可用
+  function enforceDispMode(n){
+    var sel=els.dispMode, opt=sel?sel.options[0]:null;
+    if(!opt) return;
+    var force=(n<FORCE_SCATTER);
+    opt.disabled=force;
+    opt.title=force?('结果少于 '+FORCE_SCATTER.toLocaleString()+' 点，已强制散点查看'):'';
+    if(force){
+      if(state.dispMode!=='points'){ state.dispMode='points'; state.dispAuto=true; sel.value='points'; }
+    } else if(state.dispAuto && state.dispMode==='points'){
+      state.dispMode='density'; state.dispAuto=false; sel.value='density';
+    }
   }
 
   // ---------- map ----------
   function initMap(){
     if(!window.L){ els.mapHint.textContent='地图组件加载失败(Leaflet CDN 不可达)'; return; }
-    map=L.map('map',{center:[36,110],zoom:4,zoomControl:true,preferCanvas:true,attributionControl:true});
+    map=L.map('map',{center:[36,110],zoom:NATIONAL_ZOOM,minZoom:MIN_ZOOM,zoomControl:true,preferCanvas:true,attributionControl:true});
     pointLayer=new PointCanvasLayer();
     pointLayer.addTo(map);
     populateBasemaps();
@@ -706,7 +804,7 @@
       var o=document.createElement('option'); o.value=d.id; o.textContent=d.label; els.dispMode.appendChild(o);
     });
     els.dispMode.value=state.dispMode;
-    els.dispMode.onchange=function(){ state.dispMode=els.dispMode.value; applyDispMode(); };
+    els.dispMode.onchange=function(){ state.dispMode=els.dispMode.value; state.dispAuto=false; applyDispMode(); };
   }
   function applyDispMode(){
     if(!map){ return; }
@@ -728,7 +826,7 @@
     var def=BASEMAPS.filter(function(b){ return b.id===id; })[0]||BASEMAPS[0];
     if(!map) return;
     if(tileLayer) tileLayer.remove();
-    tileLayer=L.tileLayer(def.url,{subdomains:def.subdomains,maxZoom:def.maxZoom,attribution:def.attribution});
+    tileLayer=L.tileLayer(def.url,{subdomains:def.subdomains,minZoom:MIN_ZOOM,minNativeZoom:MIN_ZOOM,maxZoom:def.maxZoom,attribution:def.attribution});
     tileLayer.addTo(map); tileLayer.bringToBack();
     els.basemap.value=def.id;
     var el=document.getElementById('map');
@@ -890,6 +988,12 @@
   var searchTimer=null;
   els.search.addEventListener('input',function(){
     clearTimeout(searchTimer);
+    var q=els.search.value.trim();
+    var posQ=q?parsePosQuery(q):null;
+    if(posQ&&!posQ.error&&state.mode!=='detail'){
+      searchTimer=setTimeout(function(){ ensureScopeData(rerender); },300);
+      return;
+    }
     searchTimer=setTimeout(rerender,300);
   });
   els.road.addEventListener('change',rerender);
