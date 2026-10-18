@@ -6,6 +6,7 @@
 *.css text eol=lf
 *.js text eol=lf
 *.mjs text eol=lf
-*.json text eol=lf
-*.geojson text eol=lf
+# Existing datasets keep their historical blob bytes and line endings.
+*.json -text
+*.geojson -text
 *.py text eol=lf
