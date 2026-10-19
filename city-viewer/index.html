@@ -67,7 +67,7 @@
   <span id="provinceTabs"></span>
   <select id="citySelect" title="地级市"></select>
   <select id="countySelect" title="县级行政区" style="display:none"></select>
-  <input id="search" placeholder="搜索: panoid / 路名 / 日期(2013-07) / 坐标(53.47,122.36) / 定位 @16-20:SCENE">
+  <input id="search" placeholder="搜索: panoid / 路名(如 G219) / 日期(2013-07) / 坐标 / 定位 @16-20:SCENE">
   <select id="roadFilter"></select>
   <select id="basemapSelect" title="底图"></select>
   <select id="dispMode" title="显示模式"></select>
@@ -86,6 +86,7 @@
 <script src="data_meta.js"></script>
 <script src="data_districts.js"></script>
 <script src="grid_all.js"></script>
+<script src="hidden_pano.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function(){
@@ -107,7 +108,14 @@
   var GRID_RES = 0.004;
   var DEEP_IN = 15;
   var DEEP_OUT = 12;
-  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null, dispMode:'density', mode:'overview', overviewCells:[], overviewMax:1, overviewTotal:0, cellPref:null, dataCity:null, autoLoaded:false, prevMode:'', prevCity:'', posQuery:null, posError:null, dispAuto:false };
+  var SEARCH_INDEX_FILE = 'pano_search_index.js';
+  var SEARCH_DEBOUNCE_MS = 350;
+  var GLOBAL_SEARCH_LIMIT = 100000;
+  var SEARCH_PREFIX_LENGTH = 4;
+  var SEARCH_PREFIX_MAX_LENGTH = 6;
+  var SEARCH_SEGMENT_START = 15;
+  var SEARCH_SEGMENT_END = 20;
+  var state = { province:'', cityFilter:'', countyFilter:'', entries:[], results:[], distMode:false, center:null, activePid:null, bounds:null, provinceKeys:[], confirmed:{}, gateRun:null, dispMode:'density', mode:'overview', overviewCells:[], overviewMax:1, overviewTotal:0, cellPref:null, dataCity:null, autoLoaded:false, prevMode:'', prevCity:'', posQuery:null, posError:null, dispAuto:false, searchActive:false, searchPrev:null, searchResults:null, searchToken:0, searchIndexPromise:null };
   var DISP_MODES = [{ id:'density', label:'密度·省内存' }, { id:'points', label:'散点' }];
   var map=null, tileLayer=null, pointLayer=null, currentPopup=null;
 
@@ -496,7 +504,14 @@
     state.overviewCells=cells; state.cellPref=cp; state.overviewMax=maxn; state.overviewTotal=tot;
     state.bounds=cells.length?{minLng:a,maxLng:b,minLat:c,maxLat:d}:null;
   }
+  function leaveSearchMode(){
+    if(!state.searchActive) return;
+    state.searchActive=false; state.searchPrev=null; state.searchResults=null;
+    state.searchToken+=1;
+    els.search.value=''; els.loading.style.display='none';
+  }
   function selectProvince(p){
+    leaveSearchMode();
     restoreDispMode();
     state.province=p; buildProvinceTabs();
     var keys=(p==='全国')?allKeys():(provinceMap()[p]||[]);
@@ -515,6 +530,7 @@
   function selectCity(city){
     city=city||'';
     if(!city){ selectProvince(state.province||'全国'); return; }
+    leaveSearchMode();
     restoreDispMode();
     state.cityFilter=city; state.countyFilter=''; state.dataCity=null;
     state.mode='city'; state.autoLoaded=false;
@@ -585,7 +601,7 @@
     return pf||null;
   }
   function applyZoomLod(){
-    if(!map) return;
+    if(!map||state.searchActive) return;
     var z=map.getZoom();
     if(state.mode==='overview'||state.mode==='city'){
       if(z<DEEP_IN) return;
@@ -652,6 +668,263 @@
     });
   }
 
+  // ---------- global search ----------
+  // 搜索索引按需加载, 只用于确定候选城市文件; 命中后按需读取并扫描, 不构建全国散点图层.
+  function normalizeSearchText(value){
+    return String(value==null?'':value)
+      .replace(/[\uFF01-\uFF5E]/g,function(character){ return String.fromCharCode(character.charCodeAt(0)-0xFEE0); })
+      .replace(/\u3000/g,' ')
+      .toLowerCase()
+      .replace(/\s+/g,'');
+  }
+  function loadSearchIndex(){
+    if(window.PANO_SEARCH_INDEX) return Promise.resolve(window.PANO_SEARCH_INDEX);
+    if(state.searchIndexPromise) return state.searchIndexPromise;
+    state.searchIndexPromise=new Promise(function(resolve,reject){
+      var script=document.createElement('script');
+      script.src=SEARCH_INDEX_FILE;
+      script.onload=function(){ resolve(window.PANO_SEARCH_INDEX||{}); };
+      script.onerror=function(){ reject(new Error('搜索索引 '+SEARCH_INDEX_FILE+' 加载失败')); };
+      document.head.appendChild(script);
+    });
+    return state.searchIndexPromise;
+  }
+  function uniqueKeys(keys){
+    var seen={},result=[];
+    (keys||[]).forEach(function(key){ if(!seen[key]){ seen[key]=1; result.push(key); } });
+    return result;
+  }
+  function intersectKeys(firstKeys,secondKeys){
+    var lookup={};
+    secondKeys.forEach(function(key){ lookup[key]=1; });
+    return firstKeys.filter(function(key){ return lookup[key]; });
+  }
+  function prefixCandidates(value){
+    var index=window.PANO_SEARCH_INDEX&&window.PANO_SEARCH_INDEX.prefix;
+    if(!index) return null;
+    var upper=String(value||'').toUpperCase();
+    for(var length=Math.min(upper.length,SEARCH_PREFIX_MAX_LENGTH);length>=SEARCH_PREFIX_LENGTH;length-=1){
+      var keys=index[upper.slice(0,length)];
+      if(keys) return keys;
+    }
+    return null;
+  }
+  function segmentCandidates(condition){
+    var index=window.PANO_SEARCH_INDEX&&window.PANO_SEARCH_INDEX.seg1620;
+    if(!index||condition[0]!==16||condition[1]!==20) return null;
+    return index[condition[2]]||null;
+  }
+  function posCandidates(posQuery){
+    var candidates=null;
+    posQuery.conds.forEach(function(condition){
+      var keys=segmentCandidates(condition);
+      if(!keys&&condition[0]===1) keys=prefixCandidates(condition[2]);
+      if(!keys) return;
+      candidates=candidates?intersectKeys(candidates,keys):keys.slice();
+    });
+    return candidates;
+  }
+  function roadCandidates(tokens){
+    var index=window.PANO_SEARCH_INDEX&&window.PANO_SEARCH_INDEX.roads;
+    if(!index||!tokens.length) return null;
+    var normalizedTokens=tokens.map(normalizeSearchText).filter(Boolean);
+    var candidates=null;
+    Object.keys(index).forEach(function(roadName){
+      for(var i=0;i<normalizedTokens.length;i+=1){ if(roadName.indexOf(normalizedTokens[i])<0) return; }
+      var keys=index[roadName];
+      candidates=candidates?uniqueKeys(candidates.concat(keys)):keys.slice();
+    });
+    return candidates;
+  }
+  function dateCandidates(query){
+    var index=window.PANO_SEARCH_INDEX&&window.PANO_SEARCH_INDEX.dates;
+    if(!index||!/^\d{4}(?:-\d{2}){0,2}$/.test(query)) return null;
+    var candidates=null,found=false;
+    Object.keys(index).forEach(function(date){
+      if(date.indexOf(query)<0) return;
+      found=true;
+      var keys=index[date];
+      candidates=candidates?uniqueKeys(candidates.concat(keys)):keys.slice();
+    });
+    return found?candidates:[];
+  }
+  function isCjkOnly(tokens){
+    if(!tokens.length) return false;
+    for(var i=0;i<tokens.length;i+=1){ if(!/[\u3400-\u9fff]/.test(tokens[i])) return false; }
+    return true;
+  }
+  function isPanoidToken(token){
+    return /^[0-9a-z]{6,}$/i.test(token)&&/\d/.test(token);
+  }
+  function analyzeSearchQuery(query){
+    var posQuery=query.charAt(0)==='@'?parsePosQuery(query):null;
+    if(posQuery&&posQuery.error) return {error:posQuery.error,posQuery:posQuery};
+    if(posQuery){
+      return {kind:'pos',posQuery:posQuery,candidates:posCandidates(posQuery),
+        matches:function(entry){ return posMatch(entry[0],posQuery.conds); }};
+    }
+    var coord=parseCoord(query);
+    if(coord) return {kind:'coord',coord:coord,candidates:null,matches:function(){ return true; }};
+    var tokens=query.toLowerCase().split(/\s+/).filter(Boolean);
+    if(tokens.length===1&&isPanoidToken(tokens[0])){
+      var needle=tokens[0].toLowerCase();
+      return {kind:'pano',tokens:tokens,candidates:prefixCandidates(tokens[0]),
+        matches:function(entry){ return String(entry[0]).toLowerCase().indexOf(needle)>=0; }};
+    }
+    var normalizedTokens=tokens.map(normalizeSearchText).filter(Boolean);
+    var dateKeys=dateCandidates(query);
+    var candidates=dateKeys!==null?dateKeys:roadCandidates(tokens);
+    if(candidates===null&&isCjkOnly(normalizedTokens)) candidates=[];
+    return {kind:'text',tokens:tokens,candidates:candidates,
+      matches:function(entry){
+        var hay=normalizeSearchText(entry[0]+' '+(entry[3]||'')+' '+(entry[4]||''));
+        for(var i=0;i<normalizedTokens.length;i+=1){ if(hay.indexOf(normalizedTokens[i])<0) return false; }
+        return true;
+      }};
+  }
+  function releaseSearchKey(key){
+    if(window.PANO_CITY&&window.PANO_CITY[key]){
+      try{ delete window.PANO_CITY[key]; }catch(error){ console.warn('search release failed',key,error); }
+    }
+  }
+  function sortMatchesByDistance(matches,coord){
+    matches.sort(function(first,second){
+      return haversine(coord.lat,coord.lng,first[2],first[1])-haversine(coord.lat,coord.lng,second[2],second[1]);
+    });
+  }
+  function fitSearchResults(matches){
+    if(!map||!matches.length) return;
+    if(matches.length===1){ map.setView([matches[0][2],matches[0][1]],16); return; }
+    var south=90,north=-90,west=180,east=-180;
+    matches.forEach(function(entry){
+      if(entry[2]<south) south=entry[2];
+      if(entry[2]>north) north=entry[2];
+      if(entry[1]<west) west=entry[1];
+      if(entry[1]>east) east=entry[1];
+    });
+    if(!(east>=west)||!(north>=south)) return;
+    map.fitBounds([[south,west],[north,east]],{padding:[30,30]});
+    clampZoom();
+  }
+  function setSearchResults(matches,analysis,isTruncated){
+    if(!state.searchActive){
+      state.searchPrev={mode:state.mode,province:state.province,cityFilter:state.cityFilter,
+        countyFilter:state.countyFilter,dataCity:state.dataCity,entries:state.entries,
+        road:els.road.value||'',dispMode:state.dispMode};
+    }
+    state.searchActive=true;
+    state.searchResults=matches;
+    state.mode='detail';
+    state.cityFilter=''; state.countyFilter=''; state.dataCity=null;
+    state.autoLoaded=false; state.activePid=null;
+    state.entries=matches; state.results=matches;
+    state.distMode=false; state.posQuery=analysis.posQuery||null; state.posError=null;
+    els.city.value='';
+    updateCountySelect('');
+    els.road.value='';
+    fillRoadFilter();
+    if(currentPopup){ currentPopup.remove(); currentPopup=null; }
+    var note=analysis.kind==='pos'?' · panoid 定位':(analysis.kind==='pano'?' · panoid 搜索':'');
+    els.stats.textContent='搜索命中 '+matches.length.toLocaleString()+' 条'+(isTruncated?' (已达到显示上限)':'')+note;
+    enforceDispMode(matches.length);
+    renderMapPoints();
+    fitSearchResults(matches);
+  }
+  async function scanSearchCandidates(candidates,analysis,token){
+    var matches=[],isTruncated=false,loadedKeys=[];
+    try{
+      for(var i=0;i<candidates.length;i+=1){
+        if(token!==state.searchToken) return;
+        var key=candidates[i];
+        var wasLoaded=Boolean(window.PANO_CITY&&window.PANO_CITY[key]);
+        if(!wasLoaded){
+          try{ await loadCityScript(key); loadedKeys.push(key); }
+          catch(error){ console.warn('search load failed',key,error); continue; }
+        }
+        var entries=(window.PANO_CITY&&window.PANO_CITY[key])||[];
+        var pref=prefOf(key);
+        for(var j=0;j<entries.length;j+=1){
+          var entry=entries[j];
+          entry[9]=pref;
+          if(!analysis.matches(entry)) continue;
+          matches.push(entry);
+          if(matches.length>=GLOBAL_SEARCH_LIMIT){ isTruncated=true; break; }
+        }
+        if(!wasLoaded) releaseSearchKey(key);
+        els.loading.textContent='搜索中 '+(i+1)+'/'+candidates.length+' · 命中 '+matches.length;
+        if(isTruncated) break;
+      }
+    }finally{
+      loadedKeys.forEach(releaseSearchKey);
+      if(token===state.searchToken) els.loading.style.display='none';
+    }
+    if(token!==state.searchToken) return;
+    if(analysis.kind==='coord') sortMatchesByDistance(matches,analysis.coord);
+    setSearchResults(matches,analysis,isTruncated);
+  }
+  function runGlobalSearch(query){
+    var analysis=analyzeSearchQuery(query);
+    if(analysis.error){
+      state.searchToken+=1;
+      els.loading.style.display='none';
+      els.stats.textContent='panoid 定位写法有误';
+      els.mapHint.textContent='panoid 定位写法: @起始位-结束位:值  例 @16-20:SCENE 或 @1-6:350830';
+      return;
+    }
+    if(analysis.kind==='coord'&&state.mode!=='detail'){
+      els.mapHint.textContent='坐标搜索请先选择城市或省份';
+      return;
+    }
+    var token=++state.searchToken;
+    loadSearchIndex().then(function(){
+      if(token!==state.searchToken) return;
+      analysis=analyzeSearchQuery(query);
+      var candidates=analysis.candidates;
+      if(candidates&&!candidates.length){ setSearchResults([],analysis,false); return; }
+      if(!candidates) candidates=allKeys();
+      candidates=uniqueKeys(candidates).filter(function(key){
+        return window.PANO_META&&window.PANO_META[key]&&!window.PANO_META[key].virtual;
+      });
+      els.loading.style.display='block';
+      els.loading.textContent='搜索中 0/'+candidates.length;
+      els.stats.textContent='搜索中… 候选 '+candidates.length+' 个文件';
+      scanSearchCandidates(candidates,analysis,token).catch(function(error){
+        if(token!==state.searchToken) return;
+        els.loading.style.display='none';
+        els.stats.textContent='搜索失败: '+error.message;
+      });
+    }).catch(function(error){
+      state.searchIndexPromise=null;
+      if(token!==state.searchToken) return;
+      els.loading.style.display='none';
+      els.stats.textContent='搜索失败: '+error.message;
+    });
+  }
+  function restoreSearchView(){
+    var previous=state.searchPrev;
+    state.searchActive=false; state.searchPrev=null; state.searchResults=null;
+    state.searchToken+=1;
+    els.search.value='';
+    els.loading.style.display='none';
+    if(!previous){ selectProvince(state.province||'全国'); return; }
+    if(previous.mode==='detail'&&previous.entries&&previous.entries.length){
+      state.mode='detail'; state.province=previous.province;
+      state.cityFilter=previous.cityFilter; state.countyFilter=previous.countyFilter;
+      state.dataCity=previous.dataCity; state.entries=previous.entries;
+      state.results=previous.entries; state.distMode=false; state.dispAuto=false;
+      els.city.value=previous.cityFilter||'';
+      updateCountySelect(previous.cityFilter||'');
+      fillRoadFilter();
+      els.road.value=previous.road||'';
+      state.dispMode=previous.dispMode||'points';
+      els.dispMode.value=state.dispMode;
+      rerender(); fitMap();
+      return;
+    }
+    if(previous.cityFilter){ els.city.value=previous.cityFilter; selectCity(previous.cityFilter); return; }
+    selectProvince(previous.province||'全国');
+  }
+
   // ---------- search ----------
   // panoid 定位检索
   //   语法: @起始位-结束位:值     (从 1 起, 含两端; 单个位置写 @16:1)
@@ -693,6 +966,13 @@
     return {lat:a,lng:b};
   }
   function computeResults(){
+    if(state.searchActive){
+      var searchRoad=els.road.value;
+      state.results=searchRoad
+        ? (state.searchResults||[]).filter(function(entry){ return (entry[3]||'')===searchRoad; })
+        : (state.searchResults||[]);
+      return;
+    }
     var q=els.search.value.trim();
     var roadSel=els.road.value, citySel=els.city.value;
     var posQ=q?parsePosQuery(q):null;
@@ -701,7 +981,7 @@
     if(state.posError){ state.results=[]; return; }
     state.posQuery=posQ;
     var coord=(q&&!posQ)?parseCoord(q):null;
-    var tokens=(q&&!coord&&!posQ)?q.toLowerCase().split(/\s+/).filter(Boolean):null;
+    var tokens=(q&&!coord&&!posQ)?q.toLowerCase().split(/\s+/).filter(Boolean).map(normalizeSearchText).filter(Boolean):null;
     var out=[];
     for(var i=0;i<state.entries.length;i++){
       var e=state.entries[i];
@@ -710,7 +990,7 @@
       if(roadSel&&((e[3]||'')!==roadSel)) continue;
       if(posQ&&!posMatch(e[0],posQ.conds)) continue;
       if(tokens){
-        var hay=(e[0]+' '+(e[3]||'')+' '+(e[4]||'')).toLowerCase(),ok=true;
+        var hay=normalizeSearchText(e[0]+' '+(e[3]||'')+' '+(e[4]||'')),ok=true;
         for(var t=0;t<tokens.length;t++){ if(hay.indexOf(tokens[t])<0){ ok=false; break; } }
         if(!ok) continue;
       }
@@ -846,7 +1126,7 @@
     var citySel=els.city.value;
     var filtered=state.results.length!==entries.length;
     var base=[];
-    if(filtered){
+    if(filtered&&!state.searchActive){
       var added=0;
       for(var i=0;i<entries.length&&added<POINT_LIMIT;i++){
         var eb=entries[i];
@@ -988,13 +1268,22 @@
   var searchTimer=null;
   els.search.addEventListener('input',function(){
     clearTimeout(searchTimer);
-    var q=els.search.value.trim();
-    var posQ=q?parsePosQuery(q):null;
-    if(posQ&&!posQ.error&&state.mode!=='detail'){
-      searchTimer=setTimeout(function(){ ensureScopeData(rerender); },300);
+    var query=els.search.value.trim();
+    if(!query){
+      if(state.searchActive) restoreSearchView(); else rerender();
       return;
     }
-    searchTimer=setTimeout(rerender,300);
+    var posQ=query.charAt(0)==='@'?parsePosQuery(query):null;
+    var wantsGlobal=Boolean(posQ&&!posQ.error)||(isPanoidToken(query)&&query.replace(/\s+/g,'').length>=6);
+    if(state.mode==='detail'&&!state.searchActive&&!wantsGlobal){
+      searchTimer=setTimeout(rerender,SEARCH_DEBOUNCE_MS);
+      return;
+    }
+    if(parseCoord(query)&&state.mode!=='detail'){
+      els.mapHint.textContent='坐标搜索请先选择城市或省份';
+      return;
+    }
+    searchTimer=setTimeout(function(){ runGlobalSearch(query); },SEARCH_DEBOUNCE_MS);
   });
   els.road.addEventListener('change',rerender);
   els.nationLoadBtn.addEventListener('click',function(){
