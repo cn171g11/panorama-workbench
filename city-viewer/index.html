@@ -1095,12 +1095,12 @@
     var sel=els.dispMode, opt=sel?sel.options[0]:null;
     if(!opt) return;
     var force=(n<FORCE_SCATTER);
-    opt.disabled=force;
-    opt.title=force?('结果少于 '+FORCE_SCATTER.toLocaleString()+' 点，已强制散点查看'):'';
-    if(force){
-      if(state.dispMode!=='points'){ state.dispMode='points'; state.dispAuto=true; sel.value='points'; }
-    } else if(state.dispAuto && state.dispMode==='points'){
-      state.dispMode='density'; state.dispAuto=false; sel.value='density';
+    opt.title='';
+    if(force && state.dispAuto){
+      if(state.dispMode!=='points'){ state.dispMode='points'; sel.value='points'; }
+      opt.title='结果少于 '+FORCE_SCATTER.toLocaleString()+' 点，已强制散点查看';
+    } else if(state.dispAuto && state.dispMode==='points' && n>=FORCE_SCATTER){
+      state.dispMode='density'; sel.value='density';
     }
   }
 
@@ -1135,17 +1135,19 @@
       var o=document.createElement('option'); o.value=d.id; o.textContent=d.label; els.dispMode.appendChild(o);
     });
     els.dispMode.value=state.dispMode;
-    els.dispMode.onchange=function(){ state.dispMode=els.dispMode.value; state.dispAuto=false; applyDispMode(); };
+    els.dispMode.onchange=function(){ state.dispMode=els.dispMode.value; applyDispMode(); };
   }
   function applyDispMode(){
     if(!map){ return; }
     if(state.dispMode!=='points'||(state.mode!=='overview'&&state.mode!=='city')){
+      state.dispAuto=false;
       renderMapPoints(); return;
     }
     var pref=(state.mode==='city')?(state.cityFilter||null):prefAtCenter();
-    if(!pref){ renderMapPoints(); return; }
+    if(!pref){ state.dispAuto=false; renderMapPoints(); return; }
     state.prevMode=state.mode; state.prevCity=state.cityFilter;
     state.autoLoaded=true;
+    state.dispAuto=true;
     els.city.value=pref; updateCountySelect(pref);
     els.loading.style.display='block';
     ensureCityData(pref,function(){
