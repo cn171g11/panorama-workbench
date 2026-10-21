@@ -63,7 +63,7 @@
 </head>
 <body>
 <header>
-  <h1>街景元数据查看器 <span style="font-size:12px;color:#888">v1.0.9 · 2026-10-22 修复东营、滨州隐藏街景显示</span></h1>
+  <h1>街景元数据查看器 <span style="font-size:12px;color:#888">v1.0.10 · 2026-10-22 修复手动散点切换与缩放回退</span></h1>
   <span id="provinceTabs"></span>
   <select id="citySelect" title="地级市"></select>
   <select id="countySelect" title="县级行政区" style="display:none"></select>
@@ -1138,6 +1138,9 @@
     els.dispMode.onchange=function(){ state.dispMode=els.dispMode.value; applyDispMode(); };
   }
   function applyDispMode(){
+    // Manual mode changes must not participate in zoom-triggered auto fallback.
+    state.autoLoaded=false;
+    state.dispAuto=false;
     if(!map){ return; }
     if(state.dispMode!=='points'||(state.mode!=='overview'&&state.mode!=='city')){
       state.dispAuto=false;
@@ -1146,8 +1149,6 @@
     var pref=(state.mode==='city')?(state.cityFilter||null):prefAtCenter();
     if(!pref){ state.dispAuto=false; renderMapPoints(); return; }
     state.prevMode=state.mode; state.prevCity=state.cityFilter;
-    state.autoLoaded=true;
-    state.dispAuto=true;
     els.city.value=pref; updateCountySelect(pref);
     els.loading.style.display='block';
     ensureCityData(pref,function(){
