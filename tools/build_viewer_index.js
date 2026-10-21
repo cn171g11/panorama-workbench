@@ -115,7 +115,18 @@ function writeGrid(stats) {
   }
   const payload = `window.PANO_GRID_ALL=${JSON.stringify(output)};`;
   fs.writeFileSync(path.join(VIEWER_ROOT, "grid_all.js"), payload, "utf8");
+  synchronizeHiddenGrid(output.hidden || []);
   return { keys: Object.keys(output).length, cells: Object.values(output).reduce((sum, list) => sum + list.length, 0), bytes: Buffer.byteLength(payload) };
+}
+
+function synchronizeHiddenGrid(hiddenCells) {
+  const filePath = path.join(VIEWER_ROOT, "hidden_pano.js");
+  const source = fs.readFileSync(filePath, "utf8");
+  const assignment = /window\.PANO_GRID_ALL\["hidden"\]=\[.*?\];/s;
+  if (!assignment.test(source)) throw new Error("Hidden grid assignment is missing");
+  const replacement = `window.PANO_GRID_ALL["hidden"]=${JSON.stringify(hiddenCells)};`;
+  // This script loads after grid_all.js, so its fallback must use the same grid.
+  fs.writeFileSync(filePath, source.replace(assignment, replacement), "utf8");
 }
 
 function writeSearchIndex(stats) {
