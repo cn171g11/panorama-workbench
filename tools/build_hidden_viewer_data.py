@@ -68,7 +68,7 @@ def write_payload(records: list) -> None:
         "window.PANO_COUNT=window.PANO_COUNT||{};"
         "window.PANO_GRID_ALL=window.PANO_GRID_ALL||{};"
         "window.PANO_CITY=window.PANO_CITY||{};"
-        "window.PANO_META[%s]={name:'腾讯隐藏街景',province:'腾讯隐藏',pref:%s};"
+        "window.PANO_META[%s]={name:'腾讯隐藏街景/时光机',province:'腾讯隐藏街景/时光机',pref:%s};"
         "window.PANO_COUNT[%s]=%d;"
         "window.PANO_GRID_ALL[%s]=%s;"
         "window.PANO_CITY[%s]=%s;"
