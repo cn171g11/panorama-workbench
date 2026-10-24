@@ -4,19 +4,15 @@ The repository has four layers. Keeping them separate makes it easier to find a 
 
 ## Published Site
 
-- `index.html`: S341 route workbench and the GitHub Pages root entry.
+- `index.html`: redirect page to `city-viewer/` (keeps the Pages root working).
 - `city-viewer/`: national city metadata viewer and its browser-loadable data files.
-- `g101/`, `g102/`, `g103/`, `g106/`, `g312/`: route-specific viewers and metadata.
-- `g212-panorama-workbench.html`: G212 route workbench.
-- `lishui-panorama/`: Lishui regional workbench.
-- `s341/`: S341 supporting viewer assets.
+- `g101/`, `g102/`, `g103/`, `g106/`, `g312/`: route viewers and their metadata.
 
 Public paths under these directories are intentionally stable. Do not rename them without adding a compatibility page or redirect.
 
 ## Research Data
 
 - `g*-*.json`, `g*-*.geojson`: route samples and route geometry.
-- `lishui-*.json`, `s341-*.json`: route-level metadata.
 - `mohe/`, `erguna/`, `gaochun/`, `huma/`, `jgdaq/`, `tahe/`, `xinlin/`: regional scan manifests and boundaries.
 
 Published manifests contain metadata only. Raw BFS state, downloaded images, tiles, and logs belong in local scan storage and are ignored by Git.
