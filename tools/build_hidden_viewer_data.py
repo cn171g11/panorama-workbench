@@ -7,6 +7,7 @@ scanned city files.
 import json
 import math
 from pathlib import Path
+from hidden_collection_rules import load_policy
 
 REPOSITORY_ROOT = Path(__file__).resolve().parents[1]
 SOURCE_PATH = REPOSITORY_ROOT / "tools" / "data" / "tencent-hidden-merged-318.json"
@@ -88,7 +89,9 @@ def write_payload(records: list) -> None:
 
 def main() -> None:
     records = json.loads(SOURCE_PATH.read_text(encoding="utf-8"))
-    unique_records = {str(record["id"]): record for record in records}
+    policy = load_policy()
+    unique_records = {str(record["id"]): record for record in records
+        if policy.should_keep_entry([str(record["id"]), record.get("lng"), record.get("lat")])}
     write_payload(list(unique_records.values()))
     print(f"hidden points: {len(unique_records)} -> {OUTPUT_PATH}")
 
