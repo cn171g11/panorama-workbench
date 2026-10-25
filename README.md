@@ -1,91 +1,151 @@
 # 街景工作台 · Panorama Workbench
 
-腾讯 / 百度街景元数据的采集、整理与可视化工作台。仓库包含可直接部署的静态查看器、路线工作台、已验证的元数据清单和采集工具。
+腾讯 / 百度街景**元数据**的采集、校验、整理与可视化。仓库只保存文本类元数据，不保存任何街景图片；
+线上主体是一个可按需加载的全国街景查看器。
 
-- 在线入口: <https://cn171g11.github.io/panorama-workbench/>
-- 城市查看器: <https://cn171g11.github.io/panorama-workbench/city-viewer/>
-- 结构说明: [`docs/repository-layout.md`](docs/repository-layout.md)
-- 运维说明: [`docs/operations.md`](docs/operations.md)
+| 入口 | 地址 |
+|---|---|
+| 城市查看器 | <https://cn171g11.github.io/panorama-workbench/city-viewer/> |
+| 仓库根路径 | <https://cn171g11.github.io/panorama-workbench/>（自动跳转到查看器） |
+| 结构说明 | [docs/repository-layout.md](docs/repository-layout.md) |
+| 数据目录 | [docs/data-catalog.md](docs/data-catalog.md) |
+| 运维手册 | [docs/operations.md](docs/operations.md) |
 
-> 本仓库收录街景元数据, 不收录街景图片。图片版权归腾讯 / 百度所有, 内容仅供研究与个人使用。
-
----
-
-## 1. 全国城市街景查看器 `city-viewer/`
-
-在线：<https://cn171g11.github.io/panorama-workbench/city-viewer/>
-
-- 覆盖多个省级行政区和地级行政区, 数据按 adcode 拆分并按需加载
-- 当前规模: **15,946,537** 个街景点, 397 个数据分片（含福建、南京、徐州、溧水、广西、安徽、宁夏等）
-- 界面：Leaflet 全屏地图，省 → 地级市两级切换（不区分县级行政区）
-- 底图：高德标准 / 高德暗色 / 高德影像 / 腾讯暗色
-- 交互: 点位渲染、最近街景、panoid / 路名 / 采集时间 / 坐标搜索、城市和区县筛选、密度与散点模式
-- panoid 定位: 支持 `@16-20:SCENE`、`@1-6:350830` 等按字符位置匹配的查询
-- 小于 20,000 条结果强制散点, 大结果集允许密度优化或散点模式
-- 全国视图底图最低 zoom 为 3, 兼容移动端瓦片服务
-- 图例：**金色**＝含全景图，**青色**＝仅元数据
-- 街景跳转：<https://qq-map.netlify.app/>
-
-**数据组织**（按地级行政区 adcode 拆分，浏览器按需加载）：
-
-- `data_meta.js` → `window.PANO_META`：每个键含 `name`、`province`、`pref`（所属地级行政区）
-- `data_<adcode>.js` → `window.PANO_CITY[key]`：`[panoid, lng, lat, road, captured, dir, has_thumb, has_pano, source]`
-- `index.html`：查看器本体；本地查看可运行 `start_viewer.bat`（起一个静态服务）
+> 街景图片版权归腾讯 / 百度所有。本仓库仅收录元数据（panoid、坐标、路名、采集时间、朝向），仅供研究与个人使用。
 
 ---
 
-## 2. 城市 / 区域全量扫描数据
+## 1. 数据规模
 
-每个目录含 `*-panoramas.json`（全量清单）、`*-panoids.json|.txt`（panoid 列表）、`*-boundary.geojson`（边界）。
+| 指标 | 数值 |
+|---|---|
+| 街景点总数 | **15,959,105** |
+| 数据分片 | 398 个 `data_*.js` |
+| 省级行政区 | 33 个 |
+| 区县边界 | 660 个（覆盖 75 个地级行政区） |
+| 腾讯隐藏街景 / 时光机 | **26,875** 点 |
+| 腾讯常规街景（新疆导出） | 5,399 点 |
 
-| 目录 | 区域 | adcode | 街景点 | 全景图 | 采集年 |
-|---|---|---|---|---|---|
-| `mohe/` | 黑龙江省 漠河市 | 232701 | 34,565 | 8,246 | 2013 |
-| `erguna/` | 内蒙古 额尔古纳市 | 150784 | 29,213 | 8,832 | 2013 |
-| `jgdaq/` | 黑龙江省 加格达奇区 | 232718 | 15,635 | 2,452 | 2013 |
-| `tahe/` | 黑龙江省 塔河县 | 232722 | 9,508 | 1,464 | 2013 |
-| `gaochun/` | 江苏省 南京市高淳区 | 320118 | 37,128 | 2,990 | 2014–2015 |
-| `xinlin/` | 黑龙江省 新林区 | 232723 | 未完成（仅边界 + 探测种子） | — | — |
-| `huma/` | 黑龙江省 呼玛县 | 232721 | 未扫描 | — | — |
+点位最多的省级行政区：
 
-> 大兴安岭四区县（漠河 / 加格达奇 / 塔河 / 呼玛）中，塔河经 18,615 点全域网格探测补扫出 5,059 个点，数据范围向外扩展约 90 公里——**首轮仅从县城种子做 BFS 会漏掉县域内互不连通的独立覆盖区**。新林区不在 DataV `232700_full` 列表中，边界改用[锐多宝行政区划](https://map.ruiduobao.com/)（adcode 232723）。
+| 省级行政区 | 街景点 |
+|---|---|
+| 江苏省 | 6,459,306 |
+| 上海市 | 3,779,723 |
+| 安徽省 | 1,741,752 |
+| 福建省 | 1,721,710 |
+| 广西壮族自治区 | 1,033,850 |
+| 宁夏回族自治区 | 516,293 |
+| 北京市 | 83,203 |
+| 山东省 | 75,498 |
+
+> 江苏、上海两地是早年网格扫描的主体，点数远高于其他省份；福建、安徽、广西、宁夏是近期按地级市全量重扫的结果。
 
 ---
 
-## 3. 线路工作台（国道 / 省道）
+## 2. 数据组织
 
-原有的 S341 工作台（根 `index.html`）、G212 兰龙线工作台和溧水区工作台已移除，根路径现在直接跳转到城市查看器。
+查看器按**地级行政区 adcode** 拆分数据，浏览器按需加载，单次只取当前城市的分片。
 
-| 入口 | 线路 | 说明 |
-|---|---|---|
-| `g101/`、`g102/`、`g103/`、`g106/`、`g312/` | G101 / G102 / G103 / G106 / G312 | 各自 `index.html` + `*-tencent-lines.geojson` + `*-tencent-panoramas-part-*.json` + `*-tencent-scan-report.json` |
+| 文件 | 作用 |
+|---|---|
+| `data_meta.js` | `PANO_META`（名称 / 省份 / 归属地级市）、`PANO_COUNT`（各分片点数） |
+| `data_districts.js` | `PANO_DISTRICTS`，区县边界多边形，供区县筛选使用 |
+| `data_<adcode>.js` | `PANO_CITY[key]` 点位数组，超过 18 万点拆分为 `<adcode>_2`、`_3`… |
+| `grid_all.js` | 全国网格聚合（0.004°），供总览与密度模式使用 |
+| `pano_search_index.js` | panoid / 路名 / 采集时间 / 坐标的按需搜索索引 |
+| `hidden_pano.js` | 「腾讯隐藏街景/时光机」合集（独立集合，不按城市拆分） |
+
+点位格式固定为 9 个字段，只允许在末尾追加新字段：
+
+```text
+[panoid, lng, lat, road, captured, dir, has_thumb, has_pano, source]
+```
 
 ---
 
-## 4. 采集方法
+## 3. 腾讯隐藏街景 / 时光机
 
-1. **边界**：DataV GeoAtlas `areas_v3/bound/<adcode>.json`（缺失时回退锐多宝行政区划）
-2. **种子**：边界内网格探测 `sv.map.qq.com/xf`（1–1.5 km 粗网格，密集区补 200 m 细网格）
-3. **扩散**：BFS 通过 `/sv` 的 `all_scenes` 扩展相邻场景，实时按边界过滤，落盘可断点续跑
-4. **缩略图 / 全景**：可选拉取 `sv1.map.qq.com/thumb|tile`（4096×2048）
-5. **速率**：全局限流约 16 req/s（`MIN_INTERVAL=0.06`），失败自动退避
-6. **缺口审计**：细网格全域探测复核，命中全部落在 BFS 结果内（`NEW_SVIDS=0`）即判定无漏扫
+合集收的是**无法在腾讯街景里连续移动**的孤立点位（多为历史影像帧、景区单帧），与常规覆盖区分开。
 
-腾讯街景沿线路覆盖通常很稀疏（如 S341 约 2%，多为 2015 年影像），百度数据用于补足线路覆盖。
+判定规则 `navigation-v1`（`tools/pano-mobility.js`）：实时请求 `sv.map.qq.com/sv?svid=&output=json`，
+只有 `roads[].points` 的前后相邻帧、`vpoints[].link`、`all_scenes` 的相邻位才算「可移动」；
+自引用、邻接为 `0,0`、坐标非法、元数据报错、`svid` 不匹配都不算。
+
+- **能移动 = 常规街景，不得进入合集**；不能移动 = 隐藏街景。
+- 剑灵（Blade & Soul）游戏街景在 `tools/data/tencent-game-exceptions.json` 登记为例外。
+- 复核证据沉淀在 `tools/data/hidden-collection-verification.json`（14,889 条），
+  `tools/purge_hidden_collection.py` 与导入工具默认读取它。
+
+2026-10-24 曾据此清理过一批混入的常规街景（19,958 → 19,706），详见
+[docs/hidden-cleanup-20261024.md](docs/hidden-cleanup-20261024.md)。
+
+### 3.1 腾讯常规街景（新疆导出）
+
+外部导出的「隐藏街景」里往往混着可移动的常规点位。这类点位**不丢弃、也不放进隐藏合集**，
+而是单独成集（`qq_xj` = 「腾讯常规街景·新疆导出」，5,399 点，来源标记 `腾讯导出`），
+与隐藏合集并列展示。新疆只有乌鲁木齐、吐鲁番有完整区县边界，无法可靠归入城市图层，所以不做 adcode 拆分。
+
+---
+
+## 4. 采集与发布流程
+
+1. **边界**：DataV GeoAtlas `areas_v3/bound/<adcode>.json`，缺失时回退锐多宝行政区划。
+2. **种子**：边界内网格探测 `sv.map.qq.com/xf`（1–1.5 km 粗网格，密集区补 200 m 细网格）。
+3. **扩散**：BFS 通过 `/sv` 的 `all_scenes` 扩展相邻场景，实时按边界过滤，支持断点续跑。
+4. **缺口扫描**：对「整天没有记录、但前后一天有记录」的时间缺口逐日补扫，产出候选点位。
+5. **移动性审计**：候选点逐条核验可移动性，只有不可移动的才允许进入隐藏合集。
+6. **合并入图**：`tools/merge_gap_scan.py` / `tools/merge_city_scan.py` 写入分片并更新 `data_meta.js`。
+7. **重建索引**：`node tools/build_viewer_index.js` 重算 `grid_all.js`、`pano_search_index.js` 与隐藏网格。
+8. **校验发布**：`tools/check_viewer_hidden_grid.js`、`tools/check_viewer_display_mode.js` 通过后提交，
+   GitHub Pages 自动构建。
+
+版本号写在 `city-viewer/index.html` 标题里，每次发布递增；APK 通过 GitHub Release 分发（包名 `cn.cn171g11.panoviewer`）。
 
 ---
 
 ## 5. 工具
 
-- `tools/city-scan/`：城市全量扫描流水线
-  - `bfs.py`（短连边 BFS）、`panorama_batch.py`（全景/缩略图批量）、`thumbs.py`、`assemble.py`、`build_viewer_data.py`
-- `tools/g212-scan.mjs`：命令行批量扫描（自读本地密钥文件，不打印密钥，仅记录 SHA256 指纹；`--route-only` 只刷新路线）
+| 工具 | 用途 |
+|---|---|
+| `tools/build_viewer_index.js` | 重建 `grid_all.js` 与 `pano_search_index.js` |
+| `tools/check_viewer_hidden_grid.js` | 校验隐藏合集条数、网格与实际加载顺序一致 |
+| `tools/check_viewer_display_mode.js` | 校验散点 / 密度模式在缩放与大结果集下的行为 |
+| `tools/merge_city_scan.py` | 市级扫描结果合并（自动分片、更新元数据） |
+| `tools/merge_gap_scan.py` | 缺口扫描候选合并，内置移动性门禁 |
+| `tools/hidden_collection_rules.py` | 隐藏合集保留 / 导入判定策略 |
+| `tools/pano-mobility.js` | 移动性判定实现（`navigation-v1`） |
+| `tools/purge_hidden_collection.py` | 按审计结果清理合集 |
+| `tools/build_hidden_viewer_data.py` | 由历史合并清单重建 `hidden_pano.js` |
+| `tools/city-scan/` | 早期城市扫描流水线（BFS、全景抓取、拼装） |
+
+测试：`python -m unittest discover -s tools/tests`、`node --test tools/tests/pano-mobility.test.js`。
 
 ---
 
-## 6. 说明与免责
+## 6. 暂存区 `staging/`
 
-- 数据来自腾讯街景**非官方接口**，无 SLA，可能随时变更、限流或封禁
-- 仅收集**元数据**，未上传任何街景图片；图片版权归腾讯 / 百度，仅供研究用途
-- 线路底图坐标会随底图坐标系自动换算；OSM 仅作线路数据来源（ODbL），导出结果应保留来源信息
-- 天地图等底图需自备 API Key；GitHub Pages 无法隐藏浏览器端密钥，请使用允许当前 Origin 的 Key
+未发布、待处理的数据放这里，**不进入查看器、不参与构建**。
+
+| 目录 | 内容 | 数量 | 状态 |
+|---|---|---|---|
+| `staging/baidu-xinjiang-20261025/` | 百度街景（新疆） | 12,986 | 未发布，等待后续计划 |
+
+---
+
+## 7. 区域扫描清单
+
+`mohe/`、`erguna/`、`gaochun/`、`jgdaq/`、`tahe/`、`huma/`、`xinlin/` 保留各区域的清单与边界文件
+（`*-panoramas.json`、`*-panoids.json|.txt`、`*-boundary.geojson`），用于复现早期扫描结果。
+
+线路工作台 `g101/`、`g102/`、`g103/`、`g106/`、`g312/` 各自带 `index.html` 与线路 geojson / 分片 json。
+
+---
+
+## 8. 说明与免责
+
+- 数据来自街景**非官方接口**，无 SLA，可能随时变更、限流或封禁。
+- 仅采集元数据，未上传任何街景图片；图片版权归腾讯 / 百度所有，仅供研究用途。
+- 百度（`baidu_pano`）与腾讯（`qq_pano`）数据来源、id 体系、坐标系不同，**不得混入同一集合**。
+- 底图需自备 Key（天地图等）；GitHub Pages 无法隐藏浏览器端密钥，请使用限制 Origin 的 Key。
+- 线路底图坐标随底图坐标系自动换算；OSM 仅作线路数据来源（ODbL）。
