@@ -63,7 +63,7 @@
 </head>
 <body>
 <header>
-  <h1>街景元数据查看器 <span style="font-size:12px;color:#888">v1.0.18 · 2026-10-25 加入新疆隐藏与常规街景</span></h1>
+  <h1>街景元数据查看器 <span style="font-size:12px;color:#888">v1.0.19 · 2026-10-26 隐藏街景按省份分类，加入青海常规街景</span></h1>
   <span id="provinceTabs"></span>
   <select id="citySelect" title="地级市"></select>
   <select id="countySelect" title="县级行政区" style="display:none"></select>
@@ -148,7 +148,8 @@
   }
   function cityMeta(key){ var m=(window.PANO_META||{})[key]; return m||{name:key,province:''}; }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
-  function isHiddenEntry(e){ return !!e && (e[9]==='hidden' || e[8]==='腾讯隐藏'); }
+  function isHiddenPref(pf){ return String(pf||'').indexOf('hidden')===0; }
+  function isHiddenEntry(e){ return !!e && (isHiddenPref(e[9]) || e[8]==='腾讯隐藏'); }
 
   // ---------- canvas point layer ----------
   var PointCanvasLayer = (window.L && L.Layer) ? L.Layer.extend({
@@ -544,7 +545,7 @@
       var pf=prefOf(k);
       for(var i=0;i<list.length;i++){
         var cl=list[i], lng=(cl[0]+0.5)*GRID_RES, lat=(cl[1]+0.5)*GRID_RES;
-        cells.push([lng,lat,cl[2],pf==='hidden'?1:0]);
+        cells.push([lng,lat,cl[2],isHiddenPref(pf)?1:0]);
         if(cl[2]>maxn) maxn=cl[2];
         tot+=cl[2];
         cp[cl[0]*100000+cl[1]]=pf;
@@ -552,7 +553,7 @@
       }
     });
     state.overviewCells=cells; state.cellPref=cp; state.overviewMax=maxn; state.overviewTotal=tot;
-    state.overviewAllHidden=keys.length>0&&keys.every(function(k){ return prefOf(k)==='hidden'; });
+    state.overviewAllHidden=keys.length>0&&keys.every(function(k){ return isHiddenPref(prefOf(k)); });
     state.bounds=cells.length?{minLng:a,maxLng:b,minLat:c,maxLat:d}:null;
   }
   function leaveSearchMode(){

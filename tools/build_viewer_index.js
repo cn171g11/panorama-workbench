@@ -95,10 +95,13 @@ function buildStats() {
   const context = { window: {} };
   vm.createContext(context);
   loadScript(context, "hidden_pano.js");
-  const hiddenEntries = (context.window.PANO_CITY || {}).hidden || [];
-  stats.grid.hidden = stats.grid.hidden || new Map();
-  for (const entry of hiddenEntries) addEntryToStats(stats, "hidden", entry);
-  totalEntries += hiddenEntries.length;
+  const hiddenCollections = Object.entries(context.window.PANO_CITY || {})
+    .filter(([key]) => key === "hidden" || key.startsWith("hidden_"));
+  for (const [key, entries] of hiddenCollections) {
+    stats.grid[key] = stats.grid[key] || new Map();
+    for (const entry of entries) addEntryToStats(stats, key, entry);
+    totalEntries += entries.length;
+  }
 
   return { stats, totalEntries };
 }
@@ -115,18 +118,24 @@ function writeGrid(stats) {
   }
   const payload = `window.PANO_GRID_ALL=${JSON.stringify(output)};`;
   fs.writeFileSync(path.join(VIEWER_ROOT, "grid_all.js"), payload, "utf8");
-  synchronizeHiddenGrid(output.hidden || []);
+  synchronizeHiddenGrid(output);
   return { keys: Object.keys(output).length, cells: Object.values(output).reduce((sum, list) => sum + list.length, 0), bytes: Buffer.byteLength(payload) };
 }
 
-function synchronizeHiddenGrid(hiddenCells) {
+function synchronizeHiddenGrid(output) {
   const filePath = path.join(VIEWER_ROOT, "hidden_pano.js");
-  const source = fs.readFileSync(filePath, "utf8");
-  const assignment = /window\.PANO_GRID_ALL\["hidden"\]=\[.*?\];/s;
-  if (!assignment.test(source)) throw new Error("Hidden grid assignment is missing");
-  const replacement = `window.PANO_GRID_ALL["hidden"]=${JSON.stringify(hiddenCells)};`;
-  // This script loads after grid_all.js, so its fallback must use the same grid.
-  fs.writeFileSync(filePath, source.replace(assignment, replacement), "utf8");
+  let source = fs.readFileSync(filePath, "utf8");
+  for (const [key, hiddenCells] of Object.entries(output)) {
+    if (key !== "hidden" && !key.startsWith("hidden_")) continue;
+    const marker = `window.PANO_GRID_ALL[${JSON.stringify(key)}]=`;
+    const start = source.indexOf(marker);
+    if (start === -1) throw new Error("Hidden grid assignment is missing: " + key);
+    const end = source.indexOf("];", start);
+    if (end === -1) throw new Error("Hidden grid assignment is unterminated: " + key);
+    // This script loads after grid_all.js, so its fallback must use the same grid.
+    source = source.slice(0, start) + marker + JSON.stringify(hiddenCells) + ";" + source.slice(end + 2);
+  }
+  fs.writeFileSync(filePath, source, "utf8");
 }
 
 function writeSearchIndex(stats) {
