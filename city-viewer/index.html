@@ -46,11 +46,10 @@
   @media (max-width:680px){
     header { padding:6px 8px; gap:6px; }
     h1 { display:none; }
-    #provinceTabs { display:flex; gap:6px; width:100%; overflow-x:auto; white-space:nowrap; -webkit-overflow-scrolling:touch; scrollbar-width:none; order:1; }
-    #provinceTabs::-webkit-scrollbar { display:none; }
+    #provinceSelect { order:1; max-width:46%; }
     .tab { flex:0 0 auto; padding:6px 12px; font-size:12.5px; }
     #citySelect, #countySelect, #roadFilter, #basemapSelect, #dispMode { font-size:12.5px; max-width:32%; }
-    #citySelect { order:2; } #countySelect { order:2; } #roadFilter { order:3; } #basemapSelect { order:4; }
+    #citySelect { order:2; } #countySelect { order:2; } #provinceSelect { order:1; } #roadFilter { order:3; } #basemapSelect { order:4; }
     #search { order:5; flex:1 1 100%; min-width:0; font-size:16px; }
     #stats { order:6; width:100%; font-size:11px; }
     .hint { left:8px; right:8px; top:auto; bottom:74px; max-width:92%; font-size:11px; line-height:1.4; }
@@ -63,9 +62,9 @@
 </head>
 <body>
 <header>
-  <h1>街景元数据查看器 <span style="font-size:12px;color:#888">v1.0.19 · 2026-10-26 隐藏街景按省份分类，加入青海常规街景</span></h1>
-  <span id="provinceTabs"></span>
-  <select id="citySelect" title="地级市"></select>
+  <h1>街景元数据查看器 <span style="font-size:12px;color:#888">v1.0.20 · 2026-10-26 隐藏街景支持按地级市选择（省份+城市两级下拉）</span></h1>
+  <select id="provinceSelect" title="省级行政区"></select>
+  <select id="citySelect" title="地级市" disabled></select>
   <select id="countySelect" title="县级行政区" style="display:none"></select>
   <input id="search" placeholder="搜索: panoid / 路名(如 G219) / 日期(2013-07) / 坐标 / 定位 @16-20:SCENE">
   <select id="roadFilter"></select>
@@ -120,7 +119,7 @@
   var map=null, tileLayer=null, pointLayer=null, currentPopup=null;
 
   var els = {
-    provTabs:document.getElementById('provinceTabs'), city:document.getElementById('citySelect'),
+    province:document.getElementById('provinceSelect'), city:document.getElementById('citySelect'),
     county:document.getElementById('countySelect'),
     search:document.getElementById('search'), road:document.getElementById('roadFilter'),
     basemap:document.getElementById('basemapSelect'), dispMode:document.getElementById('dispMode'),
@@ -451,22 +450,16 @@
     list.forEach(function(c){ var o=document.createElement('option'); o.value=c.code; o.textContent=c.name; els.county.appendChild(o); });
     els.county.style.display='';
   }
-  function buildProvinceTabs(){
+  function buildProvinceSelect(){
     var pm=provinceMap();
-    els.provTabs.innerHTML='';
-    var all=document.createElement('button');
-    all.className='tab'+(state.province==='全国'?' active':'');
-    all.textContent='全国';
-    all.title='全国所有街景点位';
-    all.onclick=function(){ if(state.province!=='全国') selectProvince('全国'); };
-    els.provTabs.appendChild(all);
-    Object.keys(pm).forEach(function(p){
-      var b=document.createElement('button');
-      b.className='tab'+(p===state.province?' active':'');
-      b.textContent=p+' ('+prefList(pm[p]).length+')';
-      b.onclick=function(){ if(p!==state.province) selectProvince(p); };
-      els.provTabs.appendChild(b);
+    var names=Object.keys(pm).sort(function(a,b){ return a.localeCompare(b,'zh-Hans-CN'); });
+    var html='<option value="全国">全国（'+names.length+' 个省级行政区）</option>';
+    names.forEach(function(p){
+      html+='<option value="'+esc(p)+'">'+esc(p)+'（'+prefList(pm[p]).length+'）</option>';
     });
+    els.province.innerHTML=html;
+    els.province.value=state.province||'全国';
+    els.province.onchange=function(){ selectProvince(els.province.value); };
   }
   function loadCityScript(key){
     return new Promise(function(resolve,reject){
@@ -498,14 +491,16 @@
   function fillCitySelect(keys,label){
     els.city.innerHTML='';
     var prefs=prefList(keys);
-    var all=document.createElement('option'); all.value=''; all.textContent='全部 ('+prefs.length+')';
+    var all=document.createElement('option'); all.value='';
+    all.textContent=label?('全部 ('+prefs.length+')'):'请先选择省份';
     els.city.appendChild(all);
     prefs.forEach(function(pf){
       var o=document.createElement('option'); o.value=pf;
       o.textContent=cityMeta(pf).name;
       els.city.appendChild(o);
     });
-    els.city.title=label||'';
+    els.city.disabled=!label;
+    els.city.title=label?('地级行政区 · '+label):'';
   }
   function clearEntries(){
     state.entries=[]; state.results=[];
@@ -565,7 +560,7 @@
   function selectProvince(p){
     leaveSearchMode();
     restoreDispMode();
-    state.province=p; buildProvinceTabs();
+    state.province=p; buildProvinceSelect();
     var keys=(p==='全国')?allKeys():(provinceMap()[p]||[]);
     state.provinceKeys=keys;
     state.cityFilter=''; state.countyFilter=''; state.mode='overview';
