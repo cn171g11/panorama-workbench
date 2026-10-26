@@ -13,7 +13,7 @@
   h1 { font-size:15px; margin:0 8px 0 0; white-space:nowrap; order:0; }
   .ver { font-size:12px; color:#888; }
   .ver-note { font-size:12px; color:#888; }
-  @media (max-width:1180px) { .ver-note { display:none; } }
+  @media (max-width:1400px) { .ver-note { display:none; } }
   #provinceSelect { order:1; max-width:260px; }
   #citySelect { order:2; max-width:240px; min-width:130px; }
   #countySelect { order:3; max-width:200px; }
@@ -32,8 +32,8 @@
   #map.map-dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.75); }
   #map.map-dark .leaflet-container { background:#0b0f13; }
   header, .leaflet-top.leaflet-right { z-index:1100; }
-  .leaflet-top { margin-top:52px; }
-  .hint { position:absolute; left:10px; top:64px; z-index:900; padding:5px 10px; border:1px solid var(--line); border-radius:7px; background:rgba(15,20,26,.88); color:var(--dim); font-size:12px; max-width:46%; }
+  .leaflet-top { margin-top:calc(var(--header-h, 52px) + 6px); }
+  .hint { position:absolute; left:10px; top:calc(var(--header-h, 64px) + 8px); z-index:900; padding:5px 10px; border:1px solid var(--line); border-radius:7px; background:rgba(15,20,26,.88); color:var(--dim); font-size:12px; max-width:46%; }
   .hud { position:absolute; right:10px; bottom:14px; z-index:900; padding:5px 10px; border:1px solid var(--line); border-radius:7px; background:rgba(15,20,26,.85); color:var(--dim); font-size:12px; line-height:1.5; text-align:right; pointer-events:none; font-variant-numeric:tabular-nums; white-space:nowrap; }
   .pv-meta { min-width:250px; max-width:330px; font-size:12.5px; }
   .pv-meta .pid { font-family:Consolas,monospace; color:var(--accent); word-break:break-all; }
@@ -73,7 +73,7 @@
 </head>
 <body>
 <header>
-  <h1>街景元数据查看器 <span class="ver">v1.0.22</span><span class="ver-note"> · 2026-10-26 修复顶部控件布局与重合点视角</span></h1>
+  <h1>街景元数据查看器 <span class="ver">v1.0.23</span><span class="ver-note"> · 2026-10-26 修复顶部控件布局与重合点视角</span></h1>
   <select id="provinceSelect" title="省级行政区"></select>
   <select id="citySelect" title="地级市" disabled></select>
   <select id="countySelect" title="县级行政区" style="display:none"></select>
@@ -571,7 +571,7 @@
   function selectProvince(p){
     leaveSearchMode();
     restoreDispMode();
-    state.province=p; buildProvinceSelect();
+    state.province=p; buildProvinceSelect(); syncHeaderHeight();
     var keys=(p==='全国')?allKeys():(provinceMap()[p]||[]);
     state.provinceKeys=keys;
     state.cityFilter=''; state.countyFilter=''; state.mode='overview';
@@ -1373,7 +1373,12 @@
       } else { showCityGrid(city); }
     } else { rerender(); fitMap(); }
   });
-  window.addEventListener('resize',function(){ if(map) map.invalidateSize(); });
+  function syncHeaderHeight(){
+    var header=document.querySelector('header');
+    var h=(header&&header.offsetHeight)||52;
+    document.documentElement.style.setProperty('--header-h', h+'px');
+  }
+  window.addEventListener('resize',function(){ syncHeaderHeight(); if(map) map.invalidateSize(); });
   document.addEventListener('keydown',function(ev){
     if(ev.key==='Escape'&&currentPopup){ currentPopup.remove(); state.activePid=null; renderMapPoints(); }
   });
