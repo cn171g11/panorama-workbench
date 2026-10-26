@@ -10,12 +10,23 @@
   * { box-sizing:border-box; }
   html,body { margin:0; height:100%; background:var(--bg); color:var(--fg); font:13px/1.5 "Segoe UI","Microsoft YaHei",sans-serif; overflow:hidden; }
   header { display:flex; flex-wrap:wrap; gap:8px; align-items:center; padding:8px 12px; background:var(--panel); border-bottom:1px solid var(--line); position:relative; z-index:1000; }
-  h1 { font-size:15px; margin:0 8px 0 0; white-space:nowrap; }
+  h1 { font-size:15px; margin:0 8px 0 0; white-space:nowrap; order:0; }
+  .ver { font-size:12px; color:#888; }
+  .ver-note { font-size:12px; color:#888; }
+  @media (max-width:1180px) { .ver-note { display:none; } }
+  #provinceSelect { order:1; max-width:260px; }
+  #citySelect { order:2; max-width:240px; min-width:130px; }
+  #countySelect { order:3; max-width:200px; }
+  #search { order:4; }
+  #roadFilter { order:5; }
+  #basemapSelect { order:6; }
+  #dispMode { order:7; }
+  #stats { order:8; }
   .tab { padding:3px 12px; border-radius:14px; border:1px solid var(--line); background:transparent; color:var(--dim); cursor:pointer; }
   .tab.active { background:#173455; border-color:var(--accent); color:#fff; }
-  #search { flex:1; min-width:200px; padding:6px 10px; border-radius:6px; border:1px solid var(--line); background:#10141a; color:var(--fg); }
+  #search { flex:1 1 280px; min-width:160px; max-width:640px; padding:6px 10px; border-radius:6px; border:1px solid var(--line); background:#10141a; color:var(--fg); }
   #search:focus { outline:none; border-color:var(--accent); }
-  select { padding:5px 8px; border-radius:6px; border:1px solid var(--line); background:#10141a; color:var(--fg); max-width:190px; }
+  select { padding:5px 8px; border-radius:6px; border:1px solid var(--line); background:#10141a; color:var(--fg); max-width:190px; flex:0 0 auto; }
   #stats { color:var(--dim); white-space:nowrap; }
   #map { position:fixed; inset:0; background:#0d1117; }
   #map.map-dark .leaflet-tile-pane { filter: invert(1) hue-rotate(180deg) brightness(0.85) contrast(0.9) saturate(0.75); }
@@ -46,12 +57,12 @@
   @media (max-width:680px){
     header { padding:6px 8px; gap:6px; }
     h1 { display:none; }
-    #provinceSelect { order:1; max-width:46%; }
-    .tab { flex:0 0 auto; padding:6px 12px; font-size:12.5px; }
-    #citySelect, #countySelect, #roadFilter, #basemapSelect, #dispMode { font-size:12.5px; max-width:32%; }
-    #citySelect { order:2; } #countySelect { order:2; } #provinceSelect { order:1; } #roadFilter { order:3; } #basemapSelect { order:4; }
-    #search { order:5; flex:1 1 100%; min-width:0; font-size:16px; }
-    #stats { order:6; width:100%; font-size:11px; }
+    #provinceSelect, #citySelect { flex:1 1 0; max-width:none; min-width:0; font-size:12.5px; }
+    #countySelect, #roadFilter, #basemapSelect, #dispMode { font-size:12.5px; max-width:48%; }
+    #provinceSelect { order:1; } #citySelect { order:2; } #countySelect { order:3; }
+    #search { order:4; flex:1 1 100%; min-width:0; font-size:16px; }
+    #roadFilter { order:5; } #basemapSelect { order:6; } #dispMode { order:7; }
+    #stats { order:8; width:100%; font-size:11px; }
     .hint { left:8px; right:8px; top:auto; bottom:74px; max-width:92%; font-size:11px; line-height:1.4; }
     .hud { right:8px; bottom:8px; font-size:11px; padding:4px 7px; }
     .pv-meta { min-width:0; max-width:74vw; }
@@ -62,12 +73,12 @@
 </head>
 <body>
 <header>
-  <h1>街景元数据查看器 <span style="font-size:12px;color:#888">v1.0.21 · 2026-10-26 隐藏街景补入香港、三沙与剑灵游戏场景</span></h1>
+  <h1>街景元数据查看器 <span class="ver">v1.0.22</span><span class="ver-note"> · 2026-10-26 修复顶部控件布局与重合点视角</span></h1>
   <select id="provinceSelect" title="省级行政区"></select>
   <select id="citySelect" title="地级市" disabled></select>
   <select id="countySelect" title="县级行政区" style="display:none"></select>
   <input id="search" placeholder="搜索: panoid / 路名(如 G219) / 日期(2013-07) / 坐标 / 定位 @16-20:SCENE">
-  <select id="roadFilter"></select>
+  <select id="roadFilter" style="display:none"></select>
   <select id="basemapSelect" title="底图"></select>
   <select id="dispMode" title="显示模式"></select>
   <span id="stats"></span>
@@ -699,6 +710,11 @@
       map.setView([(b.minLat+b.maxLat)/2,(b.minLng+b.maxLng)/2],NATIONAL_ZOOM);
       return;
     }
+    // 所有点位重合(如剑灵场景坐标相同)时 fitBounds 会拉到最大级别并白屏，改用固定视角
+    if((b.maxLng-b.minLng)<0.002 && (b.maxLat-b.minLat)<0.002){
+      map.setView([(b.minLat+b.maxLat)/2,(b.minLng+b.maxLng)/2],12);
+      clampZoom(); return;
+    }
     map.fitBounds([[b.minLat,b.minLng],[b.maxLat,b.maxLng]],{padding:[30,30]});
     clampZoom();
   }
@@ -707,6 +723,7 @@
     var n=Math.min(state.entries.length,200000);
     for(var i=0;i<n;i++){ var r=state.entries[i][3]; if(r) set[r]=1; }
     var roads=Object.keys(set).sort();
+    els.road.style.display=roads.length?'':'none';
     els.road.innerHTML='';
     var all=document.createElement('option'); all.value=''; all.textContent='全部道路 ('+roads.length+')';
     els.road.appendChild(all);
