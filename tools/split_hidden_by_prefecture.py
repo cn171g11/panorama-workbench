@@ -1,16 +1,26 @@
 """Split the hidden collection into per-prefecture collections using prefecture polygons.
 
-Boundaries come from the DataV GeoAtlas cache (GCJ-02, same datum as the panorama
-coordinates, so no reprojection is applied). Points outside every polygon stay in the
-fallback `hidden` collection.
+Rules:
+  * Blade & Soul game panoramas (listed in tools/data/tencent-game-exceptions.json or
+    whose road contains 剑灵) go to a dedicated `hidden_game` collection: their
+    coordinates are fictional and cannot be placed by geography.
+  * Everything else is assigned by point-in-polygon (DataV GeoAtlas, GCJ-02).
+  * Points outside every polygon fall back to the nearest boundary within 120 km, which
+    covers Sansha islets, the Yalu river bank and similar edge cases.
 """
 import argparse
 import json
+import math
 from pathlib import Path
 
-MUNICIPALITIES = {"110000", "120000", "310000", "500000"}
+SINGLE_PREFECTURE = {"110000", "120000", "310000", "500000", "810000", "820000"}
+SKIP_PROVINCES = {"710000"}
 HIDDEN_NAME = "腾讯隐藏街景/时光机"
 FALLBACK_KEY = "hidden"
+GAME_KEY = "hidden_game"
+GAME_NAME = "剑灵游戏街景"
+GAME_PROVINCE = "腾讯游戏街景"
+NEAREST_LIMIT_KM = 120
 
 
 def read_assignment(source, name):
@@ -19,16 +29,11 @@ def read_assignment(source, name):
     return json.JSONDecoder().raw_decode(source, start)
 
 
-def write_assignment(source, name, value, bounds):
-    _, start, end = bounds
-    return source[:start] + json.dumps(value, ensure_ascii=False, separators=(",", ":")) + source[end:]
-
-
 def bounds_of(source, name):
     marker = "window.%s=" % name
     start = source.index(marker) + len(marker)
     _, end = json.JSONDecoder().raw_decode(source, start)
-    return name, start, end
+    return start, end
 
 
 def load_prefectures(boundaries):
@@ -37,10 +42,10 @@ def load_prefectures(boundaries):
                  if f["properties"].get("level") == "province" and f["properties"].get("name")}
     items = []
     for code, feature in provinces.items():
-        if code in ("710000", "810000", "820000"):
+        if code in SKIP_PROVINCES:
             continue
         province = feature["properties"]["name"]
-        if code in MUNICIPALITIES:
+        if code in SINGLE_PREFECTURE:
             children = [(code, province, feature["geometry"])]
         else:
             path = boundaries / ("%s.json" % code)
@@ -93,6 +98,37 @@ def locate(items, lng, lat):
     return None
 
 
+def segment_km(lng, lat, a, b):
+    kx = 111.0 * math.cos(math.radians(lat))
+    ky = 111.0
+    ax, ay = (a[0] - lng) * kx, (a[1] - lat) * ky
+    bx, by = (b[0] - lng) * kx, (b[1] - lat) * ky
+    dx, dy = bx - ax, by - ay
+    if dx == 0 and dy == 0:
+        return math.hypot(ax, ay)
+    t = -(ax * dx + ay * dy) / (dx * dx + dy * dy)
+    t = max(0.0, min(1.0, t))
+    return math.hypot(ax + t * dx, ay + t * dy)
+
+
+def nearest(items, lng, lat, limit_km=NEAREST_LIMIT_KM):
+    best, best_distance = None, limit_km
+    for item in items:
+        box = item["bbox"]
+        # cheap lower bound from the bounding box
+        dx = max(box[0] - lng, 0, lng - box[2]) * 111.0 * math.cos(math.radians(lat))
+        dy = max(box[1] - lat, 0, lat - box[3]) * 111.0
+        if math.hypot(dx, dy) > best_distance:
+            continue
+        for polygon in item["polygons"]:
+            for ring in polygon:
+                for index in range(len(ring) - 1):
+                    distance = segment_km(lng, lat, ring[index], ring[index + 1])
+                    if distance < best_distance:
+                        best_distance, best = distance, item
+    return best
+
+
 def grid_of(entries):
     cells = {}
     for entry in entries:
@@ -111,8 +147,12 @@ def main():
     items = load_prefectures(args.boundaries)
     source = (viewer / "hidden_pano.js").read_text(encoding="utf-8")
 
-    entries = []
-    collections = {}
+    game_ids = set()
+    exceptions = viewer.parent / "tools" / "data" / "tencent-game-exceptions.json"
+    if exceptions.is_file():
+        game_ids = set(json.loads(exceptions.read_text(encoding="utf-8"))["panoramaIds"])
+
+    entries, collections = [], {}
     cursor = 0
     while True:
         marker = 'window.PANO_CITY["'
@@ -121,28 +161,40 @@ def main():
             break
         name_end = source.index('"]=', start)
         key = source[start + len(marker):name_end]
-        value_start = name_end + 3
-        value, value_end = json.JSONDecoder().raw_decode(source, value_start)
+        value, value_end = json.JSONDecoder().raw_decode(source, name_end + 3)
         collections[key] = len(value)
         entries.extend(value)
         cursor = value_end
-    print(json.dumps({"existing_collections": len(collections), "entries": len(entries)}))
+    print(json.dumps({"existing_collections": len(collections), "entries": len(entries),
+                      "game_exceptions": len(game_ids)}))
 
-    groups, unassigned = {}, 0
-    name_by_adcode = {}
+    groups = {}
+    placed, by_nearest, game_count, unassigned = 0, [], 0, 0
     for entry in entries:
+        sid = str(entry[0])
+        if sid in game_ids or "剑灵" in str(entry[3]):
+            game_count += 1
+            groups.setdefault(GAME_KEY, {"province": GAME_PROVINCE, "name": GAME_NAME, "entries": []})["entries"].append(entry)
+            continue
         located = locate(items, entry[1], entry[2])
+        method = "polygon"
+        if not located:
+            located = nearest(items, entry[1], entry[2])
+            method = "nearest"
         if not located:
             unassigned += 1
             groups.setdefault(FALLBACK_KEY, {"province": HIDDEN_NAME, "name": HIDDEN_NAME, "entries": []})["entries"].append(entry)
             continue
+        if method == "nearest":
+            by_nearest.append((sid, located["name"], round(entry[1], 3), round(entry[2], 3)))
+        else:
+            placed += 1
         key = "hidden_" + located["adcode"]
         group = groups.setdefault(key, {"province": located["province"],
                                         "name": located["name"] + "·隐藏街景", "entries": []})
         group["entries"].append(entry)
-        name_by_adcode[located["adcode"]] = located["name"]
 
-    order = sorted(groups, key=lambda key: (key == FALLBACK_KEY, key))
+    order = sorted(groups, key=lambda key: (key == FALLBACK_KEY, key == GAME_KEY, key))
     parts = [
         "window.PANO_META=window.PANO_META||{};window.PANO_COUNT=window.PANO_COUNT||{};\n",
         "window.PANO_GRID_ALL=window.PANO_GRID_ALL||{};window.PANO_CITY=window.PANO_CITY||{};\n",
@@ -168,20 +220,15 @@ def main():
     for key in order:
         meta[key] = {"name": groups[key]["name"], "province": groups[key]["province"], "pref": key}
         counts[key] = len(groups[key]["entries"])
-    updated = (meta_source[:meta_bounds[1]] + json.dumps(meta, ensure_ascii=False, separators=(",", ":"))
-               + meta_source[meta_bounds[2]:count_bounds[1]] + json.dumps(counts, ensure_ascii=False, separators=(",", ":"))
-               + meta_source[count_bounds[2]:])
+    updated = (meta_source[:meta_bounds[0]] + json.dumps(meta, ensure_ascii=False, separators=(",", ":"))
+               + meta_source[meta_bounds[1]:count_bounds[0]] + json.dumps(counts, ensure_ascii=False, separators=(",", ":"))
+               + meta_source[count_bounds[1]:])
     (viewer / "data_meta.js").write_text(updated, encoding="utf-8", newline="\n")
 
-    provinces = {}
-    for key in order:
-        if key == FALLBACK_KEY:
-            continue
-        provinces.setdefault(groups[key]["province"], set()).add(key)
-    print(json.dumps({"collections": len(order), "provinces": len(provinces), "unassigned": unassigned,
-                      "total": len(entries),
-                      "top": sorted(((k, len(g["entries"])) for k, g in groups.items() if k != FALLBACK_KEY),
-                                    key=lambda pair: -pair[1])[:10]}, ensure_ascii=False, indent=1))
+    print(json.dumps({"collections": len(order), "polygon": placed, "nearest": len(by_nearest),
+                      "game": game_count, "unassigned": unassigned, "total": len(entries),
+                      "game_key": GAME_KEY, "game_count": groups.get(GAME_KEY, {}).get("entries", []).__len__(),
+                      "nearest_samples": by_nearest[:12]}, ensure_ascii=False, indent=1))
 
 
 if __name__ == "__main__":
