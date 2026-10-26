@@ -6,6 +6,7 @@
 | 入口 | 地址 |
 |---|---|
 | 城市查看器 | <https://cn171g11.github.io/panorama-workbench/city-viewer/> |
+| 数据报告 | <https://cn171g11.github.io/panorama-workbench/city-viewer/report.html>（各省市常规/隐藏街景数量） |
 | 仓库根路径 | <https://cn171g11.github.io/panorama-workbench/>（自动跳转到查看器） |
 | 结构说明 | [docs/repository-layout.md](docs/repository-layout.md) |
 | 数据目录 | [docs/data-catalog.md](docs/data-catalog.md) |
@@ -40,6 +41,15 @@
 | 山东省 | 101,273 |
 
 > 江苏、上海两地是早年网格扫描的主体，点数远高于其他省份；福建、安徽、广西、宁夏是近期按地级市全量重扫的结果。
+
+---
+
+## 1.1 数据报告 `report.html`
+
+查看器顶部的「数据报告」按钮会打开 `report.html`：按**省级**和**地级**两级列出常规街景与隐藏街景数量，
+支持搜索、按列排序、展开到城市，并给出隐藏占比。页面只读取 `data_meta.js`（48 KB），不加载点位数组，打开即出结果。
+
+区县一级没有独立计数：数据按地级市存储，只有 81 个地级市带区县边界，无法拆出可靠的点数。
 
 ---
 

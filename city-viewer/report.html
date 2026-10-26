@@ -1,0 +1,251 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>街景数据报告 · 各省市数量统计</title>
+<style>
+  :root { --bg:#0d1117; --panel:#161b22; --line:#30363d; --fg:#c9d1d9; --dim:#8b949e; --accent:#58a6ff; --gold:#ffd700; --hidden:#f778ba; }
+  * { box-sizing:border-box; }
+  html,body { margin:0; background:var(--bg); color:var(--fg); font:13px/1.6 "Segoe UI","Microsoft YaHei",sans-serif; }
+  a { color:var(--accent); text-decoration:none; }
+  a:hover { text-decoration:underline; }
+  header { position:sticky; top:0; z-index:10; background:rgba(13,17,23,.94); backdrop-filter:blur(8px); border-bottom:1px solid var(--line); padding:14px 20px 12px; }
+  .title { display:flex; align-items:baseline; gap:10px; flex-wrap:wrap; }
+  h1 { font-size:19px; margin:0; font-weight:600; }
+  .ver { font-size:12px; color:var(--dim); }
+  .back { margin-left:auto; font-size:12.5px; border:1px solid var(--line); border-radius:7px; padding:5px 12px; }
+  .back:hover { border-color:var(--accent); text-decoration:none; }
+  main { max-width:1180px; margin:0 auto; padding:18px 20px 60px; }
+  .cards { display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:10px; margin-bottom:18px; }
+  .card { background:var(--panel); border:1px solid var(--line); border-radius:10px; padding:12px 14px; }
+  .card .k { color:var(--dim); font-size:12px; }
+  .card .v { font-size:21px; font-weight:600; font-variant-numeric:tabular-nums; margin-top:2px; }
+  .card.hidden .v { color:var(--hidden); }
+  .bars { display:flex; height:6px; border-radius:4px; overflow:hidden; background:#21262d; margin-bottom:18px; }
+  .bars i { display:block; height:100%; }
+  .bars i.reg { background:var(--accent); }
+  .bars i.hid { background:var(--hidden); }
+  .toolbar { display:flex; gap:10px; flex-wrap:wrap; align-items:center; margin-bottom:12px; }
+  input[type=search], select { padding:6px 10px; border-radius:7px; border:1px solid var(--line); background:#0f141a; color:var(--fg); font-size:13px; }
+  input[type=search] { flex:1 1 260px; min-width:180px; }
+  label.chk { display:flex; align-items:center; gap:6px; color:var(--dim); font-size:12.5px; cursor:pointer; }
+  table { width:100%; border-collapse:collapse; background:var(--panel); border:1px solid var(--line); border-radius:10px; overflow:hidden; }
+  thead th { background:#1b2129; color:var(--dim); font-weight:500; font-size:12px; text-align:right; padding:9px 12px; border-bottom:1px solid var(--line); cursor:pointer; user-select:none; white-space:nowrap; }
+  thead th:first-child, thead th:nth-child(2) { text-align:left; }
+  thead th.sorted::after { content:" ▾"; color:var(--accent); }
+  thead th.sorted.asc::after { content:" ▴"; }
+  tbody td { padding:8px 12px; border-bottom:1px solid #21262d; text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+  tbody td:first-child { text-align:left; }
+  tbody td:nth-child(2) { text-align:left; color:var(--dim); }
+  tr.prov { cursor:pointer; }
+  tr.prov:hover { background:#1b2129; }
+  tr.prov .caret { display:inline-block; width:12px; color:var(--dim); }
+  tr.prov.open .caret { color:var(--accent); }
+  tr.city td { background:#11161d; color:var(--dim); font-size:12.5px; }
+  tr.city td:first-child { padding-left:34px; }
+  tr.city td:first-child::before { content:"└ "; color:#30363d; }
+  .num-reg { color:var(--fg); }
+  .num-hid { color:var(--hidden); }
+  .num-hid.zero { color:#484f58; }
+  .share { display:inline-flex; align-items:center; gap:6px; justify-content:flex-end; }
+  .share .bar { width:56px; height:5px; background:#21262d; border-radius:3px; overflow:hidden; }
+  .share .bar i { display:block; height:100%; background:var(--hidden); }
+  .muted { color:var(--dim); }
+  footer { max-width:1180px; margin:0 auto; padding:0 20px 40px; color:var(--dim); font-size:12px; line-height:1.8; }
+  .note { background:#161b22; border:1px solid var(--line); border-left:3px solid var(--gold); border-radius:8px; padding:10px 14px; margin-bottom:16px; color:var(--dim); }
+  @media (max-width:720px){
+    thead th { padding:8px 8px; }
+    tbody td { padding:7px 8px; }
+    .share .bar { display:none; }
+    header { padding:10px 12px; }
+    main { padding:14px 12px 40px; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="title">
+    <h1>街景数据报告</h1>
+    <span class="ver" id="version">按省级 / 地级行政区统计常规与隐藏街景点位</span>
+    <a class="back" href="./index.html">← 返回查看器</a>
+  </div>
+</header>
+
+<main>
+  <div class="cards" id="cards"></div>
+  <div class="bars" id="bars"></div>
+
+  <div class="toolbar">
+    <input type="search" id="q" placeholder="搜索省 / 市名称，例如 安徽、芜湖、临沂">
+    <select id="sort">
+      <option value="total">按合计点位排序</option>
+      <option value="hidden">按隐藏街景排序</option>
+      <option value="regular">按常规街景排序</option>
+      <option value="name">按名称排序</option>
+    </select>
+    <label class="chk"><input type="checkbox" id="onlyHidden"> 只看有隐藏街景的省市</label>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th data-key="name">省级行政区 / 地级行政区</th>
+        <th data-key="cities">地级市</th>
+        <th data-key="regular">常规街景</th>
+        <th data-key="hidden">隐藏街景</th>
+        <th data-key="total">合计</th>
+        <th data-key="share">隐藏占比</th>
+      </tr>
+    </thead>
+    <tbody id="rows"><tr><td colspan="6" class="muted">正在读取 data_meta.js …</td></tr></tbody>
+  </table>
+
+  <div class="note" id="note" style="margin-top:16px">
+    统计口径：点位数据按<b>地级行政区</b>存储（超过 18 万点会拆成多个分片），本页按 <code>pref</code> 聚合分片后汇总到省。
+    隐藏街景指「腾讯隐藏街景/时光机」合集，已按地级市拆分。区县一级没有独立计数——数据本身不按区县存储，只有 81 个地级市带区县边界，无法拆出可靠的点数。
+  </div>
+</main>
+
+<footer>
+  数据来源：<code>city-viewer/data_meta.js</code>（PANO_META / PANO_COUNT）。页面不加载点位数组，只读元数据，打开即可秒出。
+</footer>
+
+<script src="data_meta.js"></script>
+<script>
+(function(){
+  'use strict';
+  var META = window.PANO_META || {};
+  var COUNT = window.PANO_COUNT || {};
+
+  function isHiddenKey(key){ return key === 'hidden' || String(key).indexOf('hidden') === 0; }
+  function fmt(n){ return Number(n || 0).toLocaleString('zh-CN'); }
+  function esc(s){ return String(s == null ? '' : s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+  // 聚合：省 -> 市 -> {regular, hidden}
+  var provinces = {};
+  Object.keys(META).forEach(function(key){
+    var meta = META[key] || {};
+    var count = COUNT[key] || 0;
+    if (!count) return;
+    var province = meta.province || '未标注';
+    var hidden = isHiddenKey(key);
+    var pref = meta.pref || key;
+    var cityKey = hidden ? String(pref).split('_')[1] || pref : String(pref).split('_')[0];
+    var cityName = String(meta.name || key).replace('·隐藏街景', '');
+
+    var bucket = provinces[province] || (provinces[province] = { name: province, cities: {}, regular: 0, hidden: 0, total: 0 });
+    var city = bucket.cities[cityKey] || (bucket.cities[cityKey] = { code: cityKey, name: cityName, regular: 0, hidden: 0, total: 0 });
+    if (hidden) { city.hidden += count; bucket.hidden += count; }
+    else { city.regular += count; bucket.regular += count; }
+    city.total += count;
+    bucket.total += count;
+  });
+
+  var list = Object.keys(provinces).map(function(name){ return provinces[name]; });
+  var totals = { regular: 0, hidden: 0, total: 0, provinces: list.length, cities: 0 };
+  list.forEach(function(p){
+    p.cityList = Object.keys(p.cities).map(function(k){ return p.cities[k]; })
+      .sort(function(a, b){ return b.total - a.total; });
+    p.cityCount = p.cityList.length;
+    totals.regular += p.regular; totals.hidden += p.hidden; totals.total += p.total; totals.cities += p.cityCount;
+    p.share = p.total ? p.hidden / p.total : 0;
+  });
+  totals.share = totals.total ? totals.hidden / totals.total : 0;
+
+  document.getElementById('cards').innerHTML = [
+    ['街景点总数', fmt(totals.total), ''],
+    ['常规街景', fmt(totals.regular), ''],
+    ['隐藏街景', fmt(totals.hidden), 'hidden'],
+    ['省级行政区', fmt(totals.provinces), ''],
+    ['地级行政区', fmt(totals.cities), '']
+  ].map(function(item){
+    return '<div class="card ' + item[2] + '"><div class="k">' + item[0] + '</div><div class="v">' + item[1] + '</div></div>';
+  }).join('');
+
+  document.getElementById('bars').innerHTML =
+    '<i class="reg" style="width:' + (100 - totals.share * 100).toFixed(2) + '%"></i>' +
+    '<i class="hid" style="width:' + (totals.share * 100).toFixed(2) + '%"></i>';
+
+  var state = { q: '', sort: 'total', onlyHidden: false, open: {} };
+  var rowsEl = document.getElementById('rows');
+
+  function match(text){ return !state.q || String(text).toLowerCase().indexOf(state.q.toLowerCase()) !== -1; }
+
+  function shareCell(share, total){
+    if (!total) return '<span class="muted">—</span>';
+    return '<span class="share"><span class="bar"><i style="width:' + (share * 100).toFixed(1) + '%"></i></span>' +
+      (share * 100).toFixed(1) + '%</span>';
+  }
+
+  function render(){
+    var rows = list.filter(function(p){
+      if (state.onlyHidden && !p.hidden) return false;
+      if (!state.q) return true;
+      if (match(p.name)) return true;
+      return Object.keys(p.cities).some(function(k){ return match(p.cities[k].name); });
+    });
+
+    rows.sort(function(a, b){
+      if (state.sort === 'name') return a.name.localeCompare(b.name, 'zh-Hans-CN');
+      return (b[state.sort] || 0) - (a[state.sort] || 0);
+    });
+
+    var html = '';
+    rows.forEach(function(p){
+      var open = !!state.open[p.name] || (state.q && !match(p.name));
+      html += '<tr class="prov' + (open ? ' open' : '') + '" data-name="' + esc(p.name) + '">' +
+        '<td><span class="caret">' + (open ? '▾' : '▸') + '</span> ' + esc(p.name) + '</td>' +
+        '<td>' + p.cityCount + '</td>' +
+        '<td class="num-reg">' + fmt(p.regular) + '</td>' +
+        '<td class="num-hid' + (p.hidden ? '' : ' zero') + '">' + fmt(p.hidden) + '</td>' +
+        '<td>' + fmt(p.total) + '</td>' +
+        '<td>' + shareCell(p.share, p.total) + '</td></tr>';
+      if (open) {
+        p.cityList.forEach(function(c){
+          if (state.onlyHidden && !c.hidden) return;
+          if (state.q && !match(p.name) && !match(c.name)) return;
+          html += '<tr class="city"><td>' + esc(c.name) + '</td><td></td>' +
+            '<td class="num-reg">' + fmt(c.regular) + '</td>' +
+            '<td class="num-hid' + (c.hidden ? '' : ' zero') + '">' + fmt(c.hidden) + '</td>' +
+            '<td>' + fmt(c.total) + '</td>' +
+            '<td>' + shareCell(c.total ? c.hidden / c.total : 0, c.total) + '</td></tr>';
+        });
+      }
+    });
+
+    rowsEl.innerHTML = html || '<tr><td colspan="6" class="muted">没有匹配的省市</td></tr>';
+    document.getElementById('version').textContent =
+      '共 ' + fmt(totals.total) + ' 点 · ' + totals.provinces + ' 个省级 · ' + totals.cities + ' 个地级 · 隐藏占比 ' + (totals.share * 100).toFixed(1) + '%';
+  }
+
+  rowsEl.addEventListener('click', function(event){
+    var row = event.target.closest('tr.prov');
+    if (!row) return;
+    var name = row.getAttribute('data-name');
+    state.open[name] = !state.open[name];
+    render();
+  });
+
+  var head = document.querySelectorAll('thead th');
+  head.forEach(function(th){
+    if (th.getAttribute('data-key') === 'cities' ) return;
+    th.addEventListener('click', function(){
+      var key = th.getAttribute('data-key');
+      if (key === 'share') key = 'hidden';
+      state.sort = key;
+      head.forEach(function(other){ other.classList.remove('sorted', 'asc'); });
+      th.classList.add('sorted');
+      render();
+    });
+  });
+
+  document.getElementById('q').addEventListener('input', function(event){ state.q = event.target.value.trim(); render(); });
+  document.getElementById('sort').addEventListener('change', function(event){ state.sort = event.target.value; render(); });
+  document.getElementById('onlyHidden').addEventListener('change', function(event){ state.onlyHidden = event.target.checked; render(); });
+
+  render();
+})();
+</script>
+</body>
+</html>
