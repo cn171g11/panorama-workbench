@@ -165,6 +165,13 @@ def main():
         collections[key] = len(value)
         entries.extend(value)
         cursor = value_end
+    unique = {}
+    for entry in entries:
+        unique[str(entry[0])] = entry
+    duplicate_rows = len(entries) - len(unique)
+    if duplicate_rows:
+        print(json.dumps({"duplicate_rows_removed": duplicate_rows}))
+    entries = list(unique.values())
     print(json.dumps({"existing_collections": len(collections), "entries": len(entries),
                       "game_exceptions": len(game_ids)}))
 
