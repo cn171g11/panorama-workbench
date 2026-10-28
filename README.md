@@ -134,7 +134,7 @@
 | `tools/merge_gap_scan.py` | 缺口扫描候选合并，内置移动性门禁 |
 | `tools/hidden_collection_rules.py` | 隐藏合集保留 / 导入判定策略 |
 | `tools/pano-mobility.js` | 移动性判定实现（`navigation-v1`） |
-| `tools/audit_gap_scan_mobility.mjs` | 候选点移动性审计（`navigation-v1`，JSONL 断点续跑） |
+| `tools/audit_gap_scan_mobility.mjs` | 候选点移动性审计（`navigation-v1`，16.7 点/秒配额内限速，JSONL 断点续跑） |
 | `tools/import_gap_scan_batch.py` | 按审计结果分流导入：隐藏 → `hidden_<地级码>`，常规 → `qq_<省码>` |
 | `tools/purge_hidden_collection.py` | 按审计结果清理合集 |
 | `tools/build_hidden_viewer_data.py` | 由历史合并清单重建 `hidden_pano.js` |
