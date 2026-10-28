@@ -1,5 +1,15 @@
 # Tools
 
+## Service Quota
+
+`https://sv.map.qq.com/sv` accepts at most **16.7 points/s** (about 1,000 requests per minute) per
+calling address. Exceeding it answers `HTTP 500` with an empty body and `Cost: 0` from
+`tRPC-Gateway`, and the address stays refused for a while afterwards.
+
+Every audit or scan must stay below that ceiling. `audit_gap_scan_mobility.mjs` enforces it with a
+shared token bucket: bursts of 6, a working rate that starts at 8/s, steps up on success and is
+capped at 16.7/s, and backs off when the gateway refuses.
+
 ## `city-scan/`
 
 Legacy Python pipeline for regional Tencent Street View metadata collection.

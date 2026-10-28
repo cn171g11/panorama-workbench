@@ -26,14 +26,22 @@ const require = createRequire(import.meta.url);
 const { RULE_VERSION, inspectPanorama } = require('./pano-mobility.js');
 
 const ENDPOINT = 'https://sv.map.qq.com/sv?svid=%s&output=json';
-const DEFAULT_CONCURRENCY = 2;
+const DEFAULT_CONCURRENCY = 4;
 const DEFAULT_RETRIES = 2;
 const REQUEST_TIMEOUT_MS = 20000;
 
-// The gateway answers HTTP 500 with an empty body and Cost: 0 once a burst quota is
-// exhausted. Every worker then parks until a shared cooldown expires, and the steady
-// pace is widened so the next burst stays under the limit.
-const pace = { milliseconds: 200 };
+/* Hard quota of the sv gateway: 16.7 points/s (about 1,000 requests per minute).
+ * Going above it gets the calling address refused with HTTP 500 (tRPC-Gateway, Cost: 0)
+ * for a while, so every request has to take a token from one shared bucket and the
+ * working rate never exceeds the ceiling. The run starts below the limit, steps up on
+ * success and backs off on refusal. */
+const RATE_CEILING = 16.7;
+const RATE_START = 8;
+const RATE_FLOOR = 4;
+const BURST_TOKENS = 6;
+const rate = { current: RATE_START };
+const bucket = { tokens: BURST_TOKENS, refilledAt: Date.now() };
+
 let proxyUrl = null;
 let alternate = false;
 let requestCounter = 0;
@@ -43,21 +51,35 @@ function sleep(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
 }
 
+async function takeToken() {
+  for (;;) {
+    const now = Date.now();
+    const refill = ((now - bucket.refilledAt) / 1000) * rate.current;
+    bucket.tokens = Math.min(BURST_TOKENS, bucket.tokens + refill);
+    bucket.refilledAt = now;
+    if (bucket.tokens >= 1) {
+      bucket.tokens -= 1;
+      return;
+    }
+    await sleep(Math.max(20, Math.ceil(((1 - bucket.tokens) / rate.current) * 1000)));
+  }
+}
+
 async function waitForGate() {
   const remaining = cooldown.until - Date.now();
   if (remaining > 0) await sleep(remaining);
-  await sleep(pace.milliseconds);
+  await takeToken();
 }
 
 function throttle() {
   cooldown.until = Date.now() + cooldown.penaltyMs;
   cooldown.penaltyMs = Math.min(45000, cooldown.penaltyMs * 2);
-  pace.milliseconds = Math.min(2000, Math.round(pace.milliseconds * 1.5));
+  rate.current = Math.max(RATE_FLOOR, Number((rate.current * 0.6).toFixed(1)));
 }
 
 function recover() {
   cooldown.penaltyMs = 15000;
-  pace.milliseconds = Math.max(120, pace.milliseconds - 20);
+  rate.current = Math.min(RATE_CEILING, Number((rate.current + 0.5).toFixed(1)));
 }
 
 function parseArguments(argv) {
@@ -280,7 +302,7 @@ async function main() {
         const elapsed = (Date.now() - startedAt) / 1000;
         const cooldownLeft = Math.max(0, Math.round((cooldown.until - Date.now()) / 1000));
         process.stderr.write(
-          `progress=${completed}/${pending.length} rate=${(completed / elapsed).toFixed(1)}/s pace=${pace.milliseconds}ms `
+          `progress=${completed}/${pending.length} rate=${(completed / elapsed).toFixed(1)}/s budget=${rate.current}/s `
           + `cooldown=${cooldownLeft}s elapsed=${elapsed.toFixed(0)}s\n`,
         );
       }
