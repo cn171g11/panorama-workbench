@@ -35,7 +35,9 @@ const REQUEST_TIMEOUT_MS = 20000;
  * for a while, so every request has to take a token from one shared bucket and the
  * working rate never exceeds the ceiling. The run starts below the limit, steps up on
  * success and backs off on refusal. */
-const RATE_CEILING = 16.7;
+const RATE_QUOTA = 16.7;
+const RATE_SAFETY = 0.8; // a rolling one-minute window counts slightly differently than per second
+const RATE_CEILING = Number((RATE_QUOTA * RATE_SAFETY).toFixed(1));
 const RATE_START = 8;
 const RATE_FLOOR = 4;
 const BURST_TOKENS = 6;
@@ -45,7 +47,16 @@ const bucket = { tokens: BURST_TOKENS, refilledAt: Date.now() };
 let proxyUrl = null;
 let alternate = false;
 let requestCounter = 0;
-const cooldown = { until: 0, penaltyMs: 15000 };
+
+/* A refused address stays refused for a while, so each route gets its own circuit
+ * breaker instead of one global cooldown: a blocked route is skipped until its window
+ * expires and the other route keeps working. */
+const ROUTE_PENALTY_MS = 30000;
+const ROUTE_PENALTY_MAX_MS = 120000;
+const routes = {
+  direct: { blockedUntil: 0, penaltyMs: ROUTE_PENALTY_MS },
+  proxy: { blockedUntil: 0, penaltyMs: ROUTE_PENALTY_MS },
+};
 
 function sleep(milliseconds) {
   return new Promise((resolve) => setTimeout(resolve, milliseconds));
@@ -65,20 +76,32 @@ async function takeToken() {
   }
 }
 
-async function waitForGate() {
-  const remaining = cooldown.until - Date.now();
-  if (remaining > 0) await sleep(remaining);
-  await takeToken();
+function availableRoutes() {
+  const now = Date.now();
+  const list = [];
+  if (now >= routes.direct.blockedUntil) list.push('direct');
+  if (proxyUrl && now >= routes.proxy.blockedUntil) list.push('proxy');
+  return list;
 }
 
-function throttle() {
-  cooldown.until = Date.now() + cooldown.penaltyMs;
-  cooldown.penaltyMs = Math.min(45000, cooldown.penaltyMs * 2);
+async function waitForRoute() {
+  for (;;) {
+    const list = availableRoutes();
+    if (list.length) return list[requestCounter++ % list.length];
+    const soonest = Math.min(routes.direct.blockedUntil, proxyUrl ? routes.proxy.blockedUntil : Infinity);
+    await sleep(Math.max(1000, soonest - Date.now()));
+  }
+}
+
+function blockRoute(name) {
+  const route = routes[name];
+  route.blockedUntil = Date.now() + route.penaltyMs;
+  route.penaltyMs = Math.min(ROUTE_PENALTY_MAX_MS, route.penaltyMs * 2);
   rate.current = Math.max(RATE_FLOOR, Number((rate.current * 0.6).toFixed(1)));
 }
 
-function recover() {
-  cooldown.penaltyMs = 15000;
+function forgiveRoute(name) {
+  routes[name].penaltyMs = ROUTE_PENALTY_MS;
   rate.current = Math.min(RATE_CEILING, Number((rate.current + 0.5).toFixed(1)));
 }
 
@@ -136,17 +159,17 @@ function loadCache(cachePath) {
 async function requestPanorama(sid, retries) {
   const url = ENDPOINT.replace('%s', encodeURIComponent(sid));
   let lastError = null;
-  for (let attempt = 0; attempt <= retries; attempt += 1) {
+  const maxAttempts = Math.max(2, retries + 2);
+  for (let attempt = 0; attempt < maxAttempts; attempt += 1) {
+    const route = await waitForRoute();
     try {
-      await waitForGate();
-      const throughProxy = proxyUrl && (alternate ? requestCounter++ % 2 === 1 : true);
-      const payload = throughProxy ? await fetchThroughProxy(url) : await fetchDirect(url);
-      recover();
+      await takeToken();
+      const payload = route === 'proxy' ? await fetchThroughProxy(url) : await fetchDirect(url);
+      forgiveRoute(route);
       return payload;
     } catch (error) {
       lastError = error;
-      throttle();
-      if (attempt < retries) await waitForGate();
+      blockRoute(route);
     }
   }
   throw lastError;
@@ -300,10 +323,12 @@ async function main() {
       completed += 1;
       if (completed % 250 === 0 || completed === pending.length) {
         const elapsed = (Date.now() - startedAt) / 1000;
-        const cooldownLeft = Math.max(0, Math.round((cooldown.until - Date.now()) / 1000));
+        const blocked = ['direct', 'proxy']
+          .filter((name) => name === 'direct' || proxyUrl)
+          .filter((name) => Date.now() < routes[name].blockedUntil);
         process.stderr.write(
           `progress=${completed}/${pending.length} rate=${(completed / elapsed).toFixed(1)}/s budget=${rate.current}/s `
-          + `cooldown=${cooldownLeft}s elapsed=${elapsed.toFixed(0)}s\n`,
+          + `blocked=${blocked.join('|') || '-'} elapsed=${elapsed.toFixed(0)}s\n`,
         );
       }
     }
