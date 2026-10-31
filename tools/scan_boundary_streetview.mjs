@@ -42,6 +42,7 @@ for (let index = 2; index < process.argv.length; index += 1) {
   else if (flag === '--name') { args.name = value; index += 1; }
   else if (flag === '--seed-only') { args.seedOnly = true; }
   else if (flag === '--harvest') { args.harvest = true; }
+  else if (flag === '--skip-seed') { args.skipSeed = true; }
   else if (flag === '--max-visits') { args.maxVisits = Number(value); index += 1; }
   else throw new Error(`unknown argument ${flag}`);
 }
@@ -376,7 +377,7 @@ function harvestSequence(payload) {
 /* ---------------------------------------------------------------- main */
 const started = Date.now();
 process.stderr.write(`boundary ${args.adcode} bbox=${bbox.map((v) => v.toFixed(3)).join(',')} rate=${rate.current}/s\n`);
-if (!visited.size) {
+if (!args.skipSeed && !visited.size) {
   await seed();
   saveState();
 }
