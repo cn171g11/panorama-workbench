@@ -38,6 +38,7 @@ for (let index = 2; index < process.argv.length; index += 1) {
   else if (flag === '--proxy') { args.proxy = value; index += 1; }
   else if (flag === '--rate') { args.rate = Number(value); index += 1; }
   else if (flag === '--seed-step') { args.seedStep = Number(value); index += 1; }
+  else if (flag === '--radius') { args.radius = Number(value); index += 1; }
   else if (flag === '--name') { args.name = value; index += 1; }
   else if (flag === '--seed-only') { args.seedOnly = true; }
   else if (flag === '--harvest') { args.harvest = true; }
@@ -235,7 +236,12 @@ async function seed() {
       if (inside(lng, lat)) cells.push([lng, lat]);
     }
   }
-  process.stderr.write(`seed cells inside boundary: ${cells.length}\n`);
+  const diagonal = (args.seedStep * 111000) / Math.SQRT2;
+  if (args.radius < diagonal) {
+    process.stderr.write(`WARN radius ${args.radius}m < half-diagonal ${Math.round(diagonal)}m of the `
+      + `${args.seedStep}deg grid: roads between probes will be missed\n`);
+  }
+  process.stderr.write(`seed cells inside boundary: ${cells.length} radius=${args.radius}m\n`);
   const seeds = new Set();
   let index = 0;
   let probed = 0;
