@@ -94,7 +94,10 @@ function buildStats() {
 
   const context = { window: {} };
   vm.createContext(context);
-  loadScript(context, "hidden_pano.js");
+  const hiddenDataFile = path.join(VIEWER_ROOT, "hidden_pano.js");
+  if (fs.existsSync(hiddenDataFile)) {
+    loadScript(context, "hidden_pano.js");
+  }
   const hiddenCollections = Object.entries(context.window.PANO_CITY || {})
     .filter(([key]) => key === "hidden" || key.startsWith("hidden_"));
   for (const [key, entries] of hiddenCollections) {
@@ -118,7 +121,9 @@ function writeGrid(stats) {
   }
   const payload = `window.PANO_GRID_ALL=${JSON.stringify(output)};`;
   fs.writeFileSync(path.join(VIEWER_ROOT, "grid_all.js"), payload, "utf8");
-  synchronizeHiddenGrid(output);
+  if (fs.existsSync(path.join(VIEWER_ROOT, "hidden_pano.js"))) {
+    synchronizeHiddenGrid(output);
+  }
   return { keys: Object.keys(output).length, cells: Object.values(output).reduce((sum, list) => sum + list.length, 0), bytes: Buffer.byteLength(payload) };
 }
 
