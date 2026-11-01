@@ -165,7 +165,13 @@ def main():
         report["origins"][origin] = report["origins"].get(origin, 0) + 1
 
     known_hidden = {str(entry[0]) for entry in hidden.get(hidden_key, [])}
-    fresh_hidden = [record for record in hidden_records if str(record["sid"]) not in known_hidden]
+    all_hidden = {str(entry[0]) for entries in hidden.values() for entry in entries}
+    existing = None if args.append else read_city_parts(args.viewer, args.adcode)
+    known_city = set() if existing is None else {str(entry[0]) for entry in existing}
+    # A sid must live in exactly one place: skip regular records already sitting in any
+    # hidden collection, and skip hidden records already in the city layer.
+    fresh_hidden = [record for record in hidden_records
+                    if str(record["sid"]) not in known_hidden and str(record["sid"]) not in known_city]
     report["imported_hidden"] = len(fresh_hidden)
     if fresh_hidden:
         entries = hidden.get(hidden_key, []) + [build_entry(record, HIDDEN_MARKER) for record in fresh_hidden]
@@ -181,9 +187,8 @@ def main():
         print(json.dumps(report, ensure_ascii=False, indent=1))
         return
 
-    existing = read_city_parts(args.viewer, args.adcode)
-    known_city = {str(entry[0]) for entry in existing}
-    fresh_city = [record for record in regular_records if str(record["sid"]) not in known_city]
+    fresh_city = [record for record in regular_records
+                  if str(record["sid"]) not in known_city and str(record["sid"]) not in all_hidden]
     report["imported_regular"] = len(fresh_city)
     report["already"] = len(records) - len(fresh_hidden) - len(fresh_city)
     merged = sorted(existing + [build_entry(record, "腾讯常规") for record in fresh_city],
