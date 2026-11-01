@@ -75,7 +75,7 @@
 </head>
 <body>
 <header>
-  <h1>街景元数据查看器 <span class="ver">v3.0.0</span><span class="ver-note"> · 2026-11-01 隐藏街景并入常规图层</span></h1>
+  <h1>街景元数据查看器 <span class="ver">v2.16.0</span><span class="ver-note"> · 2026-11-01 榆林地图导出入库 1,516 点</span></h1>
   <select id="provinceSelect" title="省级行政区"></select>
   <select id="citySelect" title="地级市" disabled></select>
   <select id="countySelect" title="县级行政区" style="display:none"></select>
@@ -99,6 +99,7 @@
 <script src="data_meta.js"></script>
 <script src="data_districts.js"></script>
 <script src="grid_all.js"></script>
+<script src="hidden_pano.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/leaflet@1.9.4/dist/leaflet.js"></script>
 <script>
 (function(){
@@ -161,7 +162,7 @@
   function cityMeta(key){ var m=(window.PANO_META||{})[key]; return m||{name:key,province:''}; }
   function esc(s){ return String(s==null?'':s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;'); }
   function isHiddenPref(pf){ return String(pf||'').indexOf('hidden')===0; }
-  function isHiddenEntry(e){ return false; }
+  function isHiddenEntry(e){ return !!e && (isHiddenPref(e[9]) || e[8]==='腾讯隐藏'); }
 
   // ---------- canvas point layer ----------
   var PointCanvasLayer = (window.L && L.Layer) ? L.Layer.extend({
