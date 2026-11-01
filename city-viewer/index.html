@@ -75,7 +75,7 @@
 </head>
 <body>
 <header>
-  <h1>街景元数据查看器 <span class="ver">v2.16.0</span><span class="ver-note"> · 2026-11-01 榆林地图导出入库 1,516 点</span></h1>
+  <h1>街景元数据查看器 <span class="ver">v2.17.0</span><span class="ver-note"> · 2026-11-02 新增华为地图底图（亮色/暗色）</span></h1>
   <select id="provinceSelect" title="省级行政区"></select>
   <select id="citySelect" title="地级市" disabled></select>
   <select id="countySelect" title="县级行政区" style="display:none"></select>
@@ -109,7 +109,9 @@
     { id:'amapStandard', label:'高德·标准', url:'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图', dark:false },
     { id:'amapDark', label:'高德·暗色', url:'https://webrd0{s}.is.autonavi.com/appmaptile?lang=zh_cn&size=1&scale=1&style=8&x={x}&y={y}&z={z}', subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图', dark:true },
     { id:'amapSatellite', label:'高德·影像', url:'https://webst0{s}.is.autonavi.com/appmaptile?style=6&x={x}&y={y}&z={z}', subdomains:['1','2','3','4'], maxZoom:18, attribution:'© 高德地图', dark:false },
-    { id:'tencentDark', label:'腾讯·暗色', url:'https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=4', subdomains:['0','1','2','3'], maxZoom:18, attribution:'© 腾讯地图', dark:true }
+    { id:'tencentDark', label:'腾讯·暗色', url:'https://rt{s}.map.gtimg.com/realtimerender/?z={z}&x={x}&y={-y}&type=vector&styleid=4', subdomains:['0','1','2','3'], maxZoom:18, attribution:'© 腾讯地图', dark:true },
+    { id:'huaweiStandard', label:'华为·亮色', url:'https://maprastertile-drcn.dbankcdn.cn/display-service/v1/online-render/getTile/26.02.03.16/{z}/{x}/{y}/?language=zh&p=46&scale=2&mapType=ROADMAP&presetStyleId=standard&pattern=JPG&key=DAEDANitav6P7Q0lWzCzKkLErbrJG4kS1u%2FCpEe5ZyxW5u0nSkb40bJ%2BYAugRN03fhf0BszLS1rCrzAogRHDZkxaMrloaHPQGO6LNg==', maxZoom:18, attribution:'© 华为地图', dark:false },
+    { id:'huaweiNight', label:'华为·暗色', url:'https://maprastertile-drcn.dbankcdn.cn/display-service/v1/online-render/getTile/26.02.03.16/{z}/{x}/{y}/?language=zh&p=46&scale=2&mapType=ROADMAP&presetStyleId=night&pattern=JPG&key=DAEDANitav6P7Q0lWzCzKkLErbrJG4kS1u%2FCpEe5ZyxW5u0nSkb40bJ%2BYAugRN03fhf0BszLS1rCrzAogRHDZkxaMrloaHPQGO6LNg==', maxZoom:18, attribution:'© 华为地图', dark:true }
   ];
   var POINT_LIMIT = 1000000;
   var MIN_ZOOM = 3;            // 高德底图 z<3 不返回瓦片（手机端窄视口会白屏）
