@@ -42,3 +42,6 @@ release/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# Local AI handoff notes (never commit / never push)
+AGENT.md
