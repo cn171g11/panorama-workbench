@@ -45,3 +45,4 @@ desktop.ini
 
 # Local AI handoff notes (never commit / never push)
 AGENT.md
+agent_history.md
