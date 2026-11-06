@@ -12,6 +12,8 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 node_modules/
+# Temporarily disabled panorama search; explicit recovery uses --with-search.
+city-viewer/pano_search_index.js
 npm-debug.log*
 
 # Scanner runtime state and logs

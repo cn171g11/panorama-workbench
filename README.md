@@ -21,13 +21,14 @@
 | 指标 | 数值 |
 |---|---|
 | 街景点总数 | **40,870,371** |
-| 数据分片 | 474 个 `data_*.js`，合计 702 个集合键（含 230 个隐藏集合） |
+| 数据分片 | 472 个点位 `data_*.js`（不含 meta/districts），合计 702 个集合键（含 230 个隐藏集合） |
 | 省级行政区 | 32 个 |
 | 区县边界 | 695 个（覆盖 81 个地级行政区） |
 | 腾讯隐藏街景 / 时光机 | **349,884** 点（229 个地级行政区成集，另含剑灵游戏街景 15 点） |
 | 腾讯常规街景（导入） | 12,224 点 |
 
-> 点位采集时间已按 svid 内嵌日期全量回填（2026-11-02，覆盖 99% 点位），详情面板与搜索均可按采集日期查询。
+> 点位采集时间已按 svid 内嵌日期全量回填（2026-11-02，覆盖 99% 点位），详情面板保留采集时间。
+> **v2.27.1 暂时停用全局点位搜索**（panoid、路名、日期、坐标、@ 定位）；城市/区县/道路选择、地图选点、隐藏红色标记和游戏集合不变。数据报告的名称过滤仍可使用，完整点位与坐标精度不变。详见 [停用搜索与无损压缩方案](docs/search-pause-lossless-compression-20261107.md)。
 
 点位最多的省级行政区：
 
@@ -94,7 +95,7 @@
 | `data_districts.js` | `PANO_DISTRICTS`，区县边界多边形，供区县筛选使用 |
 | `data_<adcode>.js` | `PANO_CITY[key]` 点位数组，超过 18 万点拆分为 `<adcode>_2`、`_3`… |
 | `grid_all.js` | 全国网格聚合（0.004°），供总览与密度模式使用 |
-| `pano_search_index.js` | panoid / 路名 / 采集时间 / 坐标的按需搜索索引 |
+| 全局点位搜索 | 暂时停用；不发布全国搜索索引，完整点位保留 |
 | `hidden_pano.js` | 「腾讯隐藏街景/时光机」合集（独立集合，不按城市拆分） |
 
 点位格式固定为 9 个字段，只允许在末尾追加新字段：
@@ -146,11 +147,11 @@
 5. **移动性审计**：`tools/audit_gap_scan_mobility.mjs` 逐条核验可移动性（并发请求 + 断点续跑），
    只有不可移动的才允许进入隐藏合集；可移动的转投常规集合。
 6. **合并入图**：`tools/merge_gap_scan.py` / `tools/merge_city_scan.py` 写入分片并更新 `data_meta.js`。
-7. **重建索引**：`node tools/build_viewer_index.js` 重算 `grid_all.js`、`pano_search_index.js` 与隐藏网格。
+7. **重建网格**：`node tools/build_viewer_index.js` 重算 `grid_all.js` 与隐藏网格；默认不生成搜索索引。恢复方案可显式执行 `--with-search`，但也需恢复前端搜索代码。
 8. **校验发布**：`tools/check_viewer_hidden_grid.js`、`tools/check_viewer_display_mode.js` 通过后提交，
    GitHub Pages 自动构建。
 
-版本号写在 `city-viewer/index.html` 标题里，每次发布递增；APK 通过 GitHub Release 分发（包名 `cn.cn171g11.panoviewer`）。
+版本号写在 `city-viewer/index.html` 标题里，每次发布递增；按用户决定不再打包 APK 或发布 GitHub Releases。
 
 ---
 
@@ -158,7 +159,8 @@
 
 | 工具 | 用途 |
 |---|---|
-| `tools/build_viewer_index.js` | 重建 `grid_all.js` 与 `pano_search_index.js` |
+| `tools/build_viewer_index.js` | 默认重建全国/隐藏网格；`--with-search` 显式生成搜索恢复用索引 |
+| `tools/check_viewer_search_disabled.js` | 回归验证无搜索初始化、地理/道路过滤与隐藏/游戏标记 |
 | `tools/check_viewer_hidden_grid.js` | 校验隐藏合集条数、网格与实际加载顺序一致 |
 | `tools/check_viewer_display_mode.js` | 校验散点 / 密度模式在缩放与大结果集下的行为 |
 | `tools/merge_city_scan.py` | 市级扫描结果合并（自动分片、更新元数据） |

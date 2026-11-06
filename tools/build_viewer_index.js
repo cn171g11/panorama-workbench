@@ -1,9 +1,7 @@
 #!/usr/bin/env node
 /*
- * Rebuild the nationwide grid and the on-demand search index.
- *
- * The search index lets the viewer answer panoid and road-name queries
- * without loading every city file or rendering the nationwide point layer.
+ * Rebuild the nationwide grid (search is temporarily disabled).
+ * Pass --with-search explicitly to regenerate the recoverable search index.
  */
 const fs = require("fs");
 const path = require("path");
@@ -61,6 +59,7 @@ function addEntryToStats(stats, key, entry) {
   const cells = stats.grid[key] || (stats.grid[key] = new Map());
   cells.set(cellKey, (cells.get(cellKey) || 0) + 1);
 
+  if (!stats.withSearch) return;
   if (panoramaId.length >= PREFIX_LENGTH) {
     addToIndex(stats.prefix, panoramaId.slice(0, PREFIX_LENGTH).toUpperCase(), key);
   }
@@ -79,8 +78,8 @@ function collectCityFiles() {
     .map((fileName) => path.join(VIEWER_ROOT, fileName));
 }
 
-function buildStats() {
-  const stats = { grid: {}, prefix: {}, segments: {}, roads: {}, dates: {} };
+function buildStats(withSearch = false) {
+  const stats = { grid: {}, withSearch, prefix: {}, segments: {}, roads: {}, dates: {} };
   let totalEntries = 0;
 
   for (const filePath of collectCityFiles()) {
@@ -156,16 +155,22 @@ function writeSearchIndex(stats) {
 
 function main() {
   const startedAt = Date.now();
-  const { stats, totalEntries } = buildStats();
+  const withSearch = process.argv.includes('--with-search');
+  const { stats, totalEntries } = buildStats(withSearch);
   const grid = writeGrid(stats);
-  const index = writeSearchIndex(stats);
+  const index = withSearch ? writeSearchIndex(stats) : null;
   const seconds = ((Date.now() - startedAt) / 1000).toFixed(1);
   console.log(
     `entries=${totalEntries} grid_keys=${grid.keys} grid_cells=${grid.cells} grid_mb=${(grid.bytes / 1048576).toFixed(2)}`
   );
-  console.log(
-    `prefixes=${index.prefixes} segments=${index.segments} roads=${index.roads} search_mb=${(index.bytes / 1048576).toFixed(2)} seconds=${seconds}`
-  );
+  if (index) {
+    console.log(
+      `prefixes=${index.prefixes} segments=${index.segments} roads=${index.roads} search_mb=${(index.bytes / 1048576).toFixed(2)} seconds=${seconds}`
+    );
+  } else {
+    console.log(`search=disabled seconds=${seconds}`);
+  }
 }
 
-main();
+if (require.main === module) main();
+module.exports = { addEntryToStats, buildStats, writeGrid, writeSearchIndex };
