@@ -1,0 +1,27 @@
+#!/bin/sh
+# pre-push：交接文档没跟上数据时拒绝推送（AGENT.md / agent_history.md 与页面版本、总量必须一致）
+ROOT=$(git rev-parse --show-toplevel 2>/dev/null) || exit 0
+[ -f "$ROOT/tools/check_handoff_docs.js" ] || exit 0
+
+NODE=$(command -v node 2>/dev/null)
+if [ -z "$NODE" ]; then
+  for c in \
+    "/c/Users/Yzuio/.dsh/dsh-runtimes/dsh-primary-runtime/dependencies/node/bin/node.exe" \
+    "/c/Program Files/nodejs/node.exe" \
+    "/d/Git/usr/bin/node.exe"; do
+    if [ -x "$c" ]; then NODE="$c"; break; fi
+  done
+fi
+if [ -z "$NODE" ]; then
+  echo "[pre-push] 找不到 node，跳过交接文档检查" >&2
+  exit 0
+fi
+
+if ! "$NODE" "$ROOT/tools/check_handoff_docs.js" --quiet; then
+  echo "" >&2
+  echo "[pre-push] 推送被拒绝：交接文档没跟上数据。" >&2
+  echo "           按上面的提示更新 AGENT.md §1 与 agent_history.md §1，再重新推送。" >&2
+  echo "           确认要跳过：git push --no-verify" >&2
+  exit 1
+fi
+exit 0
