@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 /*
- * Rebuild the nationwide grid (search is temporarily disabled).
- * Pass --with-search explicitly to regenerate the recoverable search index.
+ * Rebuild the nationwide grid; --with-search also generates the source index
+ * consumed by the gzip-only publication build (the derived index is not committed).
  */
 const fs = require("fs");
 const path = require("path");

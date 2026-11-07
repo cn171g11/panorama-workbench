@@ -1,0 +1,66 @@
+name: Deploy compressed viewer to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    timeout-minutes: 45
+    steps:
+      - name: Check out sources
+        uses: actions/checkout@v4
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - name: Rebuild grid and search indexes from original data
+        run: node --max-old-space-size=6144 tools/build_viewer_index.js --with-search
+      - name: Validate hidden collections, display, search, and unique IDs
+        run: |
+          node tools/check_viewer_hidden_grid.js
+          node tools/check_viewer_display_mode.js
+          node tools/check_viewer_search.js
+          python tools/check_viewer_sid_unique.py
+      - name: Run Python fixture regression tests
+        run: python -m unittest discover -s tools/tests -v
+      - name: Run browser asset loader and mobility regression tests
+        run: node --test tools/tests/asset-loader.test.js tools/tests/pano-mobility.test.js
+      - name: Build the verified gzip-only publication directory
+        run: |
+          python tools/build_gzip_site.py --output dist/pages --workers 4
+          python -c "from pathlib import Path; size=sum(p.stat().st_size for p in Path('dist/pages').rglob('*') if p.is_file()); print(f'Published directory bytes={size}'); assert size <= 1000000000, 'Pages directory exceeds 1 GB; retain data and choose another hosting plan'"
+      - name: Upload only the publication artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: dist/pages
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      actions: read
+      pages: write
+      id-token: write
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy the verified publication artifact
+        id: deployment
+        uses: actions/deploy-pages@v4

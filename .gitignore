@@ -12,7 +12,7 @@ __pycache__/
 *.py[cod]
 .pytest_cache/
 node_modules/
-# Temporarily disabled panorama search; explicit recovery uses --with-search.
+# Derived search source: generated with --with-search, gzip-published by CI, not committed.
 city-viewer/pano_search_index.js
 npm-debug.log*
 
